@@ -1,0 +1,207 @@
+{
+  "main": {
+    "id": "6f06340c5810474a",
+    "type": "split",
+    "children": [
+      {
+        "id": "5c4cc5b3016dcf8a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8dace6a0e03dae36",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "README.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "README"
+            }
+          },
+          {
+            "id": "dcfc310f04f8ddf6",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Notatka.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Notatka"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "b6e2efba4080d66e",
+    "type": "split",
+    "children": [
+      {
+        "id": "acd208ed577b3908",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "074e7cb1a55b69f2",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Przeglądarka plików"
+            }
+          },
+          {
+            "id": "b7f3260224367846",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Wyszukiwarka"
+            }
+          },
+          {
+            "id": "606da3e5fafde7aa",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Ulubione"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "88e7fd414915d026",
+    "type": "split",
+    "children": [
+      {
+        "id": "c72339da6095174d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f82a2ff6cae19541",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Notatka.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Linki zwrotne do Notatka"
+            }
+          },
+          {
+            "id": "f6c5c1627918b121",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Notatka.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Łącza wychodzące od Notatka"
+            }
+          },
+          {
+            "id": "23f86b795b8b91cc",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tagi"
+            }
+          },
+          {
+            "id": "9a9b9c3feb4f2cb1",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Wszystkie atrybuty"
+            }
+          },
+          {
+            "id": "b9f52cedd59ab7d8",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Notatka.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Konspekt Notatka"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Otwórz okno szybkiego wyboru": false,
+      "graph:Otwórz podgląd grafu": false,
+      "canvas:Stwórz nową tablicę": false,
+      "daily-notes:Otwórz dzisiejszy dziennik": false,
+      "templates:Wstaw szablon": false,
+      "command-palette:Otwórz listę poleceń": false,
+      "bases:Stwórz nową bazę danych": false
+    }
+  },
+  "active": "dcfc310f04f8ddf6",
+  "lastOpenFiles": [
+    "README.md",
+    "Notatka.md",
+    "Witaj.md"
+  ]
+}
