@@ -9,3 +9,14 @@
 - [ ] Generatory
 - [ ] Pickupy
 
+## Rzecy do zanotowania
+Staging.gd ma od linii 80 to:
+```gdscript
+## The [XROrigin3D] node used while staging
+@onready var xr_origin : XROrigin3D = XRHelpers.get_xr_origin(self)
+
+## The [XRCamera3D] node used while staging
+@onready var xr_camera : XRCamera3D = XRHelpers.get_xr_camera(self)
+```
+Muszę podmienić jakoś XROrigin3D i XRCamera3D na scenę player.tscn
+A potem ogarniać przejścia między scenami
