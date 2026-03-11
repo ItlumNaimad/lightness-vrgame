@@ -23,9 +23,19 @@
 - **Dlaczego:** Wcześniej scena ładowała samą siebie (`main.tscn`), co prowadziło do nieskończonej pętli.
 - **Integracja:** Wstawiono scenę `player.tscn` bezpośrednio do `Staging` i wyłączono domyślne węzły origin/camera, aby system korzystał z Twojego spersonalizowanego gracza.
 
+## Poprawki Błędów (2026-03-11)
+
+### 1. Rozwiązanie błędu XRToolsStaging (Type mismatch)
+- **Problem:** `Trying to assign value of type Node3D to a variable of type scene_base.gd`.
+- **Rozwiązanie:** Utworzono `scripts/game_map.gd` dziedziczący po `XRToolsSceneBase` i przypisano go do `game_map.tscn`. Każda scena ładowana przez Staging musi teraz używać tego skryptu bazowego.
+
+### 2. Naprawa fizyki i kolizji
+- **Problem:** Gracz przenikał przez podłogę.
+- **Rozwiązanie:** Poprawiono hierarchię w `player.tscn`. `CollisionShape3D` jest teraz prawidłowo podpięte pod `PlayerBody` (CharacterBody3D). Ustawiono również transformacje kapsuły, aby środek ciężkości i kamera były na odpowiednich wysokościach.
+
 ## Current Focus
-- Testowanie płynności przejść między scenami.
-- Przygotowanie szkieletu Menu Głównego.
+- Implementacja podstawowego Menu Głównego (UI w przestrzeni 3D).
+- Dodanie obsługi kontrolerów (ruch/obracanie).
 
 ## Upcoming Tasks
 - Main Menu implementation.

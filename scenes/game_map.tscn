@@ -1,4 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://cjyxx2d4hafto"]
+[gd_scene load_steps=6 format=3 uid="uid://cjyxx2d4hafto"]
+
+[ext_resource type="Script" uid="uid://mwnbe8t7v6r5" path="res://scripts/game_map.gd" id="1_script"]
 
 [sub_resource type="Environment" id="Environment_iau3x"]
 background_mode = 1
@@ -15,6 +17,7 @@ size = Vector2(20, 20)
 albedo_color = Color(0.3, 0.3, 0.3, 1)
 
 [node name="GameMap" type="Node3D"]
+script = ExtResource("1_script")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_iau3x")
