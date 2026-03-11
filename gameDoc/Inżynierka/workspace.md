@@ -23,18 +23,20 @@
 - **Dlaczego:** Wcześniej scena ładowała samą siebie (`main.tscn`), co prowadziło do nieskończonej pętli.
 - **Integracja:** Wstawiono scenę `player.tscn` bezpośrednio do `Staging` i wyłączono domyślne węzły origin/camera, aby system korzystał z Twojego spersonalizowanego gracza.
 
-## Poprawki Błędów (2026-03-11 - Sesja 3)
+## Poprawki Błędów i Rozwój (2026-03-11 - Sesja 4)
 
-### 1. Rozwiązanie błędu Null Instance w scene_base.gd
-- **Problem:** Klasa bazowa `XRToolsSceneBase` próbowała uzyskać dostęp do `$XROrigin3D/XRCamera3D` wewnątrz mapy, co powodowało błędy przy próbie przypisania `current = true` (Null Instance), bo usunęliśmy gracza z mapy.
-- **Rozwiązanie:** Nadpisano funkcję `scene_loaded` w `scripts/game_map.gd`. Funkcja jest teraz pusta, co pozwala systemowi `Staging` na globalne zarządzanie kamerą gracza bez szukania jej wewnątrz sceny mapy.
+### 1. Poprawa priorytetu Gracza w Staging
+- **Zmiana:** W `main.tscn` ustawiono instancję `Player` na pierwszym indeksie (`index=0`).
+- **Dlaczego:** Aby wymusić na skrypcie `Staging.gd` wybranie spersonalizowanego gracza zamiast domyślnego węzła.
 
-### 2. Optymalizacja integracji w main.tscn
-- **Zmiana:** Ponowne ułożenie węzłów w `main.tscn`, aby Twój `Player` był pierwszym widocznym `XROrigin3D` dla skryptu Staging.
+### 2. Dodanie podstawowego sterowania
+- **Zmiana:** Do `player.tscn` dodano `MovementDirect` (lewy kontroler) oraz `MovementTurn` (prawy kontroler).
+- **Dlaczego:** Umożliwienie poruszania się i obracania w przestrzeni VR oraz potwierdzenie działania kontrolerów.
 
 ## Current Focus
-- Przygotowanie do testów w goglach (potwierdzenie widoczności podłogi i latarki).
-- Szkielet Menu Głównego.
+- Weryfikacja działania sterowania w goglach.
+- Implementacja Menu Głównego (UI 3D).
+
 
 ## Current Focus
 - Weryfikacja działania latarki i kolizji na nowej strukturze.

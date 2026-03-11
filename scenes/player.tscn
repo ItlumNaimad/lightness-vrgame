@@ -1,9 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://c0ch7jab7i3ry"]
+[gd_scene load_steps=8 format=3 uid="uid://c0ch7jab7i3ry"]
 
 [ext_resource type="PackedScene" uid="uid://diyu06cw06syv" path="res://addons/godot-xr-tools/player/player_body.tscn" id="1_g2els"]
 [ext_resource type="PackedScene" uid="uid://btknduttnmoxf" path="res://addons/godot-xr-tools/misc/vr_common_shader_cache.tscn" id="2_qhqgy"]
 [ext_resource type="PackedScene" uid="uid://b4kad2kuba1yn" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_hand_low.tscn" id="3_dqkch"]
 [ext_resource type="PackedScene" uid="uid://l2n30mpbkdyw" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn" id="4_qlg0r"]
+[ext_resource type="PackedScene" uid="uid://bl2nuu3qhlb5k" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="5_direct"]
+[ext_resource type="PackedScene" uid="uid://b6bk2pj8vbj28" path="res://addons/godot-xr-tools/functions/movement_turn.tscn" id="6_turn"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tuyoq"]
 radius = 0.4
@@ -23,19 +25,21 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
 [node name="VRCommonShaderCache" parent="XRCamera3D" instance=ExtResource("2_qhqgy")]
 
 [node name="SpotLight3D" type="SpotLight3D" parent="XRCamera3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 light_color = Color(0.8950378, 0.86848104, 0, 1)
 spot_range = 10.0
-spot_attenuation = 1.0
-spot_angle = 45.0
-spot_angle_attenuation = 1.0
 
 [node name="left_hand" type="XRController3D" parent="."]
 tracker = &"left_hand"
 
 [node name="LeftHand" parent="left_hand" instance=ExtResource("3_dqkch")]
 
+[node name="MovementDirect" parent="left_hand" instance=ExtResource("5_direct")]
+strafe = true
+
 [node name="right_hand" type="XRController3D" parent="."]
 tracker = &"right_hand"
 
 [node name="RightHand" parent="right_hand" instance=ExtResource("4_qlg0r")]
+
+[node name="MovementTurn" parent="right_hand" instance=ExtResource("6_turn")]
+turn_mode = 2
