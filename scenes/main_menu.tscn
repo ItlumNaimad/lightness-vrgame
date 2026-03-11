@@ -1,0 +1,38 @@
+[gd_scene load_steps=7 format=3 uid="uid://cobrdt2tet5ga"]
+
+[ext_resource type="Script" uid="uid://cw5qj4bqdxpe6" path="res://scripts/main_menu.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="2_bqqt6"]
+[ext_resource type="PackedScene" uid="uid://cy68k7ne84230" path="res://scenes/main_menu_ui.tscn" id="3_ui"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_menu"]
+sky_top_color = Color(0.1, 0.1, 0.1, 1)
+sky_horizon_color = Color(0.2, 0.2, 0.2, 1)
+ground_bottom_color = Color(0, 0, 0, 1)
+ground_horizon_color = Color(0.2, 0.2, 0.2, 1)
+
+[sub_resource type="Sky" id="Sky_menu"]
+sky_material = SubResource("ProceduralSkyMaterial_menu")
+
+[sub_resource type="Environment" id="Environment_menu"]
+background_mode = 2
+sky = SubResource("Sky_menu")
+ambient_light_source = 2
+ambient_light_color = Color(0.3, 0.3, 0.3, 1)
+
+[node name="MainMenu" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_menu")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10, 0)
+
+[node name="Viewport2Din3D" parent="." instance=ExtResource("2_bqqt6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -3)
+screen_size = Vector2(2, 1.5)
+scene = ExtResource("3_ui")
+viewport_size = Vector2(800, 600)
+transparent = 1
+unshaded = true
+scene_properties_keys = PackedStringArray("main_menu_ui.gd")

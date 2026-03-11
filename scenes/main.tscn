@@ -6,7 +6,7 @@
 [node name="Main" type="Node3D"]
 
 [node name="Staging" parent="." instance=ExtResource("1_o5qli")]
-main_scene = "res://scenes/game_map.tscn"
+main_scene = "res://scenes/main_menu.tscn"
 
 [node name="Player" parent="Staging" index="0" instance=ExtResource("2_player")]
 

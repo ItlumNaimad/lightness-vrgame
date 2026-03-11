@@ -33,14 +33,26 @@
 - **Zmiana:** Do `player.tscn` dodano `MovementDirect` (lewy kontroler) oraz `MovementTurn` (prawy kontroler).
 - **Dlaczego:** Umożliwienie poruszania się i obracania w przestrzeni VR oraz potwierdzenie działania kontrolerów.
 
-## Current Focus
-- Weryfikacja działania sterowania w goglach.
-- Implementacja Menu Głównego (UI 3D).
+## Implementacja Menu Głównego (2026-03-11)
 
+### 1. Struktura UI 2D (`scenes/main_menu_ui.tscn`)
+- **Zmiana:** Stworzono kompletną scenę UI z tłem, tytułem i przyciskami (Start, Settings, Exit).
+- **Skrypt:** Dodano `scripts/main_menu_ui.gd` do obsługi sygnałów przycisków.
+
+### 2. Integracja Menu 3D (`scenes/main_menu.tscn`)
+- **Zmiana:** Wykorzystano `Viewport2Din3D` do wyświetlenia UI w przestrzeni VR.
+- **Skrypt:** Dodano `scripts/main_menu.gd` (dziedziczący po `XRToolsSceneBase`), który odbiera sygnały z UI i komunikuje się ze `Staging` (ładowanie mapy, wyjście z gry).
+- **Środowisko:** Dodano `WorldEnvironment` i oświetlenie, aby menu nie było zawieszone w próżni.
+
+### 3. Ulepszenia Gracza (`scenes/player.tscn`)
+- **Zmiana:** Dodano `FunctionPointer` (laser) do prawego kontrolera, co umożliwia interakcję z menu.
+
+### 4. Konfiguracja Staging (`scenes/main.tscn`)
+- **Zmiana:** Ustawiono `main_menu.tscn` jako scenę startową.
 
 ## Current Focus
-- Weryfikacja działania latarki i kolizji na nowej strukturze.
-- Szkielet Menu Głównego.
+- Testowanie interakcji w menu i przejścia do mapy gry.
+- Dodanie dźwięków do menu.
 
 ## Upcoming Tasks
 - Main Menu implementation.

@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://c0ch7jab7i3ry"]
+[gd_scene load_steps=9 format=3 uid="uid://c0ch7jab7i3ry"]
 
 [ext_resource type="PackedScene" uid="uid://diyu06cw06syv" path="res://addons/godot-xr-tools/player/player_body.tscn" id="1_g2els"]
 [ext_resource type="PackedScene" uid="uid://btknduttnmoxf" path="res://addons/godot-xr-tools/misc/vr_common_shader_cache.tscn" id="2_qhqgy"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://l2n30mpbkdyw" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn" id="4_qlg0r"]
 [ext_resource type="PackedScene" uid="uid://bl2nuu3qhlb5k" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="5_direct"]
 [ext_resource type="PackedScene" uid="uid://b6bk2pj8vbj28" path="res://addons/godot-xr-tools/functions/movement_turn.tscn" id="6_turn"]
+[ext_resource type="PackedScene" uid="uid://cqhw276realc" path="res://addons/godot-xr-tools/functions/function_pointer.tscn" id="7_fjrip"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tuyoq"]
 radius = 0.4
@@ -34,6 +35,7 @@ tracker = &"left_hand"
 [node name="LeftHand" parent="left_hand" instance=ExtResource("3_dqkch")]
 
 [node name="MovementDirect" parent="left_hand" instance=ExtResource("5_direct")]
+max_speed = 7.0
 strafe = true
 
 [node name="right_hand" type="XRController3D" parent="."]
@@ -42,4 +44,9 @@ tracker = &"right_hand"
 [node name="RightHand" parent="right_hand" instance=ExtResource("4_qlg0r")]
 
 [node name="MovementTurn" parent="right_hand" instance=ExtResource("6_turn")]
-turn_mode = 2
+turn_mode = 1
+
+[node name="FunctionPointer" parent="right_hand" instance=ExtResource("7_fjrip")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.02, 0.05, -0.1)
+laser_length = 1
+show_target = true
