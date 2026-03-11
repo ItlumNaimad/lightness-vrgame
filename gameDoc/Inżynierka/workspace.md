@@ -23,19 +23,22 @@
 - **Dlaczego:** Wcześniej scena ładowała samą siebie (`main.tscn`), co prowadziło do nieskończonej pętli.
 - **Integracja:** Wstawiono scenę `player.tscn` bezpośrednio do `Staging` i wyłączono domyślne węzły origin/camera, aby system korzystał z Twojego spersonalizowanego gracza.
 
-## Poprawki Błędów (2026-03-11)
+## Poprawki Błędów (2026-03-11 - Sesja 3)
 
-### 1. Rozwiązanie błędu XRToolsStaging (Type mismatch)
-- **Problem:** `Trying to assign value of type Node3D to a variable of type scene_base.gd`.
-- **Rozwiązanie:** Utworzono `scripts/game_map.gd` dziedziczący po `XRToolsSceneBase` i przypisano go do `game_map.tscn`. Każda scena ładowana przez Staging musi teraz używać tego skryptu bazowego.
+### 1. Rozwiązanie błędu Null Instance w scene_base.gd
+- **Problem:** Klasa bazowa `XRToolsSceneBase` próbowała uzyskać dostęp do `$XROrigin3D/XRCamera3D` wewnątrz mapy, co powodowało błędy przy próbie przypisania `current = true` (Null Instance), bo usunęliśmy gracza z mapy.
+- **Rozwiązanie:** Nadpisano funkcję `scene_loaded` w `scripts/game_map.gd`. Funkcja jest teraz pusta, co pozwala systemowi `Staging` na globalne zarządzanie kamerą gracza bez szukania jej wewnątrz sceny mapy.
 
-### 2. Naprawa fizyki i kolizji
-- **Problem:** Gracz przenikał przez podłogę.
-- **Rozwiązanie:** Poprawiono hierarchię w `player.tscn`. `CollisionShape3D` jest teraz prawidłowo podpięte pod `PlayerBody` (CharacterBody3D). Ustawiono również transformacje kapsuły, aby środek ciężkości i kamera były na odpowiednich wysokościach.
+### 2. Optymalizacja integracji w main.tscn
+- **Zmiana:** Ponowne ułożenie węzłów w `main.tscn`, aby Twój `Player` był pierwszym widocznym `XROrigin3D` dla skryptu Staging.
 
 ## Current Focus
-- Implementacja podstawowego Menu Głównego (UI w przestrzeni 3D).
-- Dodanie obsługi kontrolerów (ruch/obracanie).
+- Przygotowanie do testów w goglach (potwierdzenie widoczności podłogi i latarki).
+- Szkielet Menu Głównego.
+
+## Current Focus
+- Weryfikacja działania latarki i kolizji na nowej strukturze.
+- Szkielet Menu Głównego.
 
 ## Upcoming Tasks
 - Main Menu implementation.

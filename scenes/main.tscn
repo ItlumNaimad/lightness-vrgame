@@ -10,8 +10,9 @@ main_scene = "res://scenes/game_map.tscn"
 
 [node name="XROrigin3D" parent="Staging" index="1"]
 visible = false
+enabled = false
 
 [node name="Player" parent="Staging" index="1" instance=ExtResource("2_player")]
 
-[node name="XRCamera3D" parent="Staging/XROrigin3D" index="0"]
-enabled = false
+[node name="LoadingScreen" parent="Staging" index="3"]
+enable_press_to_continue = true
