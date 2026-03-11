@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Notatka.md",
+                "file": "README.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Notatka"
+              "title": "README"
             }
           }
         ],
@@ -200,8 +200,8 @@
   },
   "active": "dcfc310f04f8ddf6",
   "lastOpenFiles": [
-    "README.md",
     "Notatka.md",
+    "README.md",
     "Witaj.md"
   ]
 }

@@ -8,4 +8,6 @@
 - [ ] Przeciwnik 2
 - [ ] Generatory
 - [ ] Pickupy
+- [ ] SFXy
+- [ ] Odgłosy podłogi aby pomóc w orientacji
 
