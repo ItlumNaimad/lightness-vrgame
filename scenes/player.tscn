@@ -7,25 +7,31 @@
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tuyoq"]
 
-[node name="Player" type="Node3D"]
+[node name="Player" type="XROrigin3D"]
 
-[node name="XROrigin3D" type="XROrigin3D" parent="."]
+[node name="PlayerBody" parent="." instance=ExtResource("1_g2els")]
 
-[node name="PlayerBody" parent="XROrigin3D" instance=ExtResource("1_g2els")]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="XROrigin3D/PlayerBody"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerBody"]
 shape = SubResource("CapsuleShape3D_tuyoq")
 
-[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+[node name="XRCamera3D" type="XRCamera3D" parent="."]
 
-[node name="VRCommonShaderCache" parent="XROrigin3D/XRCamera3D" instance=ExtResource("2_qhqgy")]
+[node name="VRCommonShaderCache" parent="XRCamera3D" instance=ExtResource("2_qhqgy")]
 
-[node name="left_hand" type="XRController3D" parent="XROrigin3D"]
+[node name="SpotLight3D" type="SpotLight3D" parent="XRCamera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+light_color = Color(0.8950378, 0.86848104, 0, 1)
+spot_range = 10.0
+spot_attenuation = 1.0
+spot_angle = 45.0
+spot_angle_attenuation = 1.0
+
+[node name="left_hand" type="XRController3D" parent="."]
 tracker = &"left_hand"
 
-[node name="LeftHand" parent="XROrigin3D/left_hand" instance=ExtResource("3_dqkch")]
+[node name="LeftHand" parent="left_hand" instance=ExtResource("3_dqkch")]
 
-[node name="right_hand" type="XRController3D" parent="XROrigin3D"]
+[node name="right_hand" type="XRController3D" parent="."]
 tracker = &"right_hand"
 
-[node name="RightHand" parent="XROrigin3D/right_hand" instance=ExtResource("4_qlg0r")]
+[node name="RightHand" parent="right_hand" instance=ExtResource("4_qlg0r")]
