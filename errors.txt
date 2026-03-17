@@ -1,12 +1,8 @@
-E 0:00:04:509   main.gd:23 @ _load_initial_scene(): Viewport Texture must be set to use it.
+E 0:00:04:553   main.gd:26 @ _load_initial_scene(): Viewport Texture must be set to use it.
   <Źródło C++>  scene/main/viewport.cpp:190 @ _err_print_viewport_not_set()
-  <Ślad stosu>  main.gd:23 @ _load_initial_scene()
-                main.gd:20 @ _ready()
+  <Ślad stosu>  main.gd:26 @ _load_initial_scene()
+                main.gd:23 @ _ready()
 
-
-W 0:00:04:575   _process_picking: Object picking can't be used when stereo rendering, this will be turned off!
+W 0:00:38:486   _process_picking: Object picking can't be used when stereo rendering, this will be turned off!
   <Źródło C++>  scene/main/viewport.cpp:771 @ _process_picking()
 
-E 0:00:11:511   XRToolsHoldButton._process: Invalid call. Nonexistent function 'is_xr_active' in base 'Nil'.
-  <Źródło GDScript>hold_button.gd:65 @ XRToolsHoldButton._process()
-  <Ślad stosu>  hold_button.gd:65 @ _process()
