@@ -69,16 +69,16 @@
 - **Dlaczego:** Realizacja prośby o dedykowany ekran ładowania z manualnym potwierdzeniem przejścia, przy jednoczesnym zachowaniu płynności wizualnej (fading).
 
 ### 5. Poprawki stabilności VR i Inicjalizacji (Sesja 17.03 - Fixes)
-- **Zmiana:** Naprawiono błąd `Invalid call. Nonexistent function 'is_xr_active' in base 'Nil'` w pliku `addons/godot-xr-tools/misc/hold_button.gd`.
-- **Dlaczego:** Skrypt przycisku próbował odwołać się do systemu `Staging`, którego już nie używamy. Dodano bezpieczną weryfikację (null check) i fallback, co pozwala przyciskowi działać poprawnie w nowej architekturze.
-- **Zmiana:** Dodano opóźnienie `await get_tree().process_frame` oraz dodatkowy timer w `main.gd` przed załadowaniem pierwszej sceny.
-- **Dlaczego:** Rozwiązano błąd `Viewport Texture must be set to use it`, dając silnikowi więcej czasu na zainicjalizowanie tekstur viewportów UI.
-- **Zmiana:** Naprawiono widoczność `LoadingScreen` poprzez aktualizację jego pozycji do pozycji gracza w każdej klatce (`global_position = player.global_position`).
-- **Dlaczego:** Wcześniej ekran ładowania zostawał w punkcie startowym świata (0,0,0), przez co był niewidoczny dla gracza po przemieszczeniu się.
-- **Zmiana:** Poprawiono logikę resetowania `ground_control_velocity` w `player_body.gd`.
-- **Dlaczego:** Rozwiązano problem "ślizgania się bez końca" (sticky movement). Teraz wektor sterowania jest poprawnie zerowany, co pozwala na działanie tarcia i zatrzymywanie się gracza po puszczeniu joysticka.
-- **Zmiana:** Skonfigurowano `HoldButton` na ekranie ładowania, aby domyślnie reagował na prawy spust (`trigger_click`).
-- **Dlaczego:** Synchronizacja z laserem (pointerem), który również znajduje się na prawej ręce.
+- **Zmiana:** Przywrócono oryginalny skrypt `addons/godot-xr-tools/player/player_body.gd` z repozytorium (git checkout).
+- **Dlaczego:** Poprzednie próby ręcznej optymalizacji skryptu usunęły zbyt wiele mechanizmów stabilizujących ruch, co prowadziło do błędów fizyki (pływanie, brak tarcia). Przywrócenie oryginału przywróciło stabilną bazę fizyki XRTools.
+- **Zmiana:** Usunięto tymczasową podłogę ze sceny `scenes/main.tscn`.
+- **Dlaczego:** Obecność kolizji w scenie "zarządcy" (Main) powodowała konflikty z podłogami na wczytywanych mapach. Teraz fizyka podłoża jest zarządzana wyłącznie przez konkretne poziomy.
+- **Zmiana:** Dodano mechanizm blokowania fizyki gracza podczas ładowania w `scripts/main.gd` (`_set_player_physics_enabled`).
+- **Dlaczego:** Całkowite wyłączenie węzła `PlayerBody` i resetowanie jego prędkości podczas przejść eliminuje problem "samoczynnego startu" gracza przy inicjalizacji śledzenia VR. Fizyka jest aktywowana dopiero po zniknięciu ekranu ładowania.
+- **Zmiana:** Poprawiono stabilność podłoża w `scenes/game_map.tscn` (BoxShape3D zamiast WorldBoundary).
+- **Dlaczego:** Zapewnienie solidnego oparcia dla `PlayerBody`, co pozwala na poprawne wykrywanie stanu `on_ground` i działanie tarcia.
+- **Zmiana:** Oczyszczono `scenes/player.tscn` z nadmiarowych kształtów kolizji i ustawiono prędkość `max_speed` na 3.0.
+- **Dlaczego:** Usunięcie konfliktów między ręcznie dodanymi kształtami a tymi generowanymi przez skrypt oraz zapewnienie bardziej komfortowej prędkości poruszania się w VR.
 
 ## Current Focus
 - Testowanie stabilności przejść między Menu a Mapą w nowej architekturze.
