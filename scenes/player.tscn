@@ -13,7 +13,6 @@
 [node name="PlayerBody" parent="." instance=ExtResource("1_g2els")]
 
 [node name="XRCamera3D" type="XRCamera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
 
 [node name="VRCommonShaderCache" parent="XRCamera3D" instance=ExtResource("2_qhqgy")]
 

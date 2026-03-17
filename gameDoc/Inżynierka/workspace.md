@@ -73,12 +73,12 @@
 - **Dlaczego:** Scena `Main` pełni teraz rolę wyłącznie logicznego kontenera. Usunięcie środowiska eliminuje konflikty wizualne (każda mapa ma własne oświetlenie), a brak kolizji zapobiega błędom fizyki na starcie.
 - **Zmiana:** Reorganizacja hierarchii: `LoadingScreen` oraz `Fade` zostały przeniesione jako dzieci węzła `Player`.
 - **Dlaczego:** Pozwala to na automatyczne śledzenie pozycji gracza przez te elementy (lokalna transformacja). Usunięcie ręcznego aktualizowania pozycji w `_process` wyeliminowało "walkę" między skryptem a systemem trackingu XR, która powodowała nagłe skoki pędu.
-- **Zmiana:** Agresywne blokowanie fizyki poprzez `PROCESS_MODE_DISABLED` w `scripts/main.gd`.
-- **Dlaczego:** Zwykłe wyłączenie `enabled` w `PlayerBody` czasem nie wystarczało przy gwałtownych ruchach głową na starcie. Całkowite zawieszenie procesowania fizyki podczas ładowania gwarantuje, że gracz pozostanie w spoczynku do momentu pełnej inicjalizacji mapy.
-- **Zmiana:** Dodanie solidnej podłogi (`StaticBody3D` z `BoxShape3D`) bezpośrednio do `scenes/main_menu.tscn`.
-- **Dlaczego:** Zapewnienie stabilnego punktu startowego. Gracz musi mieć oparcie od pierwszej sekundy, aby silnik nie interpretował braku kolizji jako spadania.
-- **Zmiana:** Pełny reset `scenes/player.tscn` do ustawień domyślnych Godot XR Tools i wydłużenie timerów stabilizacji.
-- **Dlaczego:** Powrót do fundamentów wtyczki, która jest sprawdzona pod kątem stabilności, oraz danie systemom VR czasu na poprawną kalibrację przed interakcją z UI.
+- **Zmiana:** Reset pozycji kamery XR w `player.tscn` do (0,0,0).
+- **Dlaczego:** Zapobieganie "szarpnięciu" fizyki na starcie. Silnik VR sam ustawi wysokość gogli; startowanie z niezerową pozycją w scenie powodowało błędne obliczenia pędu przy pierwszej klatce.
+- **Zmiana:** Wprowadzenie systemu `_stabilize_player` w `main.gd` (Momentum Kill).
+- **Dlaczego:** Przez pierwsze 10 klatek po włączeniu fizyki wymuszamy `velocity = ZERO`. To skutecznie wygasza wszelkie siły powstałe w wyniku inicjalizacji trackingu VR lub przeskoków pozycji kamery podczas ładowania sceny.
+- **Zmiana:** Selektywne włączanie `movement_providers` (joysticków) dopiero po stabilizacji.
+- **Dlaczego:** Gwarancja, że gracz nie zacznie się poruszać, dopóki świat i fizyka nie będą w pełni gotowe.
 
 
 ## Current Focus

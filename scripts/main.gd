@@ -16,11 +16,12 @@ func _ready():
 	
 	loading_screen.visible = false
 	
-	# Całkowicie wyłączamy gracza na starcie
+	# Całkowicie wyłączamy gracza i sterowanie na starcie
 	_set_player_physics_enabled(false)
+	_set_movement_enabled(false)
 	
-	# Czekamy na stabilizację systemów
-	await get_tree().create_timer(1.0).timeout
+	# Czekamy na stabilizację systemów VR
+	await get_tree().create_timer(1.5).timeout
 	
 	# Startujemy od menu głównego
 	_load_initial_scene("res://scenes/main_menu.tscn")
@@ -34,8 +35,8 @@ func _load_initial_scene(path: String):
 		if current_scene.has_method("scene_loaded"):
 			current_scene.scene_loaded()
 		
-		# Włączamy fizykę po załadowaniu menu
-		_set_player_physics_enabled(true)
+		# Włączamy fizykę po załadowaniu pierwszego poziomu
+		await _stabilize_player()
 
 func _connect_scene_signals(scene):
 	if scene.has_signal("request_load_scene"):
@@ -56,8 +57,10 @@ func _start_transition():
 	tween.tween_method(_set_fade, 0.0, 1.0, 0.5)
 	await tween.finished
 
-	# 1. Wyłącz fizykę i pokaż loading
+	# 1. Blokada ruchu i fizyki
 	_set_player_physics_enabled(false)
+	_set_movement_enabled(false)
+	
 	loading_screen.progress = 0.0
 	loading_screen.enable_press_to_continue = false
 	loading_screen.visible = true
@@ -66,7 +69,7 @@ func _start_transition():
 	tween.tween_method(_set_fade, 1.0, 0.0, 0.5)
 	await tween.finished
 
-	# 2. Ładowanie
+	# 2. Ładowanie nowej sceny
 	ResourceLoader.load_threaded_request(next_scene_path)
 	
 	if current_scene:
@@ -85,16 +88,15 @@ func _start_transition():
 			return
 		await get_tree().create_timer(0.1).timeout
 	
-	# 3. Czekaj na przycisk
+	# 3. Czekaj na potwierdzenie gracza
 	loading_screen.enable_press_to_continue = true
-	
 	var hold_button = loading_screen.get_node_or_null("PressToContinue/HoldButton")
 	if hold_button:
 		hold_button.activate_action = "trigger_click" 
 	
 	await loading_screen.continue_pressed
 	
-	# 4. Finalizacja
+	# 4. Przełączenie sceny
 	tween = get_tree().create_tween()
 	tween.tween_method(_set_fade, 0.0, 1.0, 0.5)
 	await tween.finished
@@ -108,7 +110,9 @@ func _start_transition():
 		current_scene.scene_loaded()
 	
 	loading_screen.visible = false
-	_set_player_physics_enabled(true)
+	
+	# 5. Stabilizacja i odblokowanie sterowania
+	await _stabilize_player()
 	
 	tween = get_tree().create_tween()
 	tween.tween_method(_set_fade, 1.0, 0.0, 0.5)
@@ -121,5 +125,23 @@ func _set_player_physics_enabled(enabled: bool):
 	if player_body:
 		player_body.enabled = enabled
 		player_body.velocity = Vector3.ZERO
-		# Ustawiamy mode procesowania, aby fizyka kompletnie nie działała gdy jest wyłączona
 		player_body.process_mode = PROCESS_MODE_INHERIT if enabled else PROCESS_MODE_DISABLED
+
+func _set_movement_enabled(enabled: bool):
+	# Szukamy wszystkich movement providerów w grupie
+	var providers = get_tree().get_nodes_in_group("movement_providers")
+	for p in providers:
+		p.enabled = enabled
+
+async func _stabilize_player():
+	# Włączamy fizykę, ale przez pierwsze 10 klatek wymuszamy brak ruchu
+	# To zabija pęd powstały przy "skoku" trackingu VR
+	_set_player_physics_enabled(true)
+	var player_body = player.get_node_or_null("PlayerBody")
+	if player_body:
+		for i in range(10):
+			player_body.velocity = Vector3.ZERO
+			await get_tree().physics_frame
+	
+	# Dopiero teraz odblokowujemy joysticki
+	_set_movement_enabled(true)
