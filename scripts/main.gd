@@ -9,21 +9,17 @@ var current_scene : Node3D
 var next_scene_path : String
 
 func _ready():
-	# Podpinamy kamerę pod LoadingScreen
 	var camera = player.get_node_or_null("XRCamera3D")
 	if camera:
 		loading_screen.set_camera(camera)
 	
 	loading_screen.visible = false
 	
-	# Całkowicie wyłączamy gracza i sterowanie na starcie
+	# Blokujemy fizykę i ruch na czas inicjalizacji
 	_set_player_physics_enabled(false)
 	_set_movement_enabled(false)
 	
-	# Czekamy na stabilizację systemów VR
-	await get_tree().create_timer(1.5).timeout
-	
-	# Startujemy od menu głównego
+	await get_tree().create_timer(1.0).timeout
 	_load_initial_scene("res://scenes/main_menu.tscn")
 
 func _load_initial_scene(path: String):
@@ -32,11 +28,9 @@ func _load_initial_scene(path: String):
 		current_scene = scene_res.instantiate()
 		world.add_child(current_scene)
 		_connect_scene_signals(current_scene)
-		if current_scene.has_method("scene_loaded"):
-			current_scene.scene_loaded()
 		
-		# Stabilizujemy gracza po załadowaniu menu
-		await _stabilize_player()
+		# KLUCZ: Bezpieczna teleportacja zamiast ręcznego ustawiania pozycji
+		await _teleport_and_stabilize()
 
 func _connect_scene_signals(scene):
 	if scene.has_signal("request_load_scene"):
@@ -52,12 +46,10 @@ func _on_request_quit():
 	get_tree().quit()
 
 func _start_transition():
-	# 0. Zaciemnienie
 	var tween = get_tree().create_tween()
 	tween.tween_method(_set_fade, 0.0, 1.0, 0.5)
 	await tween.finished
 
-	# 1. Blokada ruchu i fizyki
 	_set_player_physics_enabled(false)
 	_set_movement_enabled(false)
 	
@@ -69,7 +61,6 @@ func _start_transition():
 	tween.tween_method(_set_fade, 1.0, 0.0, 0.5)
 	await tween.finished
 
-	# 2. Ładowanie nowej sceny
 	ResourceLoader.load_threaded_request(next_scene_path)
 	
 	if current_scene:
@@ -88,15 +79,9 @@ func _start_transition():
 			return
 		await get_tree().create_timer(0.1).timeout
 	
-	# 3. Czekaj na potwierdzenie gracza
 	loading_screen.enable_press_to_continue = true
-	var hold_button = loading_screen.get_node_or_null("PressToContinue/HoldButton")
-	if hold_button:
-		hold_button.activate_action = "trigger_click" 
-	
 	await loading_screen.continue_pressed
 	
-	# 4. Przełączenie sceny
 	tween = get_tree().create_tween()
 	tween.tween_method(_set_fade, 0.0, 1.0, 0.5)
 	await tween.finished
@@ -111,8 +96,8 @@ func _start_transition():
 	
 	loading_screen.visible = false
 	
-	# 5. Stabilizacja i odblokowanie sterowania
-	await _stabilize_player()
+	# KLUCZ: Ponowna bezpieczna teleportacja na nowej mapie
+	await _teleport_and_stabilize()
 	
 	tween = get_tree().create_tween()
 	tween.tween_method(_set_fade, 1.0, 0.0, 0.5)
@@ -125,31 +110,24 @@ func _set_player_physics_enabled(enabled: bool):
 	if player_body:
 		player_body.enabled = enabled
 		player_body.velocity = Vector3.ZERO
-		player_body.process_mode = PROCESS_MODE_INHERIT if enabled else PROCESS_MODE_DISABLED
 
 func _set_movement_enabled(enabled: bool):
 	var providers = get_tree().get_nodes_in_group("movement_providers")
 	for p in providers:
 		p.enabled = enabled
 
-func _stabilize_player():
-	# Najpierw zerujemy pęd przy wyłączonej fizyce
+func _teleport_and_stabilize():
 	var player_body = player.get_node_or_null("PlayerBody")
 	if player_body:
-		player_body.velocity = Vector3.ZERO
-	
-	# Zapamiętujemy bezpieczną pozycję (punkt startowy mapy)
-	var anchor_pos = player.global_position
-	
-	_set_player_physics_enabled(true)
-	
-	# Przez 30 klatek (ok. 0.5s) "betonujemy" gracza w miejscu
-	# To eliminuje wszelkie szarpnięcia wynikające z inicjalizacji trackingu
-	for i in range(30):
-		if player_body:
+		# Używamy oficjalnej funkcji teleportu, która resetuje pęd i synchronizuje Origin z Body
+		# Przenosimy się do punktu (0, 0.1, 0), aby być tuż nad podłogą
+		player_body.teleport(Transform3D(Basis(), Vector3(0, 0.1, 0)))
+		
+		_set_player_physics_enabled(true)
+		
+		# Krótkie wygaszenie pędu przez 5 klatek
+		for i in range(5):
 			player_body.velocity = Vector3.ZERO
-		player.global_position = anchor_pos
-		await get_tree().physics_frame
-	
-	# Dopiero teraz odblokowujemy sterowanie joystickiem
-	_set_movement_enabled(true)
+			await get_tree().physics_frame
+			
+		_set_movement_enabled(true)

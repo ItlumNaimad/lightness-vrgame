@@ -68,17 +68,15 @@
 - **Zmiana:** Zintegrowano mechanizm "Hold trigger to continue" z oryginalnego systemu ładowania Godot XR Tools bezpośrednio w kontrolerze `Main.gd`.
 - **Dlaczego:** Realizacja prośby o dedykowany ekran ładowania z manualnym potwierdzeniem przejścia, przy jednoczesnym zachowaniu płynności wizualnej (fading).
 
-### 5. Radykalne uproszczenie i stabilizacja ruchu (Sesja 17.03 - Final Fix)
-- **Zmiana:** Całkowite wyczyszczenie `scenes/main.tscn` z kolizji oraz usunięcie globalnego `WorldEnvironment`.
-- **Dlaczego:** Scena `Main` pełni teraz rolę wyłącznie logicznego kontenera. Usunięcie środowiska eliminuje konflikty wizualne (każda mapa ma własne oświetlenie), a brak kolizji zapobiega błędom fizyki na starcie.
-- **Zmiana:** Reorganizacja hierarchii: `LoadingScreen` oraz `Fade` zostały przeniesione jako dzieci węzła `Player`.
-- **Dlaczego:** Pozwala to na automatyczne śledzenie pozycji gracza przez te elementy (lokalna transformacja). Usunięcie ręcznego aktualizowania pozycji w `_process` wyeliminowało "walkę" między skryptem a systemem trackingu XR, która powodowała nagłe skoki pędu.
-- **Zmiana:** Reset pozycji Gracza w `Main.tscn` do (0,0,0) oraz Kamery XR w `player.tscn` do (0,0,0).
-- **Dlaczego:** Usunięcie wymuszonej wysokości 1.8m i 0.2m zapobiega "szarpnięciu" fizyki w pierwszej klatce, gdy silnik VR próbuje skompensować realną wysokość headsetu względem tych offsetów.
-- **Zmiana:** Wprowadzenie systemu **"Betonowej Stabilizacji" (Anchor)** w `main.gd`.
-- **Dlaczego:** Przez pierwsze 30 klatek po włączeniu fizyki skrypt wymusza `player.global_position = anchor_pos`. To całkowicie blokuje możliwość jakiegokolwiek przesunięcia (driftu) wynikającego z inicjalizacji systemów VR lub błędnego przeliczenia pędu przez `CharacterBody3D`.
-- **Zmiana:** Selektywne włączanie `movement_providers` (joysticków) dopiero po fazie "betonowania".
-- **Dlaczego:** Gwarancja, że gracz nie zacznie się poruszać, dopóki świat, tracking i fizyka nie będą w 100% zsynchronizowane.
+### 5. Rozwiązanie problemu niekontrolowanego pędu (Standard Przemysłowy)
+- **Problem:** Ręczne ustawianie `global_position` na węźle `XROrigin3D` powodowało konflikt z fizyką `PlayerBody` (CharacterBody3D z ustawionym `top_level = true`). Gdy Origin się przesuwał, a ciało fizyczne zostawało w miejscu, silnik VR interpretował to jako nagły, ogromny ruch, nadając graczowi gigantyczny pęd.
+- **Zmiana:** Zrezygnowano z ręcznego ustawiania pozycji w `main.gd` na rzecz wbudowanej funkcji **`player_body.teleport()`**.
+- **Dlaczego:** Funkcja `teleport()` z XRTools jest zaprojektowana specjalnie do bezpiecznej synchronizacji pozycji Origin, Kamery i Ciała Fizycznego w jednej klatce, bez generowania sił fizycznych.
+- **Dodatki:**
+    - Dodano wymuszoną pozycję `y = 0.1` podczas teleportacji, aby gracz nie narodził się *wewnątrz* podłogi (co mogłoby spowodować "wypchnięcie" i pęd).
+    - Wprowadzono funkcję `_teleport_and_stabilize`, która po teleportacji wygasza pęd przez 5 dodatkowych klatek fizyki przed odblokowaniem joysticków.
+    - Uproszczono zarządzanie stanem fizyki, usuwając problematyczne `PROCESS_MODE_DISABLED` na rzecz standardowego `enabled`.
+
 
 
 
