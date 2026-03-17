@@ -73,12 +73,13 @@
 - **Dlaczego:** Scena `Main` pełni teraz rolę wyłącznie logicznego kontenera. Usunięcie środowiska eliminuje konflikty wizualne (każda mapa ma własne oświetlenie), a brak kolizji zapobiega błędom fizyki na starcie.
 - **Zmiana:** Reorganizacja hierarchii: `LoadingScreen` oraz `Fade` zostały przeniesione jako dzieci węzła `Player`.
 - **Dlaczego:** Pozwala to na automatyczne śledzenie pozycji gracza przez te elementy (lokalna transformacja). Usunięcie ręcznego aktualizowania pozycji w `_process` wyeliminowało "walkę" między skryptem a systemem trackingu XR, która powodowała nagłe skoki pędu.
-- **Zmiana:** Reset pozycji kamery XR w `player.tscn` do (0,0,0).
-- **Dlaczego:** Zapobieganie "szarpnięciu" fizyki na starcie. Silnik VR sam ustawi wysokość gogli; startowanie z niezerową pozycją w scenie powodowało błędne obliczenia pędu przy pierwszej klatce.
-- **Zmiana:** Wprowadzenie systemu `_stabilize_player` w `main.gd` (Momentum Kill).
-- **Dlaczego:** Przez pierwsze 10 klatek po włączeniu fizyki wymuszamy `velocity = ZERO`. To skutecznie wygasza wszelkie siły powstałe w wyniku inicjalizacji trackingu VR lub przeskoków pozycji kamery podczas ładowania sceny.
-- **Zmiana:** Selektywne włączanie `movement_providers` (joysticków) dopiero po stabilizacji.
-- **Dlaczego:** Gwarancja, że gracz nie zacznie się poruszać, dopóki świat i fizyka nie będą w pełni gotowe.
+- **Zmiana:** Reset pozycji Gracza w `Main.tscn` do (0,0,0) oraz Kamery XR w `player.tscn` do (0,0,0).
+- **Dlaczego:** Usunięcie wymuszonej wysokości 1.8m i 0.2m zapobiega "szarpnięciu" fizyki w pierwszej klatce, gdy silnik VR próbuje skompensować realną wysokość headsetu względem tych offsetów.
+- **Zmiana:** Wprowadzenie systemu **"Betonowej Stabilizacji" (Anchor)** w `main.gd`.
+- **Dlaczego:** Przez pierwsze 30 klatek po włączeniu fizyki skrypt wymusza `player.global_position = anchor_pos`. To całkowicie blokuje możliwość jakiegokolwiek przesunięcia (driftu) wynikającego z inicjalizacji systemów VR lub błędnego przeliczenia pędu przez `CharacterBody3D`.
+- **Zmiana:** Selektywne włączanie `movement_providers` (joysticków) dopiero po fazie "betonowania".
+- **Dlaczego:** Gwarancja, że gracz nie zacznie się poruszać, dopóki świat, tracking i fizyka nie będą w 100% zsynchronizowane.
+
 
 
 ## Current Focus

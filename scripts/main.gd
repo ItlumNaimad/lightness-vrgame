@@ -35,7 +35,7 @@ func _load_initial_scene(path: String):
 		if current_scene.has_method("scene_loaded"):
 			current_scene.scene_loaded()
 		
-		# Włączamy fizykę po załadowaniu pierwszego poziomu
+		# Stabilizujemy gracza po załadowaniu menu
 		await _stabilize_player()
 
 func _connect_scene_signals(scene):
@@ -128,20 +128,28 @@ func _set_player_physics_enabled(enabled: bool):
 		player_body.process_mode = PROCESS_MODE_INHERIT if enabled else PROCESS_MODE_DISABLED
 
 func _set_movement_enabled(enabled: bool):
-	# Szukamy wszystkich movement providerów w grupie
 	var providers = get_tree().get_nodes_in_group("movement_providers")
 	for p in providers:
 		p.enabled = enabled
 
 func _stabilize_player():
-	# Włączamy fizykę, ale przez pierwsze 10 klatek wymuszamy brak ruchu
-	# To zabija pęd powstały przy "skoku" trackingu VR
-	_set_player_physics_enabled(true)
+	# Najpierw zerujemy pęd przy wyłączonej fizyce
 	var player_body = player.get_node_or_null("PlayerBody")
 	if player_body:
-		for i in range(10):
-			player_body.velocity = Vector3.ZERO
-			await get_tree().physics_frame
+		player_body.velocity = Vector3.ZERO
 	
-	# Dopiero teraz odblokowujemy joysticki
+	# Zapamiętujemy bezpieczną pozycję (punkt startowy mapy)
+	var anchor_pos = player.global_position
+	
+	_set_player_physics_enabled(true)
+	
+	# Przez 30 klatek (ok. 0.5s) "betonujemy" gracza w miejscu
+	# To eliminuje wszelkie szarpnięcia wynikające z inicjalizacji trackingu
+	for i in range(30):
+		if player_body:
+			player_body.velocity = Vector3.ZERO
+		player.global_position = anchor_pos
+		await get_tree().physics_frame
+	
+	# Dopiero teraz odblokowujemy sterowanie joystickiem
 	_set_movement_enabled(true)
