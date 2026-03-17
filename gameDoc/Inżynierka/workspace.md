@@ -71,8 +71,14 @@
 ### 5. Poprawki stabilności VR i Inicjalizacji (Sesja 17.03 - Fixes)
 - **Zmiana:** Naprawiono błąd `Invalid call. Nonexistent function 'is_xr_active' in base 'Nil'` w pliku `addons/godot-xr-tools/misc/hold_button.gd`.
 - **Dlaczego:** Skrypt przycisku próbował odwołać się do systemu `Staging`, którego już nie używamy. Dodano bezpieczną weryfikację (null check) i fallback, co pozwala przyciskowi działać poprawnie w nowej architekturze.
-- **Zmiana:** Dodano opóźnienie `await get_tree().process_frame` w `main.gd` przed załadowaniem pierwszej sceny.
-- **Dlaczego:** Rozwiązano błąd `Viewport Texture must be set to use it`, dając silnikowi czas na zainicjalizowanie tekstur viewportów UI przed ich wyświetleniem w VR.
+- **Zmiana:** Dodano opóźnienie `await get_tree().process_frame` oraz dodatkowy timer w `main.gd` przed załadowaniem pierwszej sceny.
+- **Dlaczego:** Rozwiązano błąd `Viewport Texture must be set to use it`, dając silnikowi więcej czasu na zainicjalizowanie tekstur viewportów UI.
+- **Zmiana:** Naprawiono widoczność `LoadingScreen` poprzez aktualizację jego pozycji do pozycji gracza w każdej klatce (`global_position = player.global_position`).
+- **Dlaczego:** Wcześniej ekran ładowania zostawał w punkcie startowym świata (0,0,0), przez co był niewidoczny dla gracza po przemieszczeniu się.
+- **Zmiana:** Poprawiono logikę resetowania `ground_control_velocity` w `player_body.gd`.
+- **Dlaczego:** Rozwiązano problem "ślizgania się bez końca" (sticky movement). Teraz wektor sterowania jest poprawnie zerowany, co pozwala na działanie tarcia i zatrzymywanie się gracza po puszczeniu joysticka.
+- **Zmiana:** Skonfigurowano `HoldButton` na ekranie ładowania, aby domyślnie reagował na prawy spust (`trigger_click`).
+- **Dlaczego:** Synchronizacja z laserem (pointerem), który również znajduje się na prawej ręce.
 
 ## Current Focus
 - Testowanie stabilności przejść między Menu a Mapą w nowej architekturze.

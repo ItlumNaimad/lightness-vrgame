@@ -54,10 +54,12 @@ func _process(delta):
 
 	var button_pressed = false
 
-	# we check all trackers
+	# we check trackers
 	var controllers = XRServer.get_trackers(XRServer.TRACKER_CONTROLLER)
 	for name in controllers:
 		var tracker : XRPositionalTracker = controllers[name]
+		# If we have a specific hand in mind (e.g. right_hand for pointer)
+		# we can check for it, or just allow any controller to trigger it.
 		if tracker.get_input(activate_action):
 			button_pressed = true
 

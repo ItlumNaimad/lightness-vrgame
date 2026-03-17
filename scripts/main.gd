@@ -16,11 +16,19 @@ func _ready():
 	
 	loading_screen.visible = false
 	
-	# Czekamy chwilę na inicjalizację Viewportów i XR przed ładowaniem pierwszej sceny
+	# Czekamy na pełną inicjalizację silnika i systemów XR
+	# Zwiększamy opóźnienie, aby uniknąć błędów Viewport Texture
 	await get_tree().process_frame
+	await get_tree().process_frame
+	await get_tree().create_timer(0.5).timeout
 	
-	# Startujemy od menu głównego bez ekranu ładowania na początku
+	# Startujemy od menu głównego
 	_load_initial_scene("res://scenes/main_menu.tscn")
+
+func _process(_delta):
+	# Aktualizuj pozycję ekranu ładowania, aby zawsze był przy graczu
+	if loading_screen.visible:
+		loading_screen.global_position = player.global_position
 
 func _load_initial_scene(path: String):
 	var scene_res = load(path)
@@ -47,7 +55,7 @@ func _on_request_quit():
 func _start_transition():
 	# 0. Zaciemnienie (Fade out)
 	var tween = get_tree().create_tween()
-	tween.tween_method(_set_fade, 0.0, 1.0, 1.0)
+	tween.tween_method(_set_fade, 0.0, 1.0, 0.5)
 	await tween.finished
 
 	# 1. Pokaż ekran ładowania
@@ -57,7 +65,7 @@ func _start_transition():
 	
 	# Rozjaśnij do ekranu ładowania
 	tween = get_tree().create_tween()
-	tween.tween_method(_set_fade, 1.0, 0.0, 1.0)
+	tween.tween_method(_set_fade, 1.0, 0.0, 0.5)
 	await tween.finished
 
 	# 2. Zacznij ładować nową scenę w tle
@@ -84,11 +92,17 @@ func _start_transition():
 	
 	# 5. Pozwól graczowi kontynuować (mechanizm przytrzymania przycisku)
 	loading_screen.enable_press_to_continue = true
+	
+	# Konfigurujemy przycisk na prawą rękę (zgodnie z pointerem)
+	var hold_button = loading_screen.get_node_or_null("PressToContinue/HoldButton")
+	if hold_button:
+		hold_button.activate_action = "trigger_click" # Prawy spust zazwyczaj
+	
 	await loading_screen.continue_pressed
 	
 	# Zaciemnij przed pokazaniem nowej sceny
 	tween = get_tree().create_tween()
-	tween.tween_method(_set_fade, 0.0, 1.0, 1.0)
+	tween.tween_method(_set_fade, 0.0, 1.0, 0.5)
 	await tween.finished
 
 	# 6. Instancjonuj nową scenę
@@ -104,7 +118,7 @@ func _start_transition():
 	# 7. Ukryj ekran ładowania i rozjaśnij (Fade in)
 	loading_screen.visible = false
 	tween = get_tree().create_tween()
-	tween.tween_method(_set_fade, 1.0, 0.0, 1.0)
+	tween.tween_method(_set_fade, 1.0, 0.0, 0.5)
 
 func _set_fade(value: float):
 	XRToolsFade.set_fade("main_transition", Color(0, 0, 0, value))

@@ -340,10 +340,11 @@ func _physics_process(delta: float):
 	# - Modify gravity direction
 	ground_control_velocity = Vector2.ZERO
 	var exclusive := false
-	for p in _movement_providers:
-		if p.is_active or (p.enabled and not exclusive):
-			if p.physics_movement(delta, self, exclusive):
-				exclusive = true
+	if enabled:
+		for p in _movement_providers:
+			if p.is_active or (p.enabled and not exclusive):
+				if p.physics_movement(delta, self, exclusive):
+					exclusive = true
 
 	# If no controller has performed an exclusive-update then apply gravity and
 	# perform any ground-control
