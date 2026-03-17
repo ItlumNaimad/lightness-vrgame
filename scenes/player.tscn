@@ -2,27 +2,20 @@
 
 [ext_resource type="PackedScene" uid="uid://diyu06cw06syv" path="res://addons/godot-xr-tools/player/player_body.tscn" id="1_g2els"]
 [ext_resource type="PackedScene" uid="uid://btknduttnmoxf" path="res://addons/godot-xr-tools/misc/vr_common_shader_cache.tscn" id="2_qhqgy"]
+[ext_resource type="Script" uid="uid://cjfu28jmrajlo" path="res://addons/godot-xr-tools/overrides/ground_physics_settings.gd" id="2_smehm"]
 [ext_resource type="PackedScene" uid="uid://b4kad2kuba1yn" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_hand_low.tscn" id="3_dqkch"]
 [ext_resource type="PackedScene" uid="uid://l2n30mpbkdyw" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn" id="4_qlg0r"]
 [ext_resource type="PackedScene" uid="uid://bl2nuu3qhlb5k" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="5_direct"]
 [ext_resource type="PackedScene" uid="uid://b6bk2pj8vbj28" path="res://addons/godot-xr-tools/functions/movement_turn.tscn" id="6_turn"]
 [ext_resource type="PackedScene" uid="uid://cqhw276realc" path="res://addons/godot-xr-tools/functions/function_pointer.tscn" id="7_fjrip"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tuyoq"]
-radius = 0.4
-height = 1.8
+[sub_resource type="Resource" id="Resource_ur7pv"]
+script = ExtResource("2_smehm")
 
 [node name="Player" type="XROrigin3D" unique_id=241470792]
 
 [node name="PlayerBody" parent="." unique_id=919191199 instance=ExtResource("1_g2els")]
-disable_mode = 1
-collision_layer = 524291
-collision_mask = 769
-safe_margin = 0.206
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerBody" unique_id=694826968]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-shape = SubResource("CapsuleShape3D_tuyoq")
+default_physics = SubResource("Resource_ur7pv")
 
 [node name="XRCamera3D" type="XRCamera3D" parent="." unique_id=614909074]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
@@ -30,11 +23,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
 [node name="VRCommonShaderCache" parent="XRCamera3D" unique_id=649349591 instance=ExtResource("2_qhqgy")]
 
 [node name="SpotLight3D" type="SpotLight3D" parent="XRCamera3D" unique_id=487293855]
-editor_description = "To oświetlenie ma być pod nogami. "
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 3.443865, 0)
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0)
 light_color = Color(0.8950378, 0.86848104, 0, 1)
-spot_range = 6.9858336
-spot_angle = 25.66
+spot_range = 3.2348468
+spot_angle = 35.0
 
 [node name="left_hand" type="XRController3D" parent="." unique_id=1608651991]
 tracker = &"left_hand"
@@ -42,7 +34,6 @@ tracker = &"left_hand"
 [node name="LeftHand" parent="left_hand" unique_id=165186871 instance=ExtResource("3_dqkch")]
 
 [node name="MovementDirect" parent="left_hand" unique_id=1508206612 instance=ExtResource("5_direct")]
-max_speed = 7.0
 strafe = true
 
 [node name="right_hand" type="XRController3D" parent="." unique_id=1385242428]
