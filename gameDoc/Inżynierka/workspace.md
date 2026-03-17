@@ -50,9 +50,26 @@
 ### 4. Konfiguracja Staging (`scenes/main.tscn`)
 - **Zmiana:** Ustawiono `main_menu.tscn` jako scenę startową.
 
+## Reorganizacja Architektury i Naprawa Systemu Ładowania (2026-03-17)
+
+### 1. Naprawa błędów "Node not found" (`scripts/main_menu.gd`, `scripts/game_map.gd`)
+- **Zmiana:** Nadpisano funkcję `scene_loaded(_user_data)` pustą implementacją w skryptach scen.
+- **Dlaczego:** Klasa bazowa `XRToolsSceneBase` domyślnie szuka węzła `XROrigin3D/XRCamera3D` wewnątrz ładowanej sceny. Ponieważ Gracz jest teraz zarządzany globalnie w `main.tscn`, sceny te nie posiadają własnego Origin, co powodowało błędy "null instance". Nadpisanie funkcji wyłącza to problematyczne wyszukiwanie.
+
+### 2. Nowy Kontroler Scen (`scripts/main.gd`)
+- **Zmiana:** Utworzono skrypt `Main.gd` zarządzający cyklem życia gry, zastępujący automatykę addonu `Staging`.
+- **Dlaczego:** Aby zapewnić pełną kontrolę nad procesem ładowania i zagwarantować trwałość (persistence) Gracza między poziomami. Skrypt obsługuje sygnały przejścia, zarządza wątkowym ładowaniem zasobów oraz płynnymi efektami `Fade`.
+
+### 3. Przebudowa Sceny Głównej (`scenes/main.tscn`)
+- **Zmiana:** Usunięto węzeł `Staging` (z addona) na rzecz przejrzystej struktury: `Player` (trwały), `World` (kontener na poziomy), `LoadingScreen`, `StartXR` oraz `Fade`.
+- **Dlaczego:** Uproszczenie hierarchii. Gracz jest teraz stałym elementem sceny głównej, co eliminuje błędy z gubieniem referencji do kamery XR przy zmianie scen. Poziomy są teraz dynamicznie wczytywane do węzła `World`.
+
+### 4. Personalizacja Ekranu Ładowania
+- **Zmiana:** Zintegrowano mechanizm "Hold trigger to continue" z oryginalnego systemu ładowania Godot XR Tools bezpośrednio w kontrolerze `Main.gd`.
+- **Dlaczego:** Realizacja prośby o dedykowany ekran ładowania z manualnym potwierdzeniem przejścia, przy jednoczesnym zachowaniu płynności wizualnej (fading).
+
 ## Current Focus
-- Testowanie interakcji w menu i przejścia do mapy gry.
-- Dodanie dźwięków do menu.
+- Testowanie stabilności przejść między Menu a Mapą w nowej architekturze.
 
 ## Upcoming Tasks
 - Main Menu implementation.

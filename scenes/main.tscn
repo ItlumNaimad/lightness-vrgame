@@ -1,16 +1,25 @@
-[gd_scene load_steps=3 format=3 uid="uid://bpwbgmkwcmsyg"]
+[gd_scene load_steps=7 format=3 uid="uid://bpwbgmkwcmsyg"]
 
-[ext_resource type="PackedScene" uid="uid://bnqnnnet4dw12" path="res://addons/godot-xr-tools/staging/staging.tscn" id="1_o5qli"]
+[ext_resource type="Script" uid="uid://be5e2p3f2a1p" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://bqumugyvkct4r" path="res://addons/godot-xr-tools/staging/loading_screen.tscn" id="3_loading"]
+[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="4_startxr"]
+[ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="5_fade"]
+[ext_resource type="Environment" uid="uid://ckiwtcdsam7ed" path="res://addons/godot-xr-tools/staging/staging_env.tres" id="6_env"]
 
 [node name="Main" type="Node3D"]
+script = ExtResource("1_main")
 
-[node name="Staging" parent="." instance=ExtResource("1_o5qli")]
-main_scene = "res://scenes/main_menu.tscn"
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource("6_env")
 
-[node name="Player" parent="Staging" index="0" instance=ExtResource("2_player")]
+[node name="Player" parent="." instance=ExtResource("2_player")]
 
-[node name="XROrigin3D" parent="Staging" index="2"]
-process_mode = 4
+[node name="World" type="Node3D" parent="."]
+
+[node name="LoadingScreen" parent="." instance=ExtResource("3_loading")]
 visible = false
-enabled = false
+
+[node name="StartXR" parent="." instance=ExtResource("4_startxr")]
+
+[node name="Fade" parent="." instance=ExtResource("5_fade")]

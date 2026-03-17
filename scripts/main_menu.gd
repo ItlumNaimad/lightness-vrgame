@@ -17,6 +17,11 @@ func _ready() -> void:
 			ui.exit_pressed.connect(_on_exit_pressed)
 			ui.settings_pressed.connect(_on_settings_pressed)
 
+func scene_loaded(_user_data = null):
+	# Gracz jest zarządzany globalnie przez Staging lub Main.
+	# Nie musimy aktywować lokalnej kamery, bo jej nie ma.
+	pass
+
 func _on_start_pressed():
 	request_load_scene.emit("res://scenes/game_map.tscn")
 
