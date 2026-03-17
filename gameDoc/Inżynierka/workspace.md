@@ -68,6 +68,12 @@
 - **Zmiana:** Zintegrowano mechanizm "Hold trigger to continue" z oryginalnego systemu ładowania Godot XR Tools bezpośrednio w kontrolerze `Main.gd`.
 - **Dlaczego:** Realizacja prośby o dedykowany ekran ładowania z manualnym potwierdzeniem przejścia, przy jednoczesnym zachowaniu płynności wizualnej (fading).
 
+### 5. Poprawki stabilności VR i Inicjalizacji (Sesja 17.03 - Fixes)
+- **Zmiana:** Naprawiono błąd `Invalid call. Nonexistent function 'is_xr_active' in base 'Nil'` w pliku `addons/godot-xr-tools/misc/hold_button.gd`.
+- **Dlaczego:** Skrypt przycisku próbował odwołać się do systemu `Staging`, którego już nie używamy. Dodano bezpieczną weryfikację (null check) i fallback, co pozwala przyciskowi działać poprawnie w nowej architekturze.
+- **Zmiana:** Dodano opóźnienie `await get_tree().process_frame` w `main.gd` przed załadowaniem pierwszej sceny.
+- **Dlaczego:** Rozwiązano błąd `Viewport Texture must be set to use it`, dając silnikowi czas na zainicjalizowanie tekstur viewportów UI przed ich wyświetleniem w VR.
+
 ## Current Focus
 - Testowanie stabilności przejść między Menu a Mapą w nowej architekturze.
 

@@ -16,6 +16,9 @@ func _ready():
 	
 	loading_screen.visible = false
 	
+	# Czekamy chwilę na inicjalizację Viewportów i XR przed ładowaniem pierwszej sceny
+	await get_tree().process_frame
+	
 	# Startujemy od menu głównego bez ekranu ładowania na początku
 	_load_initial_scene("res://scenes/main_menu.tscn")
 
