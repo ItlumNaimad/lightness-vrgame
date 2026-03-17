@@ -68,14 +68,19 @@
 - **Zmiana:** Zintegrowano mechanizm "Hold trigger to continue" z oryginalnego systemu ładowania Godot XR Tools bezpośrednio w kontrolerze `Main.gd`.
 - **Dlaczego:** Realizacja prośby o dedykowany ekran ładowania z manualnym potwierdzeniem przejścia, przy jednoczesnym zachowaniu płynności wizualnej (fading).
 
-### 5. Rozwiązanie problemu niekontrolowanego pędu (Standard Przemysłowy)
-- **Problem:** Ręczne ustawianie `global_position` na węźle `XROrigin3D` powodowało konflikt z fizyką `PlayerBody` (CharacterBody3D z ustawionym `top_level = true`). Gdy Origin się przesuwał, a ciało fizyczne zostawało w miejscu, silnik VR interpretował to jako nagły, ogromny ruch, nadając graczowi gigantyczny pęd.
-- **Zmiana:** Zrezygnowano z ręcznego ustawiania pozycji w `main.gd` na rzecz wbudowanej funkcji **`player_body.teleport()`**.
-- **Dlaczego:** Funkcja `teleport()` z XRTools jest zaprojektowana specjalnie do bezpiecznej synchronizacji pozycji Origin, Kamery i Ciała Fizycznego w jednej klatce, bez generowania sił fizycznych.
-- **Dodatki:**
-    - Dodano wymuszoną pozycję `y = 0.1` podczas teleportacji, aby gracz nie narodził się *wewnątrz* podłogi (co mogłoby spowodować "wypchnięcie" i pęd).
-    - Wprowadzono funkcję `_teleport_and_stabilize`, która po teleportacji wygasza pęd przez 5 dodatkowych klatek fizyki przed odblokowaniem joysticków.
-    - Uproszczono zarządzanie stanem fizyki, usuwając problematyczne `PROCESS_MODE_DISABLED` na rzecz standardowego `enabled`.
+### 5. Próba Architektury Eksperckiej i Optymalizacja (Sesja 17.03 - Refactor)
+- **Cel:** Całkowita izolacja Gracza od logiki przejść, aby wyeliminować "feedback loop" w transformacjach VR.
+- **Podjęte kroki (Eksperckie):**
+    - Przeniesienie `LoadingScreen` i `Fade` na ten sam poziom hierarchii co `Player` (rodzeństwo), zamiast bycia jego dziećmi.
+    - Próba zarządzania stanem fizyki przez `process_mode = PROCESS_MODE_DISABLED` oraz użycie funkcji `teleport()` do bezpiecznej synchronizacji pozycji.
+    - **Wynik:** Rozwiązanie okazało się zbyt skomplikowane i nie rozwiązało problemu losowych wystrzałów pędu, wprowadzając dodatkowy chaos w kodzie.
+- **Optymalizacja i Uproszczenie (Manualna poprawka użytkownika):**
+    - **Zmiana:** Usunięcie nadmiarowego kodu ze `scripts/main.gd`. Skrypt został sprowadzony do roli prostego przełącznika scen z efektami `Fade`.
+    - **Dlaczego:** Kod odpowiedzialny za automatyczne śledzenie kamery przez loading screen i agresywną stabilizację fizyki nie przynosił rezultatów, a jedynie zaciemniał logikę.
+    - **Status:** Gracz startuje teraz z pozycji `Vector3(0, 10, 0)` na początku (w celu testowym/inicjalizacyjnym), a przejścia między scenami opierają się na czystym instancjonowaniu węzłów w kontenerze `World`.
+
+## Current Focus
+- Stabilizacja startu gry i eliminacja resztkowego pędu przy użyciu uproszczonej logiki `main.gd`.
 
 
 
