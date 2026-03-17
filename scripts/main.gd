@@ -133,7 +133,7 @@ func _set_movement_enabled(enabled: bool):
 	for p in providers:
 		p.enabled = enabled
 
-async func _stabilize_player():
+func _stabilize_player():
 	# Włączamy fizykę, ale przez pierwsze 10 klatek wymuszamy brak ruchu
 	# To zabija pęd powstały przy "skoku" trackingu VR
 	_set_player_physics_enabled(true)
