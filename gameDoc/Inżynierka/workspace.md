@@ -68,17 +68,16 @@
 - **Zmiana:** Zintegrowano mechanizm "Hold trigger to continue" z oryginalnego systemu ładowania Godot XR Tools bezpośrednio w kontrolerze `Main.gd`.
 - **Dlaczego:** Realizacja prośby o dedykowany ekran ładowania z manualnym potwierdzeniem przejścia, przy jednoczesnym zachowaniu płynności wizualnej (fading).
 
-### 5. Poprawki stabilności VR i Inicjalizacji (Sesja 17.03 - Fixes)
-- **Zmiana:** Przywrócono oryginalny skrypt `addons/godot-xr-tools/player/player_body.gd` z repozytorium (git checkout).
-- **Dlaczego:** Poprzednie próby ręcznej optymalizacji skryptu usunęły zbyt wiele mechanizmów stabilizujących ruch, co prowadziło do błędów fizyki (pływanie, brak tarcia). Przywrócenie oryginału przywróciło stabilną bazę fizyki XRTools.
-- **Zmiana:** Usunięto tymczasową podłogę ze sceny `scenes/main.tscn`.
-- **Dlaczego:** Obecność kolizji w scenie "zarządcy" (Main) powodowała konflikty z podłogami na wczytywanych mapach. Teraz fizyka podłoża jest zarządzana wyłącznie przez konkretne poziomy.
-- **Zmiana:** Dodano mechanizm blokowania fizyki gracza podczas ładowania w `scripts/main.gd` (`_set_player_physics_enabled`).
-- **Dlaczego:** Całkowite wyłączenie węzła `PlayerBody` i resetowanie jego prędkości podczas przejść eliminuje problem "samoczynnego startu" gracza przy inicjalizacji śledzenia VR. Fizyka jest aktywowana dopiero po zniknięciu ekranu ładowania.
-- **Zmiana:** Poprawiono stabilność podłoża w `scenes/game_map.tscn` (BoxShape3D zamiast WorldBoundary).
-- **Dlaczego:** Zapewnienie solidnego oparcia dla `PlayerBody`, co pozwala na poprawne wykrywanie stanu `on_ground` i działanie tarcia.
-- **Zmiana:** Oczyszczono `scenes/player.tscn` z nadmiarowych kształtów kolizji i ustawiono prędkość `max_speed` na 3.0.
-- **Dlaczego:** Usunięcie konfliktów między ręcznie dodanymi kształtami a tymi generowanymi przez skrypt oraz zapewnienie bardziej komfortowej prędkości poruszania się w VR.
+### 5. Radykalne uproszczenie i stabilizacja ruchu (Sesja 17.03 - Final Fix)
+- **Zmiana:** Całkowite wyczyszczenie `scenes/main.tscn` z kolizji. Scena ta jest teraz wyłącznie pustym zarządcą.
+- **Dlaczego:** Poprzednie próby dodawania podłogi do `Main` powodowały "podwójne kolizje" z wczytywanymi mapami, co wyrzucało gracza z ogromną prędkością w przestrzeń.
+- **Zmiana:** Dodanie solidnej podłogi (`StaticBody3D` z `BoxShape3D`) bezpośrednio do `scenes/main_menu.tscn`.
+- **Dlaczego:** Gracz musi stać na oparciu od pierwszej klatki wczytania menu. Brak podłogi w menu powodował spadanie, które silnik XRTools próbował korygować, nadając graczowi niekontrolowany pęd.
+- **Zmiana:** Pełny reset `scenes/player.tscn` do ustawień domyślnych Godot XR Tools.
+- **Dlaczego:** Usunięcie wszelkich niestandardowych modyfikacji fizyki i kształtów kolizji, aby przywrócić naturalne i przewidywalne sterowanie joystickiem.
+- **Zmiana:** Zwiększenie opóźnienia startowego w `scripts/main.gd` do 1 sekundy.
+- **Dlaczego:** Zapewnienie pełnej stabilizacji systemu śledzenia VR przed aktywacją pierwszej sceny gry.
+
 
 ## Current Focus
 - Testowanie stabilności przejść między Menu a Mapą w nowej architekturze.

@@ -10,19 +10,16 @@ var next_scene_path : String
 
 func _ready():
 	# Podpinamy kamerę pod LoadingScreen, aby podążał za wzrokiem
-	var camera = player.get_node("XRCamera3D")
+	var camera = player.get_node_or_null("XRCamera3D")
 	if camera:
 		loading_screen.set_camera(camera)
 	
 	loading_screen.visible = false
 	
-	# Wyłączamy fizykę gracza na starcie, dopóki scena nie zostanie wczytana
-	_set_player_physics_enabled(false)
-	
 	# Czekamy na pełną inicjalizację silnika i systemów XR
 	await get_tree().process_frame
 	await get_tree().process_frame
-	await get_tree().create_timer(0.5).timeout
+	await get_tree().create_timer(1.0).timeout
 	
 	# Startujemy od menu głównego
 	_load_initial_scene("res://scenes/main_menu.tscn")
@@ -40,9 +37,6 @@ func _load_initial_scene(path: String):
 		_connect_scene_signals(current_scene)
 		if current_scene.has_method("scene_loaded"):
 			current_scene.scene_loaded()
-		
-		# Włączamy fizykę po wczytaniu pierwszej sceny
-		_set_player_physics_enabled(true)
 
 func _connect_scene_signals(scene):
 	if scene.has_signal("request_load_scene"):
@@ -63,8 +57,7 @@ func _start_transition():
 	tween.tween_method(_set_fade, 0.0, 1.0, 0.5)
 	await tween.finished
 
-	# 1. Pokaż ekran ładowania i wyłącz fizykę gracza
-	_set_player_physics_enabled(false)
+	# 1. Pokaż ekran ładowania
 	loading_screen.progress = 0.0
 	loading_screen.enable_press_to_continue = false
 	loading_screen.visible = true
@@ -102,7 +95,7 @@ func _start_transition():
 	# Konfigurujemy przycisk na prawą rękę (zgodnie z pointerem)
 	var hold_button = loading_screen.get_node_or_null("PressToContinue/HoldButton")
 	if hold_button:
-		hold_button.activate_action = "trigger_click" # Prawy spust zazwyczaj
+		hold_button.activate_action = "trigger_click" 
 	
 	await loading_screen.continue_pressed
 	
@@ -121,20 +114,10 @@ func _start_transition():
 	if current_scene.has_method("scene_loaded"):
 		current_scene.scene_loaded()
 	
-	# 7. Ukryj ekran ładowania i rozjaśnij (Fade in) oraz włącz fizykę
+	# 7. Ukryj ekran ładowania i rozjaśnij (Fade in)
 	loading_screen.visible = false
-	_set_player_physics_enabled(true)
-	
 	tween = get_tree().create_tween()
 	tween.tween_method(_set_fade, 1.0, 0.0, 0.5)
 
 func _set_fade(value: float):
 	XRToolsFade.set_fade("main_transition", Color(0, 0, 0, value))
-
-func _set_player_physics_enabled(enabled: bool):
-	var player_body = player.get_node_or_null("PlayerBody")
-	if player_body:
-		player_body.enabled = enabled
-		# Resetujemy prędkość przy wyłączaniu, aby gracz nie "płynął" po włączeniu
-		if not enabled:
-			player_body.velocity = Vector3.ZERO
