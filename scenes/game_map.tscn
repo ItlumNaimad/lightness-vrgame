@@ -1,6 +1,9 @@
 [gd_scene format=3 uid="uid://cjyxx2d4hafto"]
 
-[ext_resource type="Script" uid="uid://bj3fr6vu0caqc" path="res://scripts/game_map.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://cbilw02reekmp" path="res://scripts/game_map.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://d3qvt0affmqvn" path="res://assets/textures/Wooden Floor Texture/wood2_COLOR.jpg" id="2_lp764"]
+[ext_resource type="Texture2D" uid="uid://ch8av1pfgrixv" path="res://assets/textures/Wooden Floor Texture/wood2_OCC.jpg" id="3_m2cng"]
+[ext_resource type="Texture2D" uid="uid://bkxkmyk7y0hl4" path="res://assets/textures/Wooden Floor Texture/wood2_NRM.jpg" id="4_oviui"]
 
 [sub_resource type="Environment" id="Environment_iau3x"]
 background_mode = 1
@@ -15,7 +18,14 @@ size = Vector3(20, 1, 20)
 size = Vector2(20, 20)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial_test"]
-albedo_color = Color(0.3, 0.3, 0.3, 1)
+disable_specular_occlusion = true
+albedo_texture = ExtResource("2_lp764")
+normal_enabled = true
+normal_scale = 14.51
+normal_texture = ExtResource("4_oviui")
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = ExtResource("3_m2cng")
 
 [node name="GameMap" type="Node3D" unique_id=120756022]
 script = ExtResource("1_script")

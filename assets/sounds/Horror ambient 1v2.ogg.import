@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://d3pa2j76xxae4"
+path="res://.godot/imported/Horror ambient 1v2.ogg-cb0ba61ee987824f3eb940802c01b253.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/sounds/Horror ambient 1v2.ogg"
+dest_files=["res://.godot/imported/Horror ambient 1v2.ogg-cb0ba61ee987824f3eb940802c01b253.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
