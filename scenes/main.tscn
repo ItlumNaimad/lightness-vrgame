@@ -1,3 +1,14 @@
 [gd_scene format=3 uid="uid://bpwbgmkwcmsyg"]
 
-[node name="Menu" type="Node3D" unique_id=1596084975]
+[ext_resource type="Script" uid="uid://cyv8mo3a6pqxe" path="res://scripts/main.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="3_startxr"]
+
+[node name="Main" type="Node3D" unique_id=1461810501]
+script = ExtResource("1_script")
+
+[node name="StartXR" parent="." unique_id=1319571357 instance=ExtResource("3_startxr")]
+
+[node name="World" type="Node3D" parent="." unique_id=75027411]
+
+[node name="Player" parent="." unique_id=2073052818 instance=ExtResource("2_player")]

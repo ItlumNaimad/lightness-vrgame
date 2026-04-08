@@ -11,14 +11,7 @@
 - [ ] SFXy
 - [ ] Odgłosy podłogi aby pomóc w orientacji
 
-## Rzecy do zanotowania
-Staging.gd ma od linii 80 to:
-```gdscript
-## The [XROrigin3D] node used while staging
-@onready var xr_origin : XROrigin3D = XRHelpers.get_xr_origin(self)
+- [x] Opracowanie customowego Staging dla plików (`main.tscn` + `main.gd`) omijającego błędy fizyki w przejściach.
+- [/] Zintegrowanie importowanego `main_menu_ui.tscn` do obsługi zdarzeń.
 
-## The [XRCamera3D] node used while staging
-@onready var xr_camera : XRCamera3D = XRHelpers.get_xr_camera(self)
-```
-Muszę podmienić jakoś XROrigin3D i XRCamera3D na scenę player.tscn
-A potem ogarniać przejścia między scenami
+> Ten plik przeznaczony jest jako wewnętrzna i robocza notatka autora odnośnie statusu zadań. Główny opis projektu dla odwiedzających repozytorium znajduje się w głównym pliku `README.md`.

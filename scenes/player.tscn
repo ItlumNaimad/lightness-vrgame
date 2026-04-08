@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://c0ch7jab7i3ry"]
+[gd_scene format=3 uid="uid://c0ch7jab7i3ry"]
 
 [ext_resource type="PackedScene" uid="uid://diyu06cw06syv" path="res://addons/godot-xr-tools/player/player_body.tscn" id="1_g2els"]
 [ext_resource type="PackedScene" uid="uid://btknduttnmoxf" path="res://addons/godot-xr-tools/misc/vr_common_shader_cache.tscn" id="2_qhqgy"]
@@ -7,25 +7,26 @@
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tuyoq"]
 
-[node name="Player" type="Node3D"]
+[node name="Player" type="Node3D" unique_id=998281425]
 
-[node name="XROrigin3D" type="XROrigin3D" parent="."]
+[node name="XROrigin3D" type="XROrigin3D" parent="." unique_id=1544298595]
 
-[node name="PlayerBody" parent="XROrigin3D" instance=ExtResource("1_g2els")]
+[node name="PlayerBody" parent="XROrigin3D" unique_id=147226604 instance=ExtResource("1_g2els")]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="XROrigin3D/PlayerBody"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="XROrigin3D/PlayerBody" unique_id=550881090]
 shape = SubResource("CapsuleShape3D_tuyoq")
 
-[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D" unique_id=639605948]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.47796416, -0.46312207)
 
-[node name="VRCommonShaderCache" parent="XROrigin3D/XRCamera3D" instance=ExtResource("2_qhqgy")]
+[node name="VRCommonShaderCache" parent="XROrigin3D/XRCamera3D" unique_id=1303836383 instance=ExtResource("2_qhqgy")]
 
-[node name="left_hand" type="XRController3D" parent="XROrigin3D"]
+[node name="left_hand" type="XRController3D" parent="XROrigin3D" unique_id=806941292]
 tracker = &"left_hand"
 
-[node name="LeftHand" parent="XROrigin3D/left_hand" instance=ExtResource("3_dqkch")]
+[node name="LeftHand" parent="XROrigin3D/left_hand" unique_id=922969339 instance=ExtResource("3_dqkch")]
 
-[node name="right_hand" type="XRController3D" parent="XROrigin3D"]
+[node name="right_hand" type="XRController3D" parent="XROrigin3D" unique_id=1054815896]
 tracker = &"right_hand"
 
-[node name="RightHand" parent="XROrigin3D/right_hand" instance=ExtResource("4_qlg0r")]
+[node name="RightHand" parent="XROrigin3D/right_hand" unique_id=496257248 instance=ExtResource("4_qlg0r")]
