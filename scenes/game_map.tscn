@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://ch8av1pfgrixv" path="res://assets/textures/Wooden Floor Texture/wood2_OCC.jpg" id="3_m2cng"]
 [ext_resource type="Texture2D" uid="uid://bkxkmyk7y0hl4" path="res://assets/textures/Wooden Floor Texture/wood2_NRM.jpg" id="4_oviui"]
 [ext_resource type="AudioStream" uid="uid://bv6a0kufxjmtr" path="res://assets/sounds/ambience.mp3" id="5_m2cng"]
+[ext_resource type="PackedScene" uid="uid://b4ml2o2jh5ooc" path="res://scenes/balora.tscn" id="6_oviui"]
 
 [sub_resource type="Environment" id="Environment_iau3x"]
 background_mode = 1
@@ -28,6 +29,8 @@ normal_texture = ExtResource("4_oviui")
 ao_enabled = true
 ao_light_affect = 1.0
 ao_texture = ExtResource("3_m2cng")
+uv1_triplanar = true
+uv1_triplanar_sharpness = 1.6008334
 
 [node name="GameMap" type="Node3D" unique_id=120756022]
 script = ExtResource("1_script")
@@ -52,4 +55,8 @@ surface_material_override/0 = SubResource("StandardMaterial_test")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=569793408]
 stream = ExtResource("5_m2cng")
+volume_db = -1.273
 autoplay = true
+
+[node name="Balora" parent="." unique_id=1656694762 instance=ExtResource("6_oviui")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3419399, 6.880111)
