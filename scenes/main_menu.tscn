@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://c1n8p7fin4eiq" path="res://scripts/main_menu.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="2_bqqt6"]
 [ext_resource type="PackedScene" uid="uid://cy68k7ne84230" path="res://scenes/main_menu_ui.tscn" id="3_ui"]
+[ext_resource type="AudioStream" uid="uid://1c33sur8mvu1" path="res://assets/sounds/main_menu.mp3" id="4_wu84c"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_menu"]
 sky_top_color = Color(0.1, 0.1, 0.1, 1)
@@ -41,16 +42,19 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=982456613]
 shape = SubResource("BoxShape3D_floor")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor" unique_id=123883215]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-mesh = SubResource("PlaneMesh_floor")
-surface_material_override/0 = SubResource("StandardMaterial3D_floor")
-
 [node name="Viewport2Din3D" parent="." unique_id=1130208441 instance=ExtResource("2_bqqt6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7902997, -3)
 screen_size = Vector2(2, 1.5)
 scene = ExtResource("3_ui")
 viewport_size = Vector2(800, 600)
-transparent = 1
 unshaded = true
 scene_properties_keys = PackedStringArray("main_menu_ui.gd")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=123883215]
+mesh = SubResource("PlaneMesh_floor")
+skeleton = NodePath("../Floor")
+surface_material_override/0 = SubResource("StandardMaterial3D_floor")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1163565949]
+stream = ExtResource("4_wu84c")
+autoplay = true

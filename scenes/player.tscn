@@ -8,7 +8,6 @@
 [ext_resource type="PackedScene" uid="uid://bl2nuu3qhlb5k" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="6_smehm"]
 [ext_resource type="PackedScene" uid="uid://cqhw276realc" path="res://addons/godot-xr-tools/functions/function_pointer.tscn" id="7_ur7pv"]
 [ext_resource type="Material" path="res://addons/godot-xr-tools/materials/pointer.tres" id="8_ur7pv"]
-[ext_resource type="Material" path="res://addons/godot-xr-tools/materials/target.tres" id="9_y4r1p"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tuyoq"]
 
@@ -44,4 +43,3 @@ tracker = &"right_hand"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.02, 0.05, -0.1)
 laser_material = ExtResource("8_ur7pv")
 show_target = true
-target_material = ExtResource("9_y4r1p")

@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://d3qvt0affmqvn" path="res://assets/textures/Wooden Floor Texture/wood2_COLOR.jpg" id="2_lp764"]
 [ext_resource type="Texture2D" uid="uid://ch8av1pfgrixv" path="res://assets/textures/Wooden Floor Texture/wood2_OCC.jpg" id="3_m2cng"]
 [ext_resource type="Texture2D" uid="uid://bkxkmyk7y0hl4" path="res://assets/textures/Wooden Floor Texture/wood2_NRM.jpg" id="4_oviui"]
+[ext_resource type="AudioStream" uid="uid://bv6a0kufxjmtr" path="res://assets/sounds/ambience.mp3" id="5_m2cng"]
 
 [sub_resource type="Environment" id="Environment_iau3x"]
 background_mode = 1
@@ -15,6 +16,7 @@ ambient_light_color = Color(0.2, 0.2, 0.2, 1)
 size = Vector3(20, 1, 20)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_test"]
+lightmap_size_hint = Vector2i(102, 102)
 size = Vector2(20, 20)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial_test"]
@@ -47,3 +49,7 @@ shape = SubResource("BoxShape3D_test")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 mesh = SubResource("PlaneMesh_test")
 surface_material_override/0 = SubResource("StandardMaterial_test")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=569793408]
+stream = ExtResource("5_m2cng")
+autoplay = true
