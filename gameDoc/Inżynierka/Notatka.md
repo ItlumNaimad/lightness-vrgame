@@ -18,3 +18,20 @@ Oto kluczowe punkty jak to działa teraz:
    - Węzeł root posiada instancję `StartXR`. Uruchamia to system XR / gogle od razu po odpaleniu okna.
    - Po starcie gry `main.gd` czeka w swoim `_ready` okrągłą sekundę i wczytuje domyślnie `res://scenes/main_menu.tscn`.
    - Gdy klikniesz Start w `main_menu.tscn`, załadowanie mapy dzieje się dzięki wbudowanym metodom w Ttween, które używają `XRToolsFade` do zaciemnienia obrazu dla płynnego i bezpiecznego przejścia.
+
+## Implementacja Przeciwnika (Ballora)
+
+Aby zaimplementować przeciwnika (Ballora), który po zbliżeniu się gracza wyrzuca go do menu głównego, przygotowano dedykowany skrypt `res://scripts/ballora.gd` oraz zaleca się następującą strukturę:
+
+1. **Struktura Sceny Przeciwnika:**
+   - Węzeł główny: `Area3D` (nazwa `Ballora`), do którego podpięty jest skrypt `ballora.gd`.
+   - Węzeł `CollisionShape3D` (np. ze `SphereShape3D` z promieniem 1.5m), który wyznacza strefę złapania gracza.
+   - Opcjonalny `MeshInstance3D` do reprezentacji fizycznej przeciwnika (np. `CapsuleMesh`).
+   - Węzeł `AudioStreamPlayer3D` z przypisanym dźwiękiem przestrzennym (`assets/sounds/ballora.mp3`), zaznaczoną opcją **Autoplay** oraz zasięgiem utraty głośności (np. **Max Distance** = 15).
+
+2. **Dźwięk:**
+   - Należy upewnić się, że dźwięk ma włączone zapętlanie (z poziomu panelu konfiguracji `Import` pliku `.mp3` opcja **Loop** i wciśnięty przycisk `Reimport`).
+
+3. **Zasada działania skryptu `ballora.gd`:**
+   - Skrypt wykorzystuje sygnał `body_entered` strefy `Area3D`.
+   - Gdy kolizja rejestruje ciało ze wstawką `"PlayerBody"` w nazwie (czyli fizyczny reprezentant gracza XR), pętla przechodzi w górę po głównym drzewie gry szukając pierwszego węzła reagującego na zmianę mapy (wystawiającego zdarzenie `request_load_scene`). Następnie wyzwala zmianę mapy na scenę `main_menu.tscn`.
