@@ -1,17 +1,50 @@
-# TO DO LISTA
-- [x] Inicjalizacja repozytorium
-- [x] Utworzenie pliku README
-- [ ] Menu główne
-- [/] Scena Player
-- [ ] Pokój gry
-- [ ] Przeciwnik Ballora
-- [ ] Przeciwnik 2
-- [ ] Generatory
-- [ ] Pickupy
-- [ ] SFXy
-- [ ] Odgłosy podłogi aby pomóc w orientacji
+# Dziennik projektu i Kontekst "Lightness VR"
 
-- [x] Opracowanie customowego Staging dla plików (`main.tscn` + `main.gd`) omijającego błędy fizyki w przejściach.
-- [/] Zintegrowanie importowanego `main_menu_ui.tscn` do obsługi zdarzeń.
+> Ten plik służy jako dziennik procesu powstawania gry, dokumentujący workflow, log zmian i aktualny plan działania. Poniżej znajduje się kontekst projektu dla szybkiego wczytania ułatwiającego powrót do pracy po przerwie.
 
-> Ten plik przeznaczony jest jako wewnętrzna i robocza notatka autora odnośnie statusu zadań. Główny opis projektu dla odwiedzających repozytorium znajduje się w głównym pliku `README.md`.
+## 📝 Kontekst i Założenia Gry
+**Lightness VR** to gra (survival horror) dostępna w pełni dla osób niewidomych – bodźce wizualne nie dają przewagi, a gracz polega w 100% na informacjach dźwiękowych (i haptycznych). Czas odmierzany jest według przetrwanych sekwencji (surviving timer/clock).
+- **Zasada ogólna**: Gra podzielona jest na sekcje Menu -> Ekran Ładowania (Loading) -> Gra -> (Game Over) -> Menu.
+- **Nawigacja w menu i ekranie ładowania**: Ograniczona mobilność (brak chodu). Interfejs obsługiwany wskazaniem wirtualnej dłoni lub (co ważne dla sprawności działania) obsługiwany joystickiem kontrolera, po którym porusza się lektor (nagrany dźwięk lub syntezator TTS odczytujący zaznaczony tekst).
+- **Zderzenia / Game Over**: Popełnienie błędu (np. zignorowanie atakującego przeciwnika lub kolizja z nim) kończy grę głośnym Jumpscarem. Na Ekranie Game Over gracz wybiera czy spróbować ponownie, czy powrócić do menu głównego.
+
+## 👻 Przeciwnicy
+
+### 1. Balora
+- **Zachowanie**: Patruje / Chodzi po pokoju.
+- **Sygnał**: Gdy gracz wejdzie w określony promień detekcji, odtwarzana jest przyspieszona muzyka oznaczająca początek gonitwy.
+- **Kontra**: Należy natychmiast uciec na większą odległość, aby Balora zgubiła "trop". Jej słuch bazuje na naszej bliskości. 
+
+### 2. Marionette
+- **Zachowanie**: Śledzi z pozycji obrzeża mapy (ściany). Powoli otacza gracza i w końcu wydaje szepty otaczające.
+- **Sygnał**: Szepty, lub bliżej nieokreślony losowy dźwięk niepokoju blisko głowy gracza.
+- **Kontra**: Należy zatrzymać się w miejscu, po czym odwrócić głowę od głównego źródła szeptów (unikać patrzenia na źródło dźwięku). Brak jakiejkolwiek wymuszonej interakcji lub zbyt długie zwlekanie skutkuje atakiem.
+
+### 3. Foxy
+- **Zachowanie**: Skupia się na impulsach hałasu.
+- **Sygnał**: Wydać głośny dźwięk np. poprzez zaczenie sprintu (bieganie głośniejsze niż chodzenie) lub poprzez kolizję ze ścianą czy istotną przeszkodą. Wówczas jego własne dźwięki całkowicie się wyciszają. Następuje szarża w linii prostej na lokację gracza w której doszło do rzekomego dźwięku.
+- **Kontra**: Po nasłuchaniu ciszy Foxy'ego należy zrobić krok z dala od ścieżki uderzenia ORAZ/ALBO skutecznie wyciągnąć kontroler (jako osłonę / odepchnięcie / nakierowanie z dystansu) w stronę nadbiegającej szarży by zanegować uderzenie.
+
+---
+
+## 🛠️ Plan Działania / Workflow (To-Do)
+
+### Faza 1: Interfejs i Przejścia (Foundation)
+- [ ] **Accessibility Menu System**: Zaprojektowanie struktury menu obsługującego VR-Pointer z Godot XR Tools i dodatkowo wejścia D-pada/Joysticka. Zintegrowanie z Godot UI oraz systemem TextToSpeech / AudioStreamPlayer wymawiającym buttony.
+- [ ] **Scene Staging**: Dopięcie obsługi płynnego przejścia (bez dropów fizyki i pozycji Gracza) między MainMenu -> LoadingScreen -> GameMap.
+- [ ] **Ekran Game Over**: Interfejs z logicznym powrotem dający możliwość na reset gry.
+
+### Faza 2: Kontroler Gracza Rozszerzony
+- [ ] Obsługa logiki generowania dźwięków gracza (podział cichy uchył, chód, sprint powodujący alarm).
+- [ ] Rozpoznawanie uderzeń (Body kolizje i uderzenia w ściany dla mechaniki hałasu dla Foxiego).
+
+### Faza 3: SI Przeciwników
+- [ ] **Balora**: NavMeshAgent do swobodnego chodzenia - System detekcji proximiiti i zmiana stanu audio na Chase.
+- [ ] **Marionette**: Logika Spawnów przyległych do ściany najbliżej gracza -> system orientacyjny kierunku wzroku na głowie gracza (HMD Transform).
+- [ ] **Foxy**: System alertowy na głośne dźwięki -> zatrzymanie Audio -> szarża wektorem prostej ze ślepej strugi. Obsługa detekcji ręki do przerwania szarży.
+
+### Faza 4: Gameplay Loop i Audio
+- [ ] Główny Menadzer przetrwania i timera (liczenie czasu z narastającą presją przeciwników).
+- [ ] Globalne zasoby audio (SFX chodzenia, ambisentów, jumpscareów upewnienie się co do pozycjonowania dźwięku).
+
+*Ostatnia aktualizacja:* Plik roboczy dopasowany do planu deweloperskiego dla spójności pracy inżynierskiej.
