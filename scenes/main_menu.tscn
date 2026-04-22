@@ -46,7 +46,8 @@ shape = SubResource("BoxShape3D_floor")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7902997, -3)
 screen_size = Vector2(2, 1.5)
 scene = ExtResource("3_ui")
-viewport_size = Vector2(800, 600)
+viewport_size = Vector2(1280, 720)
+input_gamepad = true
 unshaded = true
 scene_properties_keys = PackedStringArray("main_menu_ui.gd")
 
@@ -58,3 +59,6 @@ surface_material_override/0 = SubResource("StandardMaterial3D_floor")
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1163565949]
 stream = ExtResource("4_wu84c")
 autoplay = true
+
+[node name="PlayerSpawn" type="Marker3D" parent="." unique_id=899087259]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.8493414)
