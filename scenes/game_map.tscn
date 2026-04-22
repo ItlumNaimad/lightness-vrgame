@@ -60,3 +60,5 @@ autoplay = true
 
 [node name="Balora" parent="." unique_id=1656694762 instance=ExtResource("6_oviui")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3419399, 6.880111)
+
+[node name="PlayerSpawn" type="Marker3D" parent="." unique_id=339130207]
