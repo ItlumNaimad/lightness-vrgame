@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://bl2nuu3qhlb5k" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="6_smehm"]
 [ext_resource type="PackedScene" uid="uid://cqhw276realc" path="res://addons/godot-xr-tools/functions/function_pointer.tscn" id="7_ur7pv"]
 [ext_resource type="Material" path="res://addons/godot-xr-tools/materials/pointer.tres" id="8_ur7pv"]
+[ext_resource type="Material" path="res://addons/godot-xr-tools/materials/target.tres" id="9_ur7pv"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tuyoq"]
 
@@ -25,6 +26,19 @@ shape = SubResource("CapsuleShape3D_tuyoq")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.47796416, -0.46312207)
 
 [node name="VRCommonShaderCache" parent="XROrigin3D/XRCamera3D" unique_id=1303836383 instance=ExtResource("2_qhqgy")]
+
+[node name="TimerLabel3D" type="Label3D" parent="XROrigin3D/XRCamera3D" unique_id=1464946628]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.37197274, 0.19904566, -0.541948)
+pixel_size = 0.001
+double_sided = false
+alpha_antialiasing_mode = 1
+modulate = Color(0.39308554, 0.39308554, 0.39308533, 0.83137256)
+outline_modulate = Color(0.12591082, 0.12591085, 0.12591079, 0.73333335)
+text = "00:00"
+font_size = 28
+outline_size = 13
+
+[node name="MilestoneAudio" type="AudioStreamPlayer3D" parent="XROrigin3D/XRCamera3D" unique_id=1395136088]
 
 [node name="left_hand" type="XRController3D" parent="XROrigin3D" unique_id=806941292]
 tracker = &"left_hand"
@@ -44,3 +58,4 @@ tracker = &"right_hand"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.02, 0.05, -0.1)
 laser_material = ExtResource("8_ur7pv")
 show_target = true
+target_material = ExtResource("9_ur7pv")

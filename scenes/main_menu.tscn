@@ -6,7 +6,7 @@
 [ext_resource type="AudioStream" uid="uid://1c33sur8mvu1" path="res://assets/sounds/main_menu.mp3" id="4_wu84c"]
 [ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="5_player"]
 [ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="6_startxr"]
-[ext_resource type="PackedScene" uid="uid://cs7704asajr8o" path="res://addons/godot-xr-tools/effects/fade.tscn" id="7_fade"]
+[ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="7_fade"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_menu"]
 sky_top_color = Color(0.1, 0.1, 0.1, 1)
@@ -46,7 +46,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("BoxShape3D_floor")
 
 [node name="Viewport2Din3D" parent="." unique_id=1130208441 instance=ExtResource("2_bqqt6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7902997, -3)
+transform = Transform3D(1, 0, 0, 0, 0.99819505, 0.060055528, 0, -0.060055528, 0.99819505, 0, 1.70677, -2.8091671)
 screen_size = Vector2(2, 1.5)
 scene = ExtResource("3_ui")
 viewport_size = Vector2(1280, 720)
@@ -55,6 +55,7 @@ unshaded = true
 scene_properties_keys = PackedStringArray("main_menu_ui.gd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=123883215]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0006220341, -0.004217744, 0.01574564)
 mesh = SubResource("PlaneMesh_floor")
 skeleton = NodePath("../Floor")
 surface_material_override/0 = SubResource("StandardMaterial3D_floor")
@@ -63,9 +64,9 @@ surface_material_override/0 = SubResource("StandardMaterial3D_floor")
 stream = ExtResource("4_wu84c")
 autoplay = true
 
-[node name="StartXR" parent="." instance=ExtResource("6_startxr")]
+[node name="StartXR" parent="." unique_id=2039475675 instance=ExtResource("6_startxr")]
 
-[node name="Player" parent="." instance=ExtResource("5_player")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.037252724, -0.8493414)
+[node name="Player" parent="." unique_id=629638343 instance=ExtResource("5_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7824168, -1.033799)
 
-[node name="Fade" parent="." instance=ExtResource("7_fade")]
+[node name="Fade" parent="." unique_id=1653293877 instance=ExtResource("7_fade")]

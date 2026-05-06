@@ -1,5 +1,6 @@
 extends Node
 
+var last_survival_time: float = 0.0
 var scene_path: String
 
 func load_scene(path: String):

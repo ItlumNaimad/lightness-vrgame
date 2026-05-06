@@ -25,6 +25,14 @@ func _trigger_jumpscare(player_body: Node3D):
 	if "enabled" in player_body:
 		player_body.enabled = false
 	
+	# Obsługa Licznika
+	var current_node = self
+	while current_node != null:
+		if current_node.has_method("stop_timer_and_save"):
+			current_node.stop_timer_and_save()
+			break
+		current_node = current_node.get_parent()
+	
 	# 2. Nawigacja w drzewie
 	var xr_origin = player_body.get_parent()
 	var camera = xr_origin.get_node_or_null("XRCamera3D")
@@ -60,7 +68,7 @@ func _trigger_jumpscare(player_body: Node3D):
 		audio_player.stop()
 		jumpscare_sound.play()
 	# 7. Asynchroniczne oczeikwanie na zakończenie sekwencji ataku
-	await get_tree().create_timer(3.0).timeout
+	await get_tree().create_timer(2.0).timeout
 	_return_to_main_menu()
 func _return_to_main_menu():
 	# Używamy nowego SceneLoader do powrotu do menu głównego po jumpscare

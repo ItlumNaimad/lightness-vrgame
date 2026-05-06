@@ -11,9 +11,9 @@ Oto kluczowe punkty jak to działa teraz:
 
 2. **Struktura Scen (Self-contained):**
    - Każda scena (np. `main_menu.tscn`, `game_map.tscn`) posiada własne instancje:
-     - `StartXR` (inicjalizacja OpenXR)
-     - `Player` (węzeł gracza z kamerą i kontrolerami)
-     - `Fade` (efekt przejścia)
+	 - `StartXR` (inicjalizacja OpenXR)
+	 - `Player` (węzeł gracza z kamerą i kontrolerami)
+	 - `Fade` (efekt przejścia)
    - Dzięki temu każde załadowanie mapy całkowicie resetuje stan fizyki i pozycję gracza do wartości domyślnych zdefiniowanych w edytorze.
 
 3. **Inicjowanie i przebieg:**
@@ -28,4 +28,3 @@ Aby zaimplementować przeciwnika (Ballora), który po zbliżeniu się gracza wyr
    - Skrypt wykorzystuje sygnał `body_entered` strefy `Area3D`.
    - Gdy kolizja rejestruje ciało gracza, uruchamiana jest sekwencja Jumpscare (reparenting duszka i dźwięku do kamery gracza).
    - Po zakończeniu animacji ataku, wywoływana jest funkcja `SceneLoader.load_scene(MAIN_MENU_PATH)`, która przywraca gracza do menu głównego.
-
