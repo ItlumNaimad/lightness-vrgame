@@ -5,12 +5,12 @@ var time_survived: float = 0.0
 var is_timer_running: bool = false
 var next_milestone: int = 10
 
-@onready var timer_label: Label3D = $Player/XROrigin3D/XRCamera3D/TimerLabel3D
-@onready var milestone_audio: AudioStreamPlayer3D = $Player/XROrigin3D/XRCamera3D/MilestoneAudio
+@onready var timer_label: Label3D = $Player/XRCamera3D/TimerLabel3D
+@onready var milestone_audio: AudioStreamPlayer3D = $Player/XRCamera3D/MilestoneAudio
 
 # Nadpisujemy funkcję z klasy bazowej, aby uniknąć szukania $XROrigin3D/XRCamera3D wewnątrz mapy.
 # Gracz jest zarządzany globalnie przez Staging.
-func scene_loaded(_user_data = null):
+func _ready():
 	if Engine.is_editor_hint():
 		return
 	# Reset stan przy starcie mapy
@@ -26,7 +26,7 @@ func _process(delta: float):
 	time_survived += delta
 	
 	#2. Formatowanie matematyczne (minuty:sekundy)
-	var minutes: int = int(time_survived) / 60
+	var minutes: int = int(time_survived) / 60.0
 	var seconds: int = int(time_survived) % 60
 	timer_label.text = "%02d:%02d" % [minutes, seconds]
 	

@@ -23,7 +23,7 @@ func _on_body_entered(body: Node3D):
 func _trigger_jumpscare(player_body: Node3D):
 	# 1. Zablokowanie wektora ruchu gracza
 	if "enabled" in player_body:
-		player_body.enabled = false
+		player_body.set_deferred("enabled", false)
 	
 	# Obsługa Licznika
 	var current_node = self
