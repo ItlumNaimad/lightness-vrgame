@@ -6,6 +6,9 @@
 [ext_resource type="Texture2D" uid="uid://bkxkmyk7y0hl4" path="res://assets/textures/Wooden Floor Texture/wood2_NRM.jpg" id="4_oviui"]
 [ext_resource type="AudioStream" uid="uid://bv6a0kufxjmtr" path="res://assets/sounds/ambience.mp3" id="5_m2cng"]
 [ext_resource type="PackedScene" uid="uid://b4ml2o2jh5ooc" path="res://scenes/balora.tscn" id="6_oviui"]
+[ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="7_player"]
+[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="8_startxr"]
+[ext_resource type="PackedScene" uid="uid://cs7704asajr8o" path="res://addons/godot-xr-tools/effects/fade.tscn" id="9_fade"]
 
 [sub_resource type="Environment" id="Environment_iau3x"]
 background_mode = 1
@@ -61,4 +64,9 @@ autoplay = true
 [node name="Balora" parent="." unique_id=1656694762 instance=ExtResource("6_oviui")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3419399, 6.880111)
 
-[node name="PlayerSpawn" type="Marker3D" parent="." unique_id=339130207]
+[node name="StartXR" parent="." instance=ExtResource("8_startxr")]
+
+[node name="Player" parent="." instance=ExtResource("7_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Fade" parent="." instance=ExtResource("9_fade")]

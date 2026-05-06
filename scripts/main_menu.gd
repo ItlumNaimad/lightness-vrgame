@@ -4,11 +4,16 @@ extends XRToolsSceneBase
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
+		
+	# Zablokowanie ruchu kontrolerem specjalnie i tylko dla sceny menu
+	var providers = get_tree().get_nodes_in_group("movement_providers")
+	for p in providers:
+		if "enabled" in p:
+			p.enabled = false
+			
 	# Podpinamy sygnały z UI (które jest wewnątrz Viewport2Din3D)
-	# Viewport2Din3D instancjonuje scenę jako swoje dziecko
 	var viewport_2d = $Viewport2Din3D
 	if viewport_2d:
-		# Czekamy na klatkę, aby scena UI zdążyła się załadować w viewporcie
 		if not viewport_2d.is_node_ready():
 			await viewport_2d.ready
 		var ui = viewport_2d.get_scene_instance()
@@ -17,16 +22,12 @@ func _ready() -> void:
 			ui.exit_pressed.connect(_on_exit_pressed)
 			ui.settings_pressed.connect(_on_settings_pressed)
 
-func scene_loaded(_user_data = null):
-	# Gracz jest zarządzany globalnie przez Staging lub Main.
-	# Nie musimy aktywować lokalnej kamery, bo jej nie ma.
-	pass
-
 func _on_start_pressed():
-	request_load_scene.emit("res://scenes/game_map.tscn")
+	# Używamy nowego SceneLoader do płynnego przejścia
+	SceneLoader.load_scene("res://scenes/game_map.tscn")
 
 func _on_exit_pressed():
-	request_quit.emit()
+	get_tree().quit()
 
 func _on_settings_pressed():
 	print("Settings not implemented yet")

@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Inżynierka"
-run/main_scene="uid://bpwbgmkwcmsyg"
+run/main_scene="res://scenes/main_menu.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
 
@@ -23,6 +23,7 @@ config/icon="res://icon.svg"
 
 XRToolsUserSettings="*uid://bqgb8i74tm0t"
 XRToolsRumbleManager="*uid://by853dk86g1qw"
+SceneLoader="*res://scripts/scene_loader.gd"
 
 [editor_plugins]
 

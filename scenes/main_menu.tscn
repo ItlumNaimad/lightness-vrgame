@@ -4,6 +4,9 @@
 [ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="2_bqqt6"]
 [ext_resource type="PackedScene" uid="uid://cy68k7ne84230" path="res://scenes/main_menu_ui.tscn" id="3_ui"]
 [ext_resource type="AudioStream" uid="uid://1c33sur8mvu1" path="res://assets/sounds/main_menu.mp3" id="4_wu84c"]
+[ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="5_player"]
+[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="6_startxr"]
+[ext_resource type="PackedScene" uid="uid://cs7704asajr8o" path="res://addons/godot-xr-tools/effects/fade.tscn" id="7_fade"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_menu"]
 sky_top_color = Color(0.1, 0.1, 0.1, 1)
@@ -60,5 +63,9 @@ surface_material_override/0 = SubResource("StandardMaterial3D_floor")
 stream = ExtResource("4_wu84c")
 autoplay = true
 
-[node name="PlayerSpawn" type="Marker3D" parent="." unique_id=899087259]
+[node name="StartXR" parent="." instance=ExtResource("6_startxr")]
+
+[node name="Player" parent="." instance=ExtResource("5_player")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.037252724, -0.8493414)
+
+[node name="Fade" parent="." instance=ExtResource("7_fade")]

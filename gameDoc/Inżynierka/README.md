@@ -8,8 +8,11 @@
 - **Nawigacja w menu i ekranie ładowania**: Ograniczona mobilność (brak chodu). Interfejs obsługiwany wskazaniem wirtualnej dłoni lub (co ważne dla sprawności działania) obsługiwany joystickiem kontrolera, po którym porusza się lektor (nagrany dźwięk lub syntezator TTS odczytujący zaznaczony tekst).
 - **Zderzenia / Game Over**: Popełnienie błędu (np. zignorowanie atakującego przeciwnika lub kolizja z nim) kończy grę głośnym Jumpscarem. Na Ekranie Game Over gracz wybiera czy spróbować ponownie, czy powrócić do menu głównego.
 
-## 👻 Przeciwnicy
+## 🚀 Log Zmian (Changelog)
+- **v0.2.0** - Przebudowa architektury na system **SceneLoader**. Rezygnacja z węzła nadrzędnego `Main` na rzecz pełnej podmiany scen (`change_scene_to_packed`). Rozwiązanie problemów z fizyką XR i stabilnością gracza podczas przeładowywania map.
+- **v0.1.0** - Zaprojektowanie założeń koncepcyjnych oraz opracowanie customowego systemu zarządzania scenami (Staging).
 
+## 👻 Przeciwnicy
 ### 1. Balora
 - **Zachowanie**: Patruje / Chodzi po pokoju.
 - **Sygnał**: Gdy gracz wejdzie w określony promień detekcji, odtwarzana jest przyspieszona muzyka oznaczająca początek gonitwy.
@@ -31,7 +34,7 @@
 
 ### Faza 1: Interfejs i Przejścia (Foundation)
 - [ ] **Accessibility Menu System**: Zaprojektowanie struktury menu obsługującego VR-Pointer z Godot XR Tools i dodatkowo wejścia D-pada/Joysticka. Zintegrowanie z Godot UI oraz systemem TextToSpeech / AudioStreamPlayer wymawiającym buttony.
-- [ ] **Scene Staging**: Dopięcie obsługi płynnego przejścia (bez dropów fizyki i pozycji Gracza) między MainMenu -> LoadingScreen -> GameMap.
+- [x] **Scene Staging / SceneLoader**: Wdrożenie asynchronicznego ładowania scen z przejściami Fade.
 - [ ] **Ekran Game Over**: Interfejs z logicznym powrotem dający możliwość na reset gry.
 
 ### Faza 2: Kontroler Gracza Rozszerzony

@@ -63,13 +63,5 @@ func _trigger_jumpscare(player_body: Node3D):
 	await get_tree().create_timer(3.0).timeout
 	_return_to_main_menu()
 func _return_to_main_menu():
-	var current_node = self
-	
-	# Szukamy w górę drzewa węzła, który zajmuje się zmienianiem scen (np. GameMap / Main)
-	while current_node != null:
-		if current_node.has_signal("request_load_scene"):
-			current_node.request_load_scene.emit(MAIN_MENU_PATH)
-			return
-		current_node = current_node.get_parent()
-	
-	print("Błąd: Nie znaleziono węzła odpowiedzialnego za zmianę sceny.")
+	# Używamy nowego SceneLoader do powrotu do menu głównego po jumpscare
+	SceneLoader.load_scene(MAIN_MENU_PATH)
