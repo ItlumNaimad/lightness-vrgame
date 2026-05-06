@@ -1,14 +1,20 @@
-E 0:00:29:045   player_body.gd:263 @ _update_enabled(): Can't change this state while flushing queries. Use call_deferred() or set_deferred() to change monitoring state instead.
-  <Błąd C++>    Condition "body->get_space() && flushing_queries" is true.
-  <Źródło C++>  modules/godot_physics_3d/godot_physics_server_3d.cpp:540 @ body_set_shape_disabled()
-  <Ślad stosu>  player_body.gd:263 @ _update_enabled()
-                player_body.gd:258 @ set_enabled()
-                ballora.gd:26 @ _trigger_jumpscare()
-                ballora.gd:21 @ _on_body_entered()
+E 0:00:13:741   game_map.gd:8 @ @implicit_ready(): Node not found: "Player/XRCamera3D/TimerLabel3D" (relative to "/root/GameMap").
+  <Błąd C++>    Method/function failed. Returning: nullptr
+  <Źródło C++>  scene/main/node.cpp:1963 @ get_node()
+  <Ślad stosu>  game_map.gd:8 @ @implicit_ready()
 
-W 0:00:06:115   _process_picking: Object picking can't be used when stereo rendering, this will be turned off!
-  <Źródło C++>  scene/main/viewport.cpp:771 @ _process_picking()
+E 0:00:13:741   game_map.gd:9 @ @implicit_ready(): Node not found: "Player/XRCamera3D/MilestoneAudio" (relative to "/root/GameMap").
+  <Błąd C++>    Method/function failed. Returning: nullptr
+  <Źródło C++>  scene/main/node.cpp:1963 @ get_node()
+  <Ślad stosu>  game_map.gd:9 @ @implicit_ready()
 
-W 0:00:23:699   GDScript::reload: Integer division. Decimal part will be discarded.
-  <Błąd GDScript>INTEGER_DIVISION
+E 0:00:13:872   _process: Invalid assignment of property or key 'text' with value of type 'String' on a base object of type 'null instance'.
+  <Źródło GDScript>game_map.gd:31 @ _process()
+  <Ślad stosu>  game_map.gd:31 @ _process()
+
+W 0:00:04:173   load: res://scenes/main_menu_ui.tscn:3 - ext_resource, invalid UID: uid://banvge4jxluwm - using text path instead: res://scripts/main_menu_ui.gd
+  <Źródło C++>  scene/resources/resource_format_text.cpp:500 @ load()
+
+W 0:00:13:602   GDScript::reload: Narrowing conversion (float is converted to int and loses precision).
+  <Błąd GDScript>NARROWING_CONVERSION
   <Źródło GDScript>game_map.gd:29 @ GDScript::reload()
