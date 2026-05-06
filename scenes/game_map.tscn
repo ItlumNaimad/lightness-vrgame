@@ -70,3 +70,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3419399, 6.880111)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8063904, 0)
 
 [node name="Fade" parent="." unique_id=1010360029 instance=ExtResource("9_fade")]
+
+[editable path="Player"]

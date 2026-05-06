@@ -5,13 +5,18 @@ var time_survived: float = 0.0
 var is_timer_running: bool = false
 var next_milestone: int = 10
 
-@onready var timer_label: Label3D = $Player/XRCamera3D/TimerLabel3D
-@onready var milestone_audio: AudioStreamPlayer3D = $Player/XRCamera3D/MilestoneAudio
+@onready var timer_label: Label3D = $"Player/XROrigin3D/XRCamera3D/TimerLabel"
+@onready var milestone_audio: AudioStreamPlayer3D = $"Player/XROrigin3D/XRCamera3D/MilestoneAudio"
+
 
 # Nadpisujemy funkcję z klasy bazowej, aby uniknąć szukania $XROrigin3D/XRCamera3D wewnątrz mapy.
 # Gracz jest zarządzany globalnie przez Staging.
 func _ready():
 	if Engine.is_editor_hint():
+		return
+
+	if timer_label == null or milestone_audio == null:
+		printerr("HUD nie został zainicjowany. Sprawdzić \"Editable Children\".")
 		return
 	# Reset stan przy starcie mapy
 	time_survived = 0.0
@@ -26,10 +31,12 @@ func _process(delta: float):
 	time_survived += delta
 	
 	#2. Formatowanie matematyczne (minuty:sekundy)
-	var minutes: int = int(time_survived) / 60.0
-	var seconds: int = int(time_survived) % 60
-	timer_label.text = "%02d:%02d" % [minutes, seconds]
-	
+	var total_seconds: int = int(time_survived)
+	var minutes: int = int(total_seconds / 60.0)
+	var seconds: int = total_seconds % 60
+	if timer_label:
+		timer_label.text = "%02d:%02d" % [minutes, seconds]
+
 	# 3. Sprawdzanie progów 10 sekundowych
 	if time_survived >= next_milestone:
 		_trigger_milestone_event()

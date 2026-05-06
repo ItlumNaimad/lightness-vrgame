@@ -27,7 +27,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.47796416, -0.46312207)
 
 [node name="VRCommonShaderCache" parent="XROrigin3D/XRCamera3D" unique_id=1303836383 instance=ExtResource("2_qhqgy")]
 
-[node name="TimerLabel3D" type="Label3D" parent="XROrigin3D/XRCamera3D" unique_id=1464946628]
+[node name="TimerLabel" type="Label3D" parent="XROrigin3D/XRCamera3D" unique_id=1464946628]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.37197274, 0.19904566, -0.541948)
 pixel_size = 0.001
 double_sided = false

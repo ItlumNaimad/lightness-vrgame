@@ -67,6 +67,6 @@ autoplay = true
 [node name="StartXR" parent="." unique_id=2039475675 instance=ExtResource("6_startxr")]
 
 [node name="Player" parent="." unique_id=629638343 instance=ExtResource("5_player")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7824168, -1.033799)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5640538, -1.033799)
 
 [node name="Fade" parent="." unique_id=1653293877 instance=ExtResource("7_fade")]
