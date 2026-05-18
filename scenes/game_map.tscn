@@ -1,0 +1,74 @@
+[gd_scene format=3 uid="uid://cjyxx2d4hafto"]
+
+[ext_resource type="Script" uid="uid://cbilw02reekmp" path="res://scripts/game_map.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://d3qvt0affmqvn" path="res://assets/textures/Wooden Floor Texture/wood2_COLOR.jpg" id="2_lp764"]
+[ext_resource type="Texture2D" uid="uid://ch8av1pfgrixv" path="res://assets/textures/Wooden Floor Texture/wood2_OCC.jpg" id="3_m2cng"]
+[ext_resource type="Texture2D" uid="uid://bkxkmyk7y0hl4" path="res://assets/textures/Wooden Floor Texture/wood2_NRM.jpg" id="4_oviui"]
+[ext_resource type="AudioStream" uid="uid://bv6a0kufxjmtr" path="res://assets/sounds/ambience.mp3" id="5_m2cng"]
+[ext_resource type="PackedScene" uid="uid://b4ml2o2jh5ooc" path="res://scenes/balora.tscn" id="6_oviui"]
+[ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="7_player"]
+[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="8_startxr"]
+[ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="9_fade"]
+
+[sub_resource type="Environment" id="Environment_iau3x"]
+background_mode = 1
+background_color = Color(0.1, 0.1, 0.1, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.2, 0.2, 0.2, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_test"]
+size = Vector3(20, 1, 20)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_test"]
+lightmap_size_hint = Vector2i(102, 102)
+size = Vector2(20, 20)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial_test"]
+disable_specular_occlusion = true
+albedo_texture = ExtResource("2_lp764")
+normal_enabled = true
+normal_scale = 14.51
+normal_texture = ExtResource("4_oviui")
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = ExtResource("3_m2cng")
+uv1_triplanar = true
+uv1_triplanar_sharpness = 1.6008334
+
+[node name="GameMap" type="Node3D" unique_id=120756022]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=982597785]
+environment = SubResource("Environment_iau3x")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1915778391]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10, 0)
+light_energy = 2.0
+
+[node name="Floor" type="StaticBody3D" parent="." unique_id=309467535]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=1961788420]
+shape = SubResource("BoxShape3D_test")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor" unique_id=1559076285]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("PlaneMesh_test")
+surface_material_override/0 = SubResource("StandardMaterial_test")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=569793408]
+stream = ExtResource("5_m2cng")
+volume_db = -1.273
+autoplay = true
+
+[node name="Balora" parent="." unique_id=1656694762 instance=ExtResource("6_oviui")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3419399, 6.880111)
+
+[node name="StartXR" parent="." unique_id=1224595367 instance=ExtResource("8_startxr")]
+
+[node name="Player" parent="." unique_id=805658640 instance=ExtResource("7_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8063904, 0)
+
+[node name="Fade" parent="." unique_id=1010360029 instance=ExtResource("9_fade")]
+
+[editable path="Player"]

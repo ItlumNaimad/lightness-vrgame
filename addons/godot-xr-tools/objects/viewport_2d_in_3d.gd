@@ -58,7 +58,7 @@ const DEFAULT_LAYER := 0b0000_0000_0101_0000_0000_0000_0000_0001
 @export_group("Physics")
 
 ## Physical screen size property
-@export var screen_size : Vector2 = Vector2(3.0, 2.0): set = set_screen_size
+@export var screen_size : Vector2 = Vector2(5.0, 3.8): set = set_screen_size
 
 ## Viewport collision enabled property
 @export var enabled : bool = true: set = set_enabled
