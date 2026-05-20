@@ -48,6 +48,7 @@ tracker = &"left_hand"
 [node name="FunctionGazePointer" parent="XROrigin3D/left_hand" unique_id=1737039443 instance=ExtResource("10_gaze")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.1)
 distance = 0.15
+suppress_radius = 0.0
 click_on_hold = true
 hold_time = 0.4
 
@@ -61,5 +62,6 @@ tracker = &"right_hand"
 [node name="FunctionGazePointer" parent="XROrigin3D/right_hand" unique_id=1943132758 instance=ExtResource("10_gaze")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.1)
 distance = 0.15
+suppress_radius = 0.0
 click_on_hold = true
 hold_time = 0.4
