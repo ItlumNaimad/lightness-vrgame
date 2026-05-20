@@ -58,6 +58,7 @@ tracker = &"right_hand"
 [node name="RightHand" parent="XROrigin3D/right_hand" unique_id=496257248 instance=ExtResource("4_qlg0r")]
 
 [node name="MovementDirect" parent="XROrigin3D/right_hand" unique_id=883431152 instance=ExtResource("6_smehm")]
+strafe = true
 
 [node name="FunctionGazePointer" parent="XROrigin3D/right_hand" unique_id=1943132758 instance=ExtResource("10_gaze")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.1)

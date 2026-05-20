@@ -30,12 +30,18 @@ func _physics_process(delta: float):
 	var current_location = global_transform.origin
 	var next_location = nav_agent.get_next_path_position()
 	
-	var direction = (next_location - current_location).normalized()
+	var direction = (next_location - current_location)
+	direction.y = 0
+	direction = direction.normalized()
+	
+	var current_y_velocity = velocity.y
 	velocity = direction * SPEED
 	
 	# 3. Dodanie grawitacji, aby postać nie unosiła się w powietrzu
 	if not is_on_floor():
-		velocity.y -= 9.8 * delta
+		current_y_velocity -= 9.8 * delta
+		
+	velocity.y = current_y_velocity
 
 	# 4. Wykonanie ruchu z automatycznym ślizganiem się po przeszkodach
 	move_and_slide()
