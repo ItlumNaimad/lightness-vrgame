@@ -46,7 +46,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("BoxShape3D_floor")
 
 [node name="Viewport2Din3D" parent="." unique_id=1130208441 instance=ExtResource("2_bqqt6")]
-transform = Transform3D(1, 0, 0, 0, 0.99819505, 0.060055528, 0, -0.060055528, 0.99819505, 0, 1.2, -0.6)
+transform = Transform3D(1, 0, 0, 0, 0.99819505, 0.060055528, 0, -0.060055528, 0.99819505, 0, 2.2438202, -0.9660638)
 screen_size = Vector2(2, 1.5)
 scene = ExtResource("3_ui")
 viewport_size = Vector2(1280, 720)
@@ -67,6 +67,6 @@ autoplay = true
 [node name="StartXR" parent="." unique_id=2039475675 instance=ExtResource("6_startxr")]
 
 [node name="Player" parent="." unique_id=629638343 instance=ExtResource("5_player")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5640538, -0.0068191886)
+transform = Transform3D(0.30901697, 0, -0.95105654, 0, 1, 0, 0.95105654, 0, 0.30901697, 0, 0.5640538, -0.0068191886)
 
 [node name="Fade" parent="." unique_id=1653293877 instance=ExtResource("7_fade")]
