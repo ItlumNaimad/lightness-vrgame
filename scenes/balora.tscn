@@ -17,7 +17,10 @@ material = SubResource("StandardMaterial3D_2mo37")
 radius = 0.761
 height = 2.778
 
-[node name="Balora" type="Area3D" unique_id=1656694762]
+[sub_resource type="SphereShape3D" id="SphereShape3D_jumpscare"]
+radius = 1.8
+
+[node name="Balora" type="CharacterBody3D" unique_id=1656694762]
 script = ExtResource("1_2mo37")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=237287144]
@@ -37,3 +40,10 @@ max_distance = 20.11
 
 [node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=566194156]
 stream = ExtResource("3_24ggd")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+
+[node name="JumpscareTrigger" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpscareTrigger"]
+shape = SubResource("SphereShape3D_jumpscare")
