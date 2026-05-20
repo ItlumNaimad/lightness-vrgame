@@ -45,18 +45,18 @@ horizontal_alignment = 1
 layout_mode = 2
 
 [node name="StartButton" type="Button" parent="VBoxContainer" unique_id=701909221]
-custom_minimum_size = Vector2(0, 50)
+custom_minimum_size = Vector2(500, 70)
 layout_mode = 2
 text = "Start Game"
 text_overrun_behavior = 1
 
 [node name="SettingsButton" type="Button" parent="VBoxContainer" unique_id=1476206413]
-custom_minimum_size = Vector2(0, 50)
+custom_minimum_size = Vector2(500, 70)
 layout_mode = 2
 text = "Settings"
 
 [node name="ExitButton" type="Button" parent="VBoxContainer" unique_id=1696166017]
-custom_minimum_size = Vector2(0, 50)
+custom_minimum_size = Vector2(500, 70)
 layout_mode = 2
 text = "Exit"
 
