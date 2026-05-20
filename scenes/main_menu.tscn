@@ -46,7 +46,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("BoxShape3D_floor")
 
 [node name="Viewport2Din3D" parent="." unique_id=1130208441 instance=ExtResource("2_bqqt6")]
-transform = Transform3D(1, 0, 0, 0, 0.99819505, 0.060055528, 0, -0.060055528, 0.99819505, 0, 1.70677, -2.8091671)
+transform = Transform3D(1, 0, 0, 0, 0.99819505, 0.060055528, 0, -0.060055528, 0.99819505, 0, 1.2, -0.6)
 screen_size = Vector2(2, 1.5)
 scene = ExtResource("3_ui")
 viewport_size = Vector2(1280, 720)
