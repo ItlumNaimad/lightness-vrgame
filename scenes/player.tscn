@@ -50,7 +50,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.1)
 distance = 0.15
 suppress_radius = 0.0
 click_on_hold = true
-hold_time = 0.4
+hold_time = 0.7
 
 [node name="right_hand" type="XRController3D" parent="XROrigin3D" unique_id=1054815896]
 tracker = &"right_hand"
@@ -64,4 +64,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.1)
 distance = 0.15
 suppress_radius = 0.0
 click_on_hold = true
-hold_time = 0.4
+hold_time = 0.7
