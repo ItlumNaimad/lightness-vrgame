@@ -16,8 +16,12 @@ func _ready():
 	# Podpięcie sygnału łapania z nowego węzła Area3D
 	jumpscare_trigger.body_entered.connect(_on_body_entered)
 	
-	# Znalezienie gracza za pomocą przypisanej grupy
-	player = get_tree().get_first_node_in_group("player")
+	# Znalezienie aktywnej pozycji głowy gracza
+	var player_root = get_tree().get_first_node_in_group("player")
+	if player_root:
+		player = player_root.get_node_or_null("XROrigin3D/XRCamera3D")
+		if player == null:
+			player = player_root
 
 func _physics_process(delta: float):
 	if is_jumpscaring or player == null:
