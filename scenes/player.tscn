@@ -6,9 +6,6 @@
 [ext_resource type="PackedScene" uid="uid://b6bk2pj8vbj28" path="res://addons/godot-xr-tools/functions/movement_turn.tscn" id="4_fjrip"]
 [ext_resource type="PackedScene" uid="uid://l2n30mpbkdyw" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn" id="4_qlg0r"]
 [ext_resource type="PackedScene" uid="uid://bl2nuu3qhlb5k" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="6_smehm"]
-[ext_resource type="PackedScene" uid="uid://cqhw276realc" path="res://addons/godot-xr-tools/functions/function_pointer.tscn" id="7_ur7pv"]
-[ext_resource type="Material" path="res://addons/godot-xr-tools/materials/pointer.tres" id="8_ur7pv"]
-[ext_resource type="Material" path="res://addons/godot-xr-tools/materials/target.tres" id="9_ur7pv"]
 [ext_resource type="PackedScene" uid="uid://do1wif8rpqtwj" path="res://addons/godot-xr-tools/functions/function_gaze_pointer.tscn" id="10_gaze"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tuyoq"]
@@ -24,7 +21,7 @@ collision_layer = 524289
 shape = SubResource("CapsuleShape3D_tuyoq")
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D" unique_id=639605948]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.47796416, -0.46312207)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06774485, 0.47796416, -0.18833774)
 
 [node name="VRCommonShaderCache" parent="XROrigin3D/XRCamera3D" unique_id=1303836383 instance=ExtResource("2_qhqgy")]
 
@@ -48,11 +45,9 @@ tracker = &"left_hand"
 
 [node name="MovementTurn" parent="XROrigin3D/left_hand" unique_id=186636919 instance=ExtResource("4_fjrip")]
 
-[node name="FunctionGazePointer" parent="XROrigin3D/left_hand" instance=ExtResource("10_gaze")]
+[node name="FunctionGazePointer" parent="XROrigin3D/left_hand" unique_id=1737039443 instance=ExtResource("10_gaze")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.1)
 distance = 0.15
-show_laser = 0
-show_target = true
 click_on_hold = true
 hold_time = 0.4
 
@@ -63,10 +58,8 @@ tracker = &"right_hand"
 
 [node name="MovementDirect" parent="XROrigin3D/right_hand" unique_id=883431152 instance=ExtResource("6_smehm")]
 
-[node name="FunctionGazePointer" parent="XROrigin3D/right_hand" instance=ExtResource("10_gaze")]
+[node name="FunctionGazePointer" parent="XROrigin3D/right_hand" unique_id=1943132758 instance=ExtResource("10_gaze")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.1)
 distance = 0.15
-show_laser = 0
-show_target = true
 click_on_hold = true
 hold_time = 0.4
