@@ -15,6 +15,7 @@
 [node name="XROrigin3D" type="XROrigin3D" parent="." unique_id=1544298595]
 
 [node name="PlayerBody" parent="XROrigin3D" unique_id=147226604 instance=ExtResource("1_g2els")]
+movement_direction = 2
 collision_layer = 524289
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="XROrigin3D/PlayerBody" unique_id=550881090]
