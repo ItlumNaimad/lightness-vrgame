@@ -1,6 +1,5 @@
 extends CharacterBody3D
 
-const MAIN_MENU_PATH = "res://scenes/main_menu.tscn"
 const SPEED = 1.5 # Prędkość poruszania się przeciwnika
 
 @onready var mesh_instance = $MeshInstance3D
@@ -22,6 +21,11 @@ func _ready():
 		player = player_root.get_node_or_null("XROrigin3D/XRCamera3D")
 		if player == null:
 			player = player_root
+			
+	# Zwiększenie pożądanego dystansu, by wysoka postać nie blokowała się na punktach nawigacji na podłodze
+	if nav_agent:
+		nav_agent.path_desired_distance = 2.0
+		nav_agent.target_desired_distance = 2.0
 
 func _physics_process(delta: float):
 	if is_jumpscaring or player == null:
@@ -38,14 +42,14 @@ func _physics_process(delta: float):
 	direction.y = 0
 	direction = direction.normalized()
 	
-	var current_y_velocity = velocity.y
-	velocity = direction * SPEED
+	velocity.x = direction.x * SPEED
+	velocity.z = direction.z * SPEED
 	
 	# 3. Dodanie grawitacji, aby postać nie unosiła się w powietrzu
 	if not is_on_floor():
-		current_y_velocity -= 9.8 * delta
-		
-	velocity.y = current_y_velocity
+		velocity.y -= 9.8 * delta
+	else:
+		velocity.y = 0.0
 
 	# 4. Wykonanie ruchu z automatycznym ślizganiem się po przeszkodach
 	move_and_slide()
@@ -57,46 +61,10 @@ func _on_body_entered(body: Node3D):
 		is_jumpscaring = true
 		_trigger_jumpscare(body)
 
-func _trigger_jumpscare(player_body: Node3D):
+func _trigger_jumpscare(_player_body: Node3D):
 	# Zatrzymanie ruchu przeciwnika
 	velocity = Vector3.ZERO
+	audio_player.stop()
 	
-	if "enabled" in player_body:
-		player_body.set_deferred("enabled", false)
-	
-	var current_node = self
-	while current_node != null:
-		if current_node.has_method("stop_timer_and_save"):
-			current_node.stop_timer_and_save()
-			break
-		current_node = current_node.get_parent()
-	
-	var xr_origin = player_body.get_parent()
-	var camera = xr_origin.get_node_or_null("XRCamera3D")
-	
-	if camera:
-		var mesh_global_trans = mesh_instance.global_transform
-		var audio_global_trans = audio_player.global_transform
-		
-		remove_child(mesh_instance)
-		remove_child(audio_player)
-		camera.add_child(mesh_instance)
-		camera.add_child(audio_player)
-		
-		mesh_instance.global_transform = mesh_global_trans
-		audio_player.global_transform = audio_global_trans
-		
-		var tween = get_tree().create_tween()
-		tween.set_parallel(true)
-		
-		var target_transform = Transform3D()
-		target_transform.origin = Vector3(0, -0.3, -0.5)
-		
-		tween.tween_property(mesh_instance, "transform", target_transform, 0.2).set_trans(Tween.TRANS_SINE)
-		tween.tween_property(audio_player, "transform", target_transform, 0.2).set_trans(Tween.TRANS_SINE)
-		
-		audio_player.stop()
-		jumpscare_sound.play()
-
-	await get_tree().create_timer(2.0).timeout
-	SceneLoader.load_scene(MAIN_MENU_PATH)
+	# Delegacja do wspólnego helpera (reparenting, haptyka, powrót do menu)
+	await JumpscareHelper.execute(self, jumpscare_sound, [mesh_instance, audio_player])

@@ -28,3 +28,57 @@ Aby zaimplementować przeciwnika (Ballora), który po zbliżeniu się gracza wyr
    - Skrypt wykorzystuje sygnał `body_entered` strefy `Area3D`.
    - Gdy kolizja rejestruje ciało gracza, uruchamiana jest sekwencja Jumpscare (reparenting duszka i dźwięku do kamery gracza).
    - Po zakończeniu animacji ataku, wywoływana jest funkcja `SceneLoader.load_scene(MAIN_MENU_PATH)`, która przywraca gracza do menu głównego.
+
+2. **Poprawki Fizyki i Nawigacji (Balora):**
+   - Aby zapobiec zapadaniu się podłogę, aplikacja wektora grawitacji (`velocity.y`) w `move_and_slide()` została zrestrukturyzowana, aby przypisywać osie horyzontalne X i Z oddzielnie od osi wertykalnej.
+   - Aby postać nie zacinała się docierając do węzła NavMesh (szła, a potem stawała zamrożona), zwiększono `path_desired_distance` w `NavigationAgent3D` do `2.0`. Problem wynikał z mierzenia dystansu w przestrzeni 3D - środek wysokiej postaci znajduje się na wys. ~1.3m, podczas gdy punkt nawigacyjny leży na podłodze (wys. 0m), przez co postać nigdy nie osiągała domyślnego progu `1.0m`.
+
+## Implementacja Przeciwnika (Marionette / Marnin)
+
+Marionette to `Node3D` operujący jako wróg pojawiający się na krawędziach mapy (np. ściany pokoju). Jej zadaniem jest zaskoczenie gracza za pomocą mylących dźwięków kierunkowych i wymuszenie na nim pasywności. Została wpięta bezpośrednio do głównej planszy `game_map.tscn`.
+
+1. **Zasada działania (State Machine):**
+   - **HIDDEN:** Ukrywa się na 20-35 sekund, nasłuchując timera.
+   - **WHISPERING:** Przenosi się na odległość 7-9 metrów od gracza i odtwarza zapętlony, przerażający szept z komponentu `AudioStreamPlayer3D`.
+   - **JUMPSCARE:** Atak – zatrzymanie czasu, wyrzucenie gracza z mapy i odtworzenie głośnego krzyku w uchu.
+
+2. **Mechanika przetrwania i rozpoznawanie zachowań (VR):**
+   - Skrypt dynamicznie śledzi wektor i pozycję `XRCamera3D`.
+   - **Weryfikacja ruchu:** Jeśli po uruchomieniu szeptów gracz przemieści się w osi poziomej o więcej niż `0.6` metra, zostaje zaatakowany.
+   - **Weryfikacja pola widzenia:** Obliczany jest iloczyn skalarny (`dot product`) między kierunkiem wzroku gracza (`-camera.global_transform.basis.z`) a kierunkiem na przeciwnika. Jeśli wynik jest większy niż `0.707` (co odpowiada stożkowi około 45 stopni), gra uznaje, że użytkownik patrzy w niebezpiecznym kierunku. Patrzenie przez ponad 1.5 sekundy uruchamia Jumpscare.
+   - Aby przeżyć i by wróg wrócił do stanu `HIDDEN`, gracz musi zastygnąć w bezruchu i odwrócić głowę (patrzeć pod kątem mniejszym niż 45 stopni na wroga) przez minimum 3.0 sekundy.
+
+## Audyt i Naprawy Projektu
+
+Przeprowadzono pełną analizę projektu (szczegóły w pliku `gameDoc/Inżynierka/Audit.md`). Poniżej lista zrealizowanych napraw oraz zadań do wykonania.
+
+### Naprawy wykonane
+
+1. **NavMesh — runtime bake (KRYTYCZNE):**
+   - `NavigationMesh` w `game_map.tscn` była pusta (brak wygenerowanych wierzchołków). Dodano automatyczne wywołanie `nav_region.bake_navigation_mesh()` w `_ready()` skryptu `game_map.gd`, co zapewnia poprawną nawigację AI nawet bez ręcznego bake'a w edytorze.
+
+2. **Ściany pokoju (KRYTYCZNE):**
+   - Mapa posiadała wyłącznie podłogę — gracz mógł wyjść poza obszar gry. Dodano 4 ściany (`WallNorth`, `WallSouth`, `WallEast`, `WallWest`) jako `StaticBody3D` o wymiarach 20×4×0.5m wewnątrz `NavigationRegion3D`.
+
+3. **Reset grawitacji Balory:**
+   - `velocity.y` nie był resetowany po wylądowaniu, co prowadziło do narastającej resztkowej wartości ujemnej. Dodano `else: velocity.y = 0.0` w pętli `_physics_process`.
+
+4. **Wspólny helper Jumpscare (`jumpscare_helper.gd`):**
+   - Wydzielono zduplikowaną logikę Jumpscare'a (reparenting audio/meshy do kamery, zatrzymanie timera, powrót do menu) do klasy statycznej `JumpscareHelper`. Oba przeciwnicy (Balora i Marionette) delegują teraz sekwencję ataku do jednego miejsca w kodzie.
+   - Helper dodaje również **wibracje haptyczne** (rumble) obu kontrolerów VR podczas Jumpscare'a, wykorzystując wcześniej nieużywany `XRToolsRumbleManager`.
+
+5. **Marionette — konfigurowalność z edytora:**
+   - Hardcoded granice mapy (-9 do 9) zamieniono na zmienne `@export` (`map_bounds_min`, `map_bounds_max`), konfigurowalne bezpośrednio w Inspektorze Godota. Analogicznie wyeksportowano progi kątów patrzenia, czasy przetrwania i dystanse spawnu.
+
+6. **Stary komentarz o Staging:**
+   - Usunięto mylący komentarz w `game_map.gd` odnoszący się do porzuconego systemu Staging.
+
+### Zadania do wykonania
+
+| Priorytet | Zadanie | Status |
+|-----------|---------|--------|
+| 🟡 WYSOKI | Ekran Game Over (dedykowana scena / UI) | Do zrobienia |
+| 🟡 WYSOKI | System TTS / lektora w menu (Accessibility) | Do zrobienia |
+| 🟡 WYSOKI | Dźwięki kroków gracza (potrzebne do Foxy) | Do zrobienia |
+| 🔵 NISKI | Nazwa projektu "Inżynierka" → "Lightness" w `project.godot` | Do zrobienia |
+| 🔵 NISKI | Nazwy warstw kolizji w `project.godot` | Do zrobienia |

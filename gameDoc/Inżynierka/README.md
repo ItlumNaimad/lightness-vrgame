@@ -42,8 +42,8 @@
 - [ ] Rozpoznawanie uderzeń (Body kolizje i uderzenia w ściany dla mechaniki hałasu dla Foxiego).
 
 ### Faza 3: SI Przeciwników
-- [ ] **Balora**: NavMeshAgent do swobodnego chodzenia - System detekcji proximiiti i zmiana stanu audio na Chase.
-- [ ] **Marionette**: Logika Spawnów przyległych do ściany najbliżej gracza -> system orientacyjny kierunku wzroku na głowie gracza (HMD Transform).
+- [x] **Balora**: NavMeshAgent do swobodnego chodzenia - System detekcji proximity i wywołanie stanu Jumpscare.
+- [x] **Marionette**: Logika Spawnów przyległych do ściany -> system orientacyjny kierunku wzroku na głowie gracza (wektory XRCamera3D) oraz badanie dystansu w poziomie.
 - [ ] **Foxy**: System alertowy na głośne dźwięki -> zatrzymanie Audio -> szarża wektorem prostej ze ślepej strugi. Obsługa detekcji ręki do przerwania szarży.
 
 ### Faza 4: Gameplay Loop i Audio
