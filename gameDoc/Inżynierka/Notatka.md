@@ -95,6 +95,7 @@ Przeprowadzono pełną analizę projektu (szczegóły w pliku `gameDoc/Inżynier
 |-----------|---------|--------|
 | 🟡 WYSOKI | Ekran Game Over (dedykowana scena / UI) | Do zrobienia |
 | 🟡 WYSOKI | System TTS / lektora w menu (Accessibility) | Do zrobienia |
-| 🟡 WYSOKI | Dźwięki kroków gracza (potrzebne do Foxy) | Do zrobienia |
+| 🟡 WYSOKI | Zaawansowane dźwięki kroków gracza (zależne od powierzchni podłogi + triggery dla Foxy) | Do zrobienia |
+| 🟡 WYSOKI | Dźwiękowa informacja zwrotna przy obracaniu się joystickiem (zapobieganie utracie orientacji) | Do zrobienia |
 | 🔵 NISKI | Nazwa projektu "Inżynierka" → "Lightness" w `project.godot` | Do zrobienia |
 | 🔵 NISKI | Nazwy warstw kolizji w `project.godot` | Do zrobienia |

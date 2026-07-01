@@ -11,8 +11,8 @@ var current_state: State = State.HIDDEN
 @export var map_bounds_max: Vector3 = Vector3(9.0, 3.0, 9.0)
 
 ## Dystans spawnu od gracza
-@export var spawn_distance_min: float = 7.0
-@export var spawn_distance_max: float = 9.0
+@export var spawn_distance_min: float = 1.0
+@export var spawn_distance_max: float = 1.5
 
 ## Próg kąta patrzenia (cos 45 stopni = 0.707)
 @export var look_threshold: float = 0.707
@@ -53,6 +53,7 @@ var survive_timer: float = 0.0
 var grace_timer: float = 0.0
 
 var initial_player_pos: Vector3 = Vector3.ZERO
+var current_offset: Vector3 = Vector3.ZERO
 
 ## Ile rund szeptów zostało w bieżącej serii
 var _rounds_remaining: int = 0
@@ -99,6 +100,13 @@ func _process(delta: float):
 				_enter_whispering()
 		
 		State.WHISPERING:
+			# Przyczepienie do gracza: ciągłe podążanie za kamerą (głową) z wylosowanym offsetem
+			var target_pos = camera.global_position + current_offset
+			target_pos.x = clamp(target_pos.x, map_bounds_min.x, map_bounds_max.x)
+			target_pos.y = clamp(target_pos.y, map_bounds_min.y, map_bounds_max.y)
+			target_pos.z = clamp(target_pos.z, map_bounds_min.z, map_bounds_max.z)
+			global_position = target_pos
+			
 			# 0. Okres łaski — gracz ma czas na zorientowanie się
 			if grace_timer > 0.0:
 				grace_timer -= delta
@@ -165,15 +173,13 @@ func _enter_whispering():
 	if camera:
 		initial_player_pos = camera.global_position
 		
-		# Losowa pozycja na okręgu wokół gracza
+		# Obliczenie stałego offsetu względem głowy gracza
 		var angle = randf_range(0, TAU)
 		var distance = randf_range(spawn_distance_min, spawn_distance_max)
-		var spawn_pos = initial_player_pos + Vector3(cos(angle) * distance, 0, sin(angle) * distance)
+		current_offset = Vector3(cos(angle) * distance, randf_range(-0.5, 0.5), sin(angle) * distance)
 		
-		# Wysokość obok głowy gracza (z lekkim offsetem)
-		spawn_pos.y = initial_player_pos.y + randf_range(-0.5, 0.5)
-		
-		# Ograniczenie do granic mapy (konfigurowalnych z edytora)
+		# Ograniczenie pierwszej pozycji spawnu (będzie powtarzane co klatkę w _process)
+		var spawn_pos = initial_player_pos + current_offset
 		spawn_pos.x = clamp(spawn_pos.x, map_bounds_min.x, map_bounds_max.x)
 		spawn_pos.y = clamp(spawn_pos.y, map_bounds_min.y, map_bounds_max.y)
 		spawn_pos.z = clamp(spawn_pos.z, map_bounds_min.z, map_bounds_max.z)
