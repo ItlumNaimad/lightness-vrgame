@@ -21,7 +21,10 @@ var current_state: State = State.HIDDEN
 @export var look_fail_time: float = 1.5
 
 ## Czas przetrwania (bezruch + odwrócony wzrok) potrzebny do odparcia ataku
-@export var survive_time: float = 3.0
+@export var survive_time: float = 2.0
+
+## Czas łaski na zorientowanie się po pojawieniu szeptów (sekundy)
+@export var grace_time: float = 2.5
 
 @onready var whisper_sound: AudioStreamPlayer3D = $WhisperSound
 @onready var jumpscare_sound: AudioStreamPlayer3D = $JumpscareSound
@@ -32,6 +35,7 @@ var camera: XRCamera3D
 var state_timer: float = 0.0
 var look_timer: float = 0.0
 var survive_timer: float = 0.0
+var grace_timer: float = 0.0
 
 var initial_player_pos: Vector3 = Vector3.ZERO
 
@@ -58,6 +62,14 @@ func _process(delta: float):
 				_enter_whispering()
 		
 		State.WHISPERING:
+			# 0. Okres łaski — gracz ma czas na zorientowanie się
+			if grace_timer > 0.0:
+				grace_timer -= delta
+				# Ciągle aktualizuj pozycję startową podczas grace period,
+				# żeby nie karać za ruch sprzed "zamrożenia"
+				initial_player_pos = camera.global_position
+				return
+			
 			# 1. Weryfikacja ruchu gracza (tylko dystans poziomy — schylanie dozwolone)
 			var current_player_pos = camera.global_position
 			var pos_2d_start = Vector2(initial_player_pos.x, initial_player_pos.z)
@@ -93,6 +105,7 @@ func _enter_whispering():
 	current_state = State.WHISPERING
 	look_timer = 0.0
 	survive_timer = 0.0
+	grace_timer = grace_time
 	
 	if camera:
 		initial_player_pos = camera.global_position

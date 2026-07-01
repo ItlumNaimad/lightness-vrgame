@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://l2n30mpbkdyw" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn" id="4_qlg0r"]
 [ext_resource type="PackedScene" uid="uid://bl2nuu3qhlb5k" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="6_smehm"]
 [ext_resource type="PackedScene" uid="uid://do1wif8rpqtwj" path="res://addons/godot-xr-tools/functions/function_gaze_pointer.tscn" id="10_gaze"]
+[ext_resource type="PackedScene" uid="uid://drs4eeq721ojn" path="res://addons/godot-xr-tools/functions/movement_sprint.tscn" id="11_sprint"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tuyoq"]
 
@@ -17,6 +18,10 @@
 [node name="PlayerBody" parent="XROrigin3D" unique_id=147226604 instance=ExtResource("1_g2els")]
 movement_direction = 2
 collision_layer = 524289
+
+[node name="MovementSprint" parent="XROrigin3D" instance=ExtResource("11_sprint")]
+sprint_speed_multiplier = 2.0
+controller = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="XROrigin3D/PlayerBody" unique_id=550881090]
 shape = SubResource("CapsuleShape3D_tuyoq")

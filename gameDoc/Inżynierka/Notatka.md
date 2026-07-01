@@ -73,6 +73,22 @@ Przeprowadzono pełną analizę projektu (szczegóły w pliku `gameDoc/Inżynier
 6. **Stary komentarz o Staging:**
    - Usunięto mylący komentarz w `game_map.gd` odnoszący się do porzuconego systemu Staging.
 
+7. **Sterowanie zorientowane na kontroler (Hand-Oriented Movement):**
+   - Domyślnie ruch w XR Tools bazuje na orientacji głowy (kamery). Zmodyfikowano skrypt wtyczki `addons/godot-xr-tools/player/player_body.gd` dodając parametr `movement_direction`, pozwalający wybrać węzeł odniesienia (Kamera, Lewy Kontroler, Prawy Kontroler).
+   - W `player.tscn` ustawiono `movement_direction = 2` (Prawy Kontroler). Dzięki temu gracz idzie w stronę wychylenia gałki prawego kontrolera, niezależnie od tego, w którą stronę odwraca głowę. Jest to kluczowe do walki z Marionette (możliwość wycofywania się patrząc przed siebie).
+
+8. **Okres łaski (Grace Period) dla Marionette:**
+   - Aby nie karać gracza za ruch w momencie usłyszenia szeptów (gdy jeszcze nie zdążył zareagować), dodano do `marionette.gd` parametr `grace_time` (domyślnie 2.5s).
+   - W tym czasie gracz może się swobodnie zorientować w sytuacji, a dystans ruchu zaczyna być mierzony dopiero po upłynięciu tego czasu.
+
+9. **Tryb Debugowania (Wizualizacja) dla Marionette:**
+   - Dodano parametr `debug_visible` do skryptu `marionette.gd`, który programowo generuje świecącą różową kulę reprezentującą pozycję wroga.
+   - **Jak włączyć:** W edytorze otworzyć `game_map.tscn`, zaznaczyć węzeł `Marionette` i w Inspektorze (po prawej) zaznaczyć opcję **Debug Visible**. Domyślnie wyłączone dla normalnej rozgrywki.
+
+10. **Sprint gracza:**
+   - Do sceny gracza dodano węzeł `MovementSprint` z XR Tools (wymagane by był dzieckiem `XROrigin3D`).
+   - Ustawiono aktywację na lewym kontrolerze pod przyciskiem `primary_click` (wciśnięcie gałki) w trybie *Hold to Sprint*. Prędkość wzrasta dwukrotnie, co jest kluczowe w ucieczce przed Balorą.
+
 ### Zadania do wykonania
 
 | Priorytet | Zadanie | Status |
