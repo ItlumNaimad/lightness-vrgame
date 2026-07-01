@@ -2,8 +2,14 @@ extends Node
 
 var last_survival_time: float = 0.0
 var scene_path: String
+var is_loading: bool = false
 
 func load_scene(path: String):
+	# Blokada wielokrotnego wywołania (zapobiega podwójnemu ładowaniu)
+	if is_loading:
+		return
+	is_loading = true
+	
 	scene_path = path
 	
 	# 1. Wywołanie animacji ściemnienia na globalnym komponencie XR
@@ -31,6 +37,9 @@ func _process(_delta):
 		
 		# 3. Zastąpienie całego aktywnego środowiska
 		get_tree().change_scene_to_packed(loaded_resource)
+		
+		# Reset flagi — nowa scena może z powrotem ładować inne sceny
+		is_loading = false
 		
 		# 4. Opóźnienie wywołania rozjaśnienia (czekamy na reinicjalizację nowej sceny)
 		call_deferred("_fade_in")

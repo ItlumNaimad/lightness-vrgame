@@ -3,6 +3,9 @@ extends Node3D
 enum State { HIDDEN, WHISPERING, JUMPSCARE }
 var current_state: State = State.HIDDEN
 
+## Włącz widoczny mesh debugowy (kula), żeby widzieć gdzie Marionette się pojawia
+@export var debug_visible: bool = false
+
 ## Granice spawnu Marionette (do konfiguracji w edytorze)
 @export var map_bounds_min: Vector3 = Vector3(-9.0, 0.0, -9.0)
 @export var map_bounds_max: Vector3 = Vector3(9.0, 3.0, 9.0)
@@ -26,6 +29,18 @@ var current_state: State = State.HIDDEN
 ## Czas łaski na zorientowanie się po pojawieniu szeptów (sekundy)
 @export var grace_time: float = 2.5
 
+## Minimalna / maksymalna liczba szeptów w jednej serii
+@export var min_whisper_rounds: int = 2
+@export var max_whisper_rounds: int = 4
+
+## Przerwa między szeptami w serii (sekundy)
+@export var series_pause_min: float = 3.0
+@export var series_pause_max: float = 6.0
+
+## Przerwa między seriami (sekundy)
+@export var long_pause_min: float = 20.0
+@export var long_pause_max: float = 35.0
+
 @onready var whisper_sound: AudioStreamPlayer3D = $WhisperSound
 @onready var jumpscare_sound: AudioStreamPlayer3D = $JumpscareSound
 
@@ -39,9 +54,31 @@ var grace_timer: float = 0.0
 
 var initial_player_pos: Vector3 = Vector3.ZERO
 
+## Ile rund szeptów zostało w bieżącej serii
+var _rounds_remaining: int = 0
+
+# Debug mesh (kula do wizualizacji pozycji)
+var _debug_mesh: MeshInstance3D
+
 func _ready():
+	# Tworzenie kuli debugowej
+	_debug_mesh = MeshInstance3D.new()
+	var sphere = SphereMesh.new()
+	sphere.radius = 0.3
+	sphere.height = 0.6
+	_debug_mesh.mesh = sphere
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.0, 0.5, 0.7)
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.emission_enabled = true
+	mat.emission = Color(1.0, 0.0, 0.5)
+	mat.emission_energy_multiplier = 2.0
+	_debug_mesh.material_override = mat
+	_debug_mesh.visible = false
+	add_child(_debug_mesh)
+
 	_find_player()
-	_enter_hidden()
+	_start_new_series()
 
 func _find_player():
 	var player_root = get_tree().get_first_node_in_group("player")
@@ -94,12 +131,30 @@ func _process(delta: float):
 				survive_timer += delta
 				look_timer = 0.0
 				if survive_timer > survive_time:
-					_enter_hidden()
+					_whisper_survived()
 
-func _enter_hidden():
-	current_state = State.HIDDEN
+## Gracz odpędził jeden szept — sprawdź czy seria trwa dalej
+func _whisper_survived():
+	_rounds_remaining -= 1
 	whisper_sound.stop()
-	state_timer = randf_range(20.0, 35.0)
+	if _debug_mesh:
+		_debug_mesh.visible = false
+	
+	if _rounds_remaining > 0:
+		# Krótka przerwa, potem następny szept z INNEGO kierunku
+		current_state = State.HIDDEN
+		state_timer = randf_range(series_pause_min, series_pause_max)
+		print("Marionette: Odpędzono szept, ale zostało jeszcze ", _rounds_remaining, " rund!")
+	else:
+		# Seria zakończona — długa przerwa
+		_start_new_series()
+		print("Marionette: Seria zakończona, odpoczynek.")
+
+## Rozpoczyna nową serię z losową liczbą rund
+func _start_new_series():
+	current_state = State.HIDDEN
+	_rounds_remaining = randi_range(min_whisper_rounds, max_whisper_rounds)
+	state_timer = randf_range(long_pause_min, long_pause_max)
 
 func _enter_whispering():
 	current_state = State.WHISPERING
@@ -125,6 +180,8 @@ func _enter_whispering():
 		
 		global_position = spawn_pos
 		
+	if _debug_mesh:
+		_debug_mesh.visible = debug_visible
 	whisper_sound.play()
 
 func _trigger_jumpscare(reason: String):

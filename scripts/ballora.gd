@@ -59,6 +59,8 @@ func _on_body_entered(body: Node3D):
 		return
 	if "PlayerBody" in body.name or body.is_in_group("player"):
 		is_jumpscaring = true
+		# Natychmiast wyłącz detekcję, żeby nie odpalić jumpscare'a dwa razy
+		jumpscare_trigger.set_deferred("monitoring", false)
 		_trigger_jumpscare(body)
 
 func _trigger_jumpscare(_player_body: Node3D):
