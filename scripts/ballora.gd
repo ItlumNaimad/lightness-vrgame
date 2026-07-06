@@ -13,10 +13,12 @@ var is_jumpscaring: bool = false
 
 func _ready():
 	# Podpięcie sygnału łapania z nowego węzła Area3D
+	# ![ASK] Czy to jest podpięty sygnał do Area3D który jest odpowiedzialny za jumpscare trigger?
 	jumpscare_trigger.body_entered.connect(_on_body_entered)
 	
 	# Znalezienie aktywnej pozycji głowy gracza
 	var player_root = get_tree().get_first_node_in_group("player")
+	# ![ASK] Czy potrzeba w sumie podzielenia zmiennych na player i player_root? Bo chyba jedyny sens mają te zmienne jak będą typowane
 	if player_root:
 		player = player_root.get_node_or_null("XROrigin3D/XRCamera3D")
 		if player == null:
@@ -28,6 +30,7 @@ func _ready():
 		nav_agent.target_desired_distance = 2.0
 
 func _physics_process(delta: float):
+	# ![ASK] Po co ta linijka? Do czego w ogóle służy? Sprawdza tylko czy ballora jumspcaruje lub czy player jest nullem a i tak zwraca tylko returna
 	if is_jumpscaring or player == null:
 		return
 
@@ -37,7 +40,7 @@ func _physics_process(delta: float):
 	# 2. Obliczanie wektora ruchu w stronę następnego punktu na ścieżce NavMesh
 	var current_location = global_transform.origin
 	var next_location = nav_agent.get_next_path_position()
-	
+	# ![ASK] czy cały algorytm poruszania (po za tym że ma sens i maa get_next_path_position() które omija przeszkody) to czy jest optymalnie zaprojektowanym algorytmem?
 	var direction = (next_location - current_location)
 	direction.y = 0
 	direction = direction.normalized()
@@ -69,4 +72,5 @@ func _trigger_jumpscare(_player_body: Node3D):
 	audio_player.stop()
 	
 	# Delegacja do wspólnego helpera (reparenting, haptyka, powrót do menu)
+	# ![ASK] Co to JumpspcareHelper i jak działa await w Godocie i co w ogóle robi linijka poniżej
 	await JumpscareHelper.execute(self, jumpscare_sound, [mesh_instance, audio_player])

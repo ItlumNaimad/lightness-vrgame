@@ -24,7 +24,10 @@ var current_state: State = State.HIDDEN
 @export var look_fail_time: float = 1.5
 
 ## Czas przetrwania (bezruch + odwrócony wzrok) potrzebny do odparcia ataku
-@export var survive_time: float = 2.0
+@export var survive_time: float = 1.5
+
+## Maksymalny czas na reakcję przed Jumpscare'em (sekundy)
+@export var attack_duration_limit: float = 3.0
 
 ## Czas łaski na zorientowanie się po pojawieniu szeptów (sekundy)
 @export var grace_time: float = 2.5
@@ -51,6 +54,7 @@ var state_timer: float = 0.0
 var look_timer: float = 0.0
 var survive_timer: float = 0.0
 var grace_timer: float = 0.0
+var attack_timer: float = 0.0
 
 var initial_player_pos: Vector3 = Vector3.ZERO
 var current_offset: Vector3 = Vector3.ZERO
@@ -100,6 +104,11 @@ func _process(delta: float):
 				_enter_whispering()
 		
 		State.WHISPERING:
+			attack_timer += delta
+			if attack_timer > attack_duration_limit:
+				_trigger_jumpscare("Czas na reakcję (3s) minął!")
+				return
+				
 			# Przyczepienie do gracza: ciągłe podążanie za kamerą (głową) z wylosowanym offsetem
 			var target_pos = camera.global_position + current_offset
 			target_pos.x = clamp(target_pos.x, map_bounds_min.x, map_bounds_max.x)
@@ -107,22 +116,21 @@ func _process(delta: float):
 			target_pos.z = clamp(target_pos.z, map_bounds_min.z, map_bounds_max.z)
 			global_position = target_pos
 			
-			# 0. Okres łaski — gracz ma czas na zorientowanie się
+			# 0. Okres łaski — gracz ma czas na zatrzymanie się
 			if grace_timer > 0.0:
 				grace_timer -= delta
 				# Ciągle aktualizuj pozycję startową podczas grace period,
 				# żeby nie karać za ruch sprzed "zamrożenia"
 				initial_player_pos = camera.global_position
-				return
-			
-			# 1. Weryfikacja ruchu gracza (tylko dystans poziomy — schylanie dozwolone)
-			var current_player_pos = camera.global_position
-			var pos_2d_start = Vector2(initial_player_pos.x, initial_player_pos.z)
-			var pos_2d_current = Vector2(current_player_pos.x, current_player_pos.z)
-			
-			if pos_2d_current.distance_to(pos_2d_start) > max_movement_allowed:
-				_trigger_jumpscare("Ruszyłeś się podczas szeptów!")
-				return
+			else:
+				# 1. Weryfikacja ruchu gracza (tylko dystans poziomy — schylanie dozwolone)
+				var current_player_pos = camera.global_position
+				var pos_2d_start = Vector2(initial_player_pos.x, initial_player_pos.z)
+				var pos_2d_current = Vector2(current_player_pos.x, current_player_pos.z)
+				
+				if pos_2d_current.distance_to(pos_2d_start) > max_movement_allowed:
+					_trigger_jumpscare("Ruszyłeś się podczas szeptów!")
+					return
 			
 			# 2. Weryfikacja wzroku gracza (dot product)
 			var camera_forward = -camera.global_transform.basis.z.normalized()
@@ -168,6 +176,7 @@ func _enter_whispering():
 	current_state = State.WHISPERING
 	look_timer = 0.0
 	survive_timer = 0.0
+	attack_timer = 0.0
 	grace_timer = grace_time
 	
 	if camera:
