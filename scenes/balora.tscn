@@ -18,7 +18,7 @@ radius = 0.761
 height = 2.778
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_jumpscare"]
-radius = 1.8
+radius = 1.3971037
 
 [node name="Balora" type="CharacterBody3D" unique_id=1656694762]
 script = ExtResource("1_2mo37")

@@ -41,8 +41,8 @@ var current_state: State = State.HIDDEN
 @export var series_pause_max: float = 6.0
 
 ## Przerwa między seriami (sekundy)
-@export var long_pause_min: float = 20.0
-@export var long_pause_max: float = 35.0
+@export var long_pause_min: float = 15.0
+@export var long_pause_max: float = 30.0
 
 @onready var whisper_sound: AudioStreamPlayer3D = $WhisperSound
 @onready var jumpscare_sound: AudioStreamPlayer3D = $JumpscareSound

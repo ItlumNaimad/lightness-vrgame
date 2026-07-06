@@ -1,6 +1,6 @@
 extends CharacterBody3D
 
-const SPEED = 1.5 # Prędkość poruszania się przeciwnika
+const SPEED = 1.0 # Prędkość poruszania się przeciwnika
 
 @onready var mesh_instance = $MeshInstance3D
 @onready var audio_player: AudioStreamPlayer3D = $BaloraTheme
