@@ -40,6 +40,9 @@ func _process(_delta):
 		
 		# Reset flagi — nowa scena może z powrotem ładować inne sceny
 		is_loading = false
+		if ClassDB.class_exists("JumpscareHelper") or true:
+			# Klasy GDScript są globalnie widoczne, po prostu ustawiamy
+			JumpscareHelper.is_jumpscaring_global = false
 		
 		# 4. Opóźnienie wywołania rozjaśnienia (czekamy na reinicjalizację nowej sceny)
 		call_deferred("_fade_in")

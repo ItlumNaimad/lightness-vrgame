@@ -89,13 +89,21 @@ Przeprowadzono pełną analizę projektu (szczegóły w pliku `gameDoc/Inżynier
    - Do sceny gracza dodano węzeł `MovementSprint` z XR Tools (wymagane by był dzieckiem `XROrigin3D`).
    - Ustawiono aktywację na lewym kontrolerze pod przyciskiem `primary_click` (wciśnięcie gałki) w trybie *Hold to Sprint*. Prędkość wzrasta dwukrotnie, co jest kluczowe w ucieczce przed Balorą.
 
+11. **Dźwięki kroków i obrotu (Dostępność):**
+   - Podpięto węzeł `XRToolsMovementFootstep` odpowiedzialny za dźwięki poruszania się oraz `default_surface.tres` ładujący zdefiniowane próbki podłoża.
+   - Stworzono niestandardowy menedżer `player_audio_manager.gd`, który wykrywa skokowe obroty joystickiem (Snap Turn) i odtwarza `whoosh.mp3`, zapobiegając utracie orientacji przestrzennej gracza. Dodatkowo skrypt na bieżąco analizuje prędkość gracza i ocenia "generowany hałas", który jest zintegrowany na potrzeby wroga Foxy.
+
+12. **Balans Marionette i poprawki błędów z Jumpscare'ami:**
+   - Wyeliminowano problem "szeptania po pokonaniu". Sprecyzowano zasady ataku: gracz ma bezwzględnie 3 sekundy na zażegnanie ataku. Przetrwanie wymaga stania w miejscu i patrzenia odwróconym wzrokiem łącznie przez 1.5 sekundy.
+   - W klasie `JumpscareHelper` wdrożono globalną zmienną odcinającą. Zapobiega to nakładaniu się Jumpscare'ów (np. atak z dwóch stron jednocześnie od Balory i Marionette) i chroni przed zapętleniem przeładowania sceny.
+
 ### Zadania do wykonania
 
 | Priorytet | Zadanie                                                                                       | Status       |
 | --------- | --------------------------------------------------------------------------------------------- | ------------ |
 | 🟡 WYSOKI | Ekran Game Over (dedykowana scena / UI)                                                       | Do zrobienia |
 | 🟡 WYSOKI | System TTS / lektora w menu (Accessibility) + menu wybierane kontrolerem                      | Do zrobienia |
-| 🟡 WYSOKI | Zaawansowane dźwięki kroków gracza (zależne od powierzchni podłogi + triggery dla Foxy)       | Do zrobienia |
-| 🟡 WYSOKI | Dźwiękowa informacja zwrotna przy obracaniu się joystickiem (zapobieganie utracie orientacji) | Do zrobienia |
+| 🟡 WYSOKI | Zaawansowane dźwięki kroków gracza (zależne od powierzchni podłogi + triggery dla Foxy)       | Zrobione     |
+| 🟡 WYSOKI | Dźwiękowa informacja zwrotna przy obracaniu się joystickiem (zapobieganie utracie orientacji) | Zrobione     |
 | 🔵 NISKI  | Nazwa projektu "Inżynierka" → "Lightness" w `project.godot`                                   | Do zrobienia |
 | 🔵 NISKI  | Nazwy warstw kolizji w `project.godot`                                                        | Do zrobienia |

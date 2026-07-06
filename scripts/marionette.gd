@@ -148,6 +148,7 @@ func _process(delta: float):
 				look_timer = 0.0
 				if survive_timer > survive_time:
 					_whisper_survived()
+					return
 
 ## Gracz odpędził jeden szept — sprawdź czy seria trwa dalej
 func _whisper_survived():

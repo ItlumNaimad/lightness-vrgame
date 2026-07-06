@@ -4,6 +4,8 @@ class_name JumpscareHelper
 
 const MAIN_MENU_PATH = "res://scenes/main_menu.tscn"
 
+static var is_jumpscaring_global: bool = false
+
 ## Wywołuje pełną sekwencję Jumpscare:
 ## 1. Zatrzymuje timer przetrwania (jeśli istnieje).
 ## 2. Reparentuje dźwięk jumpscare'a do kamery gracza.
@@ -14,6 +16,10 @@ static func execute(
 	jumpscare_sound: AudioStreamPlayer3D,
 	extra_nodes_to_reparent: Array[Node3D] = []
 ) -> void:
+	if is_jumpscaring_global:
+		return
+	is_jumpscaring_global = true
+	
 	# 1. Zatrzymanie timera
 	var game_map = caller.get_tree().current_scene
 	if game_map and game_map.has_method("stop_timer_and_save"):
