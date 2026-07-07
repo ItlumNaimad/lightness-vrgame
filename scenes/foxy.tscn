@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bebk6fhspwj0v" path="res://scripts/foxy.gd" id="1_foxy"]
 [ext_resource type="AudioStream" uid="uid://buv1fya4k5bwa" path="res://assets/sounds/foxy_runing.mp3" id="2_run"]
 [ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="3_jump"]
-[ext_resource type="AudioStream" path="res://assets/sounds/foxy_walking.mp3" id="4_walk"]
+[ext_resource type="AudioStream" path="res://assets/sounds/foxy_walking.wav" id="4_walk"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_foxy_col"]
 radius = 0.4
