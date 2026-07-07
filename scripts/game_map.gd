@@ -8,6 +8,7 @@ var next_milestone: int = 10
 @onready var timer_label: Label3D = $"Player/XROrigin3D/XRCamera3D/TimerLabel"
 @onready var milestone_audio: AudioStreamPlayer3D = $"Player/XROrigin3D/XRCamera3D/MilestoneAudio"
 @onready var nav_region: NavigationRegion3D = $NavigationRegion3D
+@onready var ambient_audio: AudioStreamPlayer = $AudioStreamPlayer
 
 
 func _ready():
@@ -18,15 +19,17 @@ func _ready():
 		printerr("HUD nie został zainicjowany. Sprawdzić \"Editable Children\".")
 		return
 	
-	# Automatyczny bake NavMesh przy starcie mapy, jeśli nie został zbudowany wcześniej.
-	# Zapewnia to poprawną nawigację AI (Balora) nawet po modyfikacji geometrii sceny.
+	# Automatyczny bake NavMesh przy starcie mapy, odroczony by nie blokować klatki
 	if nav_region and nav_region.navigation_mesh:
-		nav_region.bake_navigation_mesh()
+		call_deferred("_deferred_bake_navmesh")
 	
 	# Reset stanu przy starcie mapy (każda scena jest samowystarczalna).
 	time_survived = 0.0
 	next_milestone = 10
 	is_timer_running = true
+
+func _deferred_bake_navmesh():
+	nav_region.bake_navigation_mesh()
 	
 func _process(delta: float):
 	if Engine.is_editor_hint() or not is_timer_running:
@@ -45,6 +48,33 @@ func _process(delta: float):
 	# 3. Sprawdzanie progów 10 sekundowych
 	if time_survived >= next_milestone:
 		_trigger_milestone_event()
+		
+	# 4. Efekt Distortion (zbliżające się zagrożenie = obniżony, mroczny ton ambientu)
+	_update_distortion_effect(delta)
+
+func _update_distortion_effect(delta: float):
+	if ambient_audio == null:
+		return
+		
+	var closest_dist = 999.0
+	var enemies = get_tree().get_nodes_in_group("enemy")
+	var player_root = get_tree().get_first_node_in_group("player")
+	
+	if player_root:
+		var p_pos = player_root.global_position
+		for e in enemies:
+			if e is Node3D:
+				var d = e.global_position.distance_to(p_pos)
+				if d < closest_dist:
+					closest_dist = d
+					
+		# Mapowanie dystansu: < 2 metry -> silny pitch (0.5), > 10 metrów -> normalny (1.0)
+		var target_pitch = 1.0
+		if closest_dist < 10.0:
+			target_pitch = remap(closest_dist, 2.0, 10.0, 0.4, 1.0)
+			target_pitch = clamp(target_pitch, 0.4, 1.0)
+			
+		ambient_audio.pitch_scale = lerp(ambient_audio.pitch_scale, target_pitch, delta * 3.0)
 		
 func _trigger_milestone_event():
 	# Przesuwamy próg o kolejne 10 sekund

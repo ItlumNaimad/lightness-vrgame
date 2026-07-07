@@ -9,9 +9,10 @@
 [ext_resource type="PackedScene" uid="uid://do1wif8rpqtwj" path="res://addons/godot-xr-tools/functions/function_gaze_pointer.tscn" id="10_gaze"]
 [ext_resource type="PackedScene" uid="uid://drs4eeq721ojn" path="res://addons/godot-xr-tools/functions/movement_sprint.tscn" id="11_sprint"]
 [ext_resource type="Script" uid="uid://ddgofpxlmq1d3" path="res://scripts/player_audio_manager.gd" id="12_audio_mgr"]
-[ext_resource type="AudioStream" uid="uid://nxwcy3rpkag7" path="res://assets/sounds/whoosh.mp3" id="13_whoosh"]
+[ext_resource type="AudioStream" path="res://assets/sounds/whoosh2.mp3" id="13_whoosh"]
 [ext_resource type="PackedScene" uid="uid://0xlsitpu17r1" path="res://addons/godot-xr-tools/functions/movement_footstep.tscn" id="14_footstep"]
 [ext_resource type="Resource" uid="uid://dbsq5a4220b3" path="res://assets/sounds/default_surface.tres" id="15_surface"]
+[ext_resource type="AudioStream" path="res://assets/sounds/danger.wav" id="16_danger"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tuyoq"]
 
@@ -49,6 +50,7 @@ font_size = 28
 outline_size = 13
 
 [node name="MilestoneAudio" type="AudioStreamPlayer3D" parent="XROrigin3D/XRCamera3D" unique_id=1395136088]
+stream = ExtResource("16_danger")
 
 [node name="left_hand" type="XRController3D" parent="XROrigin3D" unique_id=806941292]
 tracker = &"left_hand"
@@ -85,4 +87,4 @@ script = ExtResource("12_audio_mgr")
 
 [node name="TurnAudioPlayer" type="AudioStreamPlayer" parent="PlayerAudioManager" unique_id=745962780]
 stream = ExtResource("13_whoosh")
-volume_db = 15.0
+volume_db = 3.0

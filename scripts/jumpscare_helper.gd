@@ -87,6 +87,6 @@ static func _trigger_rumble(caller: Node) -> void:
 	var right_hand = player_root.get_node_or_null("XROrigin3D/right_hand")
 	
 	if left_hand and left_hand is XRController3D:
-		XRServer.get_tracker(left_hand.tracker).set_input("haptic", Vector2(1.0, 0.5))
+		left_hand.trigger_haptic_pulse("haptic", 100.0, 1.0, 0.5, 0.0)
 	if right_hand and right_hand is XRController3D:
-		XRServer.get_tracker(right_hand.tracker).set_input("haptic", Vector2(1.0, 0.5))
+		right_hand.trigger_haptic_pulse("haptic", 100.0, 1.0, 0.5, 0.0)

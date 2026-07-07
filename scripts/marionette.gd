@@ -11,8 +11,8 @@ var current_state: State = State.HIDDEN
 @export var map_bounds_max: Vector3 = Vector3(9.0, 3.0, 9.0)
 
 ## Dystans spawnu od gracza
-@export var spawn_distance_min: float = 0.5
-@export var spawn_distance_max: float = 0.8
+@export var spawn_distance_min: float = 1.0
+@export var spawn_distance_max: float = 1.5
 
 ## Próg kąta patrzenia (cos 45 stopni = 0.707)
 @export var look_threshold: float = 0.707
@@ -27,10 +27,10 @@ var current_state: State = State.HIDDEN
 @export var survive_time: float = 1.5
 
 ## Maksymalny czas na reakcję przed Jumpscare'em (sekundy)
-@export var attack_duration_limit: float = 3.0
+@export var attack_duration_limit: float = 5.5
 
 ## Czas łaski na zorientowanie się po pojawieniu szeptów (sekundy)
-@export var grace_time: float = 2.5
+@export var grace_time: float = 4.0
 
 ## Minimalna / maksymalna liczba szeptów w jednej serii
 @export var min_whisper_rounds: int = 2
@@ -110,7 +110,9 @@ func _process(delta: float):
 				return
 				
 			# Przyczepienie do gracza: ciągłe podążanie za kamerą (głową) z wylosowanym offsetem
-			var target_pos = camera.global_position + current_offset
+			# Efekt crescendo: dystans z czasem maleje o max 50% potęgując wrażenie zbliżania
+			var crescendo_mult = 1.0 - (attack_timer / attack_duration_limit) * 0.5
+			var target_pos = camera.global_position + (current_offset * crescendo_mult)
 			target_pos.x = clamp(target_pos.x, map_bounds_min.x, map_bounds_max.x)
 			target_pos.y = clamp(target_pos.y, map_bounds_min.y, map_bounds_max.y)
 			target_pos.z = clamp(target_pos.z, map_bounds_min.z, map_bounds_max.z)
@@ -156,6 +158,14 @@ func _whisper_survived():
 	whisper_sound.stop()
 	if _debug_mesh:
 		_debug_mesh.visible = false
+		
+	# Dźwięk sukcesu
+	var success_player = AudioStreamPlayer.new()
+	success_player.stream = preload("res://assets/sounds/nice-sfx.mp3")
+	success_player.volume_db = -5.0
+	add_child(success_player)
+	success_player.play()
+	success_player.finished.connect(success_player.queue_free)
 	
 	if _rounds_remaining > 0:
 		# Krótka przerwa, potem następny szept z INNEGO kierunku
@@ -170,6 +180,8 @@ func _whisper_survived():
 ## Rozpoczyna nową serię z losową liczbą rund
 func _start_new_series():
 	current_state = State.HIDDEN
+	if whisper_sound:
+		whisper_sound.stop()
 	_rounds_remaining = randi_range(min_whisper_rounds, max_whisper_rounds)
 	state_timer = randf_range(long_pause_min, long_pause_max)
 

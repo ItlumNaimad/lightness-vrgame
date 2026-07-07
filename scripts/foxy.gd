@@ -27,10 +27,10 @@ enum State { IDLE, LISTENING, PREPARING_CHARGE, CHARGING, JUMPSCARE }
 @onready var jumpscare_trigger: Area3D = $JumpscareTrigger
 @onready var block_trigger: Area3D = $BlockTrigger
 
-var current_state: State = State.LISTENING
+var current_state: State = State.IDLE
 var current_noise: float = 0.0
 var target_position: Vector3 = Vector3.ZERO
-var state_timer: float = 0.0
+var state_timer: float = 4.0
 var is_jumpscaring: bool = false
 
 func _ready():
@@ -63,6 +63,14 @@ func _enter_preparing_charge():
 		run_sound.stop()
 	if walk_sound:
 		walk_sound.stop()
+		
+	var warning_player = AudioStreamPlayer3D.new()
+	warning_player.stream = preload("res://assets/sounds/nice-sfx.mp3")
+	warning_player.volume_db = 10.0
+	add_child(warning_player)
+	warning_player.play()
+	warning_player.finished.connect(warning_player.queue_free)
+	
 	print("Foxy: Zapadła cisza. Przygotowuje szarżę.")
 
 func _enter_charging():
@@ -202,4 +210,12 @@ func _on_block_entered(body: Node3D):
 		return
 	if current_state == State.CHARGING:
 		print("Foxy: Zablokowany przez rękę (", body.name, ")!")
+		
+		var success_player = AudioStreamPlayer.new()
+		success_player.stream = preload("res://assets/sounds/nice-sfx.mp3")
+		success_player.volume_db = -5.0
+		add_child(success_player)
+		success_player.play()
+		success_player.finished.connect(success_player.queue_free)
+		
 		_enter_idle()
