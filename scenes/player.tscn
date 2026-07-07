@@ -5,8 +5,8 @@
 [ext_resource type="PackedScene" uid="uid://bdwmserhqai5h" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_physics_hand_low.tscn" id="3_dqkch"]
 [ext_resource type="PackedScene" uid="uid://b6bk2pj8vbj28" path="res://addons/godot-xr-tools/functions/movement_turn.tscn" id="4_fjrip"]
 [ext_resource type="PackedScene" uid="uid://btf05hjpw6k05" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_physics_hand_low.tscn" id="4_qlg0r"]
-[ext_resource type="PackedScene" uid="uid://bl2nuu3qhlb5k" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="6_smehm"]
 [ext_resource type="PackedScene" uid="uid://do1wif8rpqtwj" path="res://addons/godot-xr-tools/functions/function_gaze_pointer.tscn" id="10_gaze"]
+[ext_resource type="PackedScene" uid="uid://cqhw276realc" path="res://addons/godot-xr-tools/functions/function_pointer.tscn" id="10_pointer"]
 [ext_resource type="PackedScene" uid="uid://drs4eeq721ojn" path="res://addons/godot-xr-tools/functions/movement_sprint.tscn" id="11_sprint"]
 [ext_resource type="Script" uid="uid://ddgofpxlmq1d3" path="res://scripts/player_audio_manager.gd" id="12_audio_mgr"]
 [ext_resource type="AudioStream" uid="uid://nxwcy3rpkag7" path="res://assets/sounds/whoosh.mp3" id="13_whoosh"]
@@ -57,13 +57,8 @@ tracker = &"left_hand"
 
 [node name="MovementTurn" parent="XROrigin3D/left_hand" unique_id=186636919 instance=ExtResource("4_fjrip")]
 
-[node name="FunctionGazePointer" parent="XROrigin3D/left_hand" unique_id=1737039443 instance=ExtResource("10_gaze")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.1)
-visible = false
-distance = 0.15
-suppress_radius = 0.0
-click_on_hold = true
-hold_time = 0.7
+[node name="FunctionPointer" parent="XROrigin3D/left_hand" unique_id=1737039443 instance=ExtResource("10_pointer")]
+show_laser = 2
 
 [node name="right_hand" type="XRController3D" parent="XROrigin3D" unique_id=1054815896]
 tracker = &"right_hand"
@@ -73,16 +68,12 @@ tracker = &"right_hand"
 [node name="MovementDirect" parent="XROrigin3D/right_hand" unique_id=883431152 instance=ExtResource("6_smehm")]
 strafe = true
 
-[node name="FunctionGazePointer" parent="XROrigin3D/right_hand" unique_id=1943132758 instance=ExtResource("10_gaze")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.1)
-distance = 0.15
-suppress_radius = 0.0
-click_on_hold = true
-hold_time = 1.0
+[node name="FunctionPointer" parent="XROrigin3D/right_hand" unique_id=1943132758 instance=ExtResource("10_pointer")]
+show_laser = 2
 
 [node name="PlayerAudioManager" type="Node" parent="." unique_id=863448654]
 script = ExtResource("12_audio_mgr")
 
 [node name="TurnAudioPlayer" type="AudioStreamPlayer" parent="PlayerAudioManager" unique_id=745962780]
 stream = ExtResource("13_whoosh")
-volume_db = -1.351
+volume_db = 15.0

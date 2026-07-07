@@ -21,6 +21,9 @@ height = 1.8
 height = 1.9
 radius = 0.6
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_block"]
+size = Vector3(1.2, 1.8, 1.0)
+
 [node name="Foxy" type="CharacterBody3D" unique_id=2065885202 groups=["enemy"]]
 collision_layer = 4
 collision_mask = 3
@@ -60,3 +63,11 @@ collision_mask = 524289
 [node name="CollisionShape3D" type="CollisionShape3D" parent="JumpscareTrigger" unique_id=829897168]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
 shape = SubResource("CylinderShape3D_foxy_trig")
+
+[node name="BlockTrigger" type="Area3D" parent="." unique_id=1234567890]
+collision_layer = 0
+collision_mask = 131072
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BlockTrigger"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0.5)
+shape = SubResource("BoxShape3D_block")

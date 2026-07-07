@@ -25,6 +25,7 @@ enum State { IDLE, LISTENING, PREPARING_CHARGE, CHARGING, JUMPSCARE }
 @onready var walk_sound: AudioStreamPlayer3D = $WalkSound
 @onready var mesh_instance = $MeshInstance3D
 @onready var jumpscare_trigger: Area3D = $JumpscareTrigger
+@onready var block_trigger: Area3D = $BlockTrigger
 
 var current_state: State = State.LISTENING
 var current_noise: float = 0.0
@@ -35,6 +36,8 @@ var is_jumpscaring: bool = false
 func _ready():
 	if jumpscare_trigger:
 		jumpscare_trigger.body_entered.connect(_on_body_entered)
+	if block_trigger:
+		block_trigger.body_entered.connect(_on_block_entered)
 	
 	if ClassDB.class_exists("EventBus") or true:
 		# Odwołanie do autoload EventBus
@@ -193,3 +196,10 @@ func _on_body_entered(body: Node3D):
 			walk_sound.stop()
 		print("Foxy: Jumpscare!")
 		await JumpscareHelper.execute(self, jumpscare_sound, [mesh_instance])
+
+func _on_block_entered(body: Node3D):
+	if is_jumpscaring:
+		return
+	if current_state == State.CHARGING:
+		print("Foxy: Zablokowany przez rękę (", body.name, ")!")
+		_enter_idle()
