@@ -21,11 +21,11 @@ ambient_light_color = Color(0.2, 0.2, 0.2, 1)
 [sub_resource type="NavigationMesh" id="NavigationMesh_new"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_test"]
-size = Vector3(20, 1, 20)
+size = Vector3(40.593994, 1, 43.245117)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_test"]
 lightmap_size_hint = Vector2i(102, 102)
-size = Vector2(20, 20)
+size = Vector2(40, 43)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial_test"]
 disable_specular_occlusion = true
@@ -40,19 +40,19 @@ uv1_triplanar = true
 uv1_triplanar_sharpness = 1.6008334
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall_ns"]
-size = Vector3(20, 4, 0.5)
+size = Vector3(40.58618, 4, 0.5)
 
 [sub_resource type="BoxMesh" id="BoxMesh_wall_ns"]
-size = Vector3(20, 4, 0.5)
+size = Vector3(40, 4, 0.5)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial_wall"]
 albedo_color = Color(0.15, 0.12, 0.1, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall_ew"]
-size = Vector3(0.5, 4, 20)
+size = Vector3(0.5, 4, 43.78125)
 
 [sub_resource type="BoxMesh" id="BoxMesh_wall_ew"]
-size = Vector3(0.5, 4, 20)
+size = Vector3(0.5, 4, 44)
 
 [node name="GameMap" type="Node3D" unique_id=120756022]
 script = ExtResource("1_script")
@@ -79,7 +79,7 @@ mesh = SubResource("PlaneMesh_test")
 surface_material_override/0 = SubResource("StandardMaterial_test")
 
 [node name="WallNorth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=723940986]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 10.25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 21.738867)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallNorth" unique_id=1396440935]
 shape = SubResource("BoxShape3D_wall_ns")
@@ -89,7 +89,7 @@ mesh = SubResource("BoxMesh_wall_ns")
 surface_material_override/0 = SubResource("StandardMaterial_wall")
 
 [node name="WallSouth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=118626652]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -10.25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -21.617676)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallSouth" unique_id=913572083]
 shape = SubResource("BoxShape3D_wall_ns")
@@ -99,7 +99,7 @@ mesh = SubResource("BoxMesh_wall_ns")
 surface_material_override/0 = SubResource("StandardMaterial_wall")
 
 [node name="WallEast" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1399451984]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.25, 2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.171703, 2, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallEast" unique_id=727175830]
 shape = SubResource("BoxShape3D_wall_ew")
@@ -109,7 +109,7 @@ mesh = SubResource("BoxMesh_wall_ew")
 surface_material_override/0 = SubResource("StandardMaterial_wall")
 
 [node name="WallWest" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1916824261]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.25, 2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.25622, 2, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallWest" unique_id=584697121]
 shape = SubResource("BoxShape3D_wall_ew")
@@ -133,9 +133,9 @@ transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0
 [node name="Fade" parent="." unique_id=1010360029 instance=ExtResource("9_fade")]
 
 [node name="Balora" parent="." unique_id=1656694762 instance=ExtResource("6_oviui")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4395071, 8.604672)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4395071, 16.287754)
 
 [node name="Foxy" parent="." unique_id=123456789 instance=ExtResource("11_foxy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.0, 1.4, -5.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1.4, -18.799488)
 
 [editable path="Player"]
