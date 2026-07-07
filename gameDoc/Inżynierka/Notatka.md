@@ -97,6 +97,11 @@ Przeprowadzono pełną analizę projektu (szczegóły w pliku `gameDoc/Inżynier
    - Wyeliminowano problem "szeptania po pokonaniu". Sprecyzowano zasady ataku: gracz ma bezwzględnie 3 sekundy na zażegnanie ataku. Przetrwanie wymaga stania w miejscu i patrzenia odwróconym wzrokiem łącznie przez 1.5 sekundy.
    - W klasie `JumpscareHelper` wdrożono globalną zmienną odcinającą. Zapobiega to nakładaniu się Jumpscare'ów (np. atak z dwóch stron jednocześnie od Balory i Marionette) i chroni przed zapętleniem przeładowania sceny.
 
+13. **Globalny system emisji dźwięku i demon Foxy:**
+   - Wprowadzono węzeł Autoload `EventBus` w projekcie, który pośredniczy w wysyłaniu informacji o hałasie.
+   - Menedżer audio gracza nasłuchuje kroków (oraz uwzględnia prędkość - sprint jest głośniejszy) i emituje ten hałas globalnie.
+   - Nowy przeciwnik, **Foxy**, nasłuchuje zdarzeń `noise_emitted`. Każdy krok podnosi jego pasek "irytacji". Gdy zostanie przekroczony próg hałasu (np. nadmierne bieganie), Foxy milknie na 2 sekundy po czym wykonuje z ogromną prędkością szarżę w linii prostej na ostatnią pozycję gracza.
+
 ### Zadania do wykonania
 
 | Priorytet | Zadanie                                                                                       | Status       |

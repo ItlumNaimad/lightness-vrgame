@@ -38,7 +38,7 @@ func _on_footstep(surface_name: String):
 	var player_body = origin.get_node_or_null("PlayerBody")
 	if player_body:
 		if player_body.ground_control_velocity.length() > 2.0:
-			noise_level = 2.0 # Bieg
+			noise_level = 2.5 # Bieg jest dużo głośniejszy
 	
-	print("Gracz: Krok na powierzchni '", surface_name, "' (Hałas: ", noise_level, ")")
-	# Tutaj w przyszłości Foxy będzie nasłuchiwał: np. globalny sygnał emit_noise(position, noise_level)
+	if EventBus:
+		EventBus.noise_emitted.emit(origin.global_position, noise_level)
