@@ -22,6 +22,7 @@ enum State { IDLE, LISTENING, PREPARING_CHARGE, CHARGING, JUMPSCARE }
 
 @onready var jumpscare_sound: AudioStreamPlayer3D = $JumpscareSound
 @onready var run_sound: AudioStreamPlayer3D = $RunSound
+@onready var walk_sound: AudioStreamPlayer3D = $WalkSound
 @onready var mesh_instance = $MeshInstance3D
 @onready var jumpscare_trigger: Area3D = $JumpscareTrigger
 
@@ -55,12 +56,24 @@ func _enter_preparing_charge():
 	current_state = State.PREPARING_CHARGE
 	state_timer = prepare_time
 	current_noise = 0.0
-	run_sound.stop()
-	print("Foxy: Zapadła cisza. Przygotowuje szarżę na ", target_position)
+	if run_sound:
+		run_sound.stop()
+	if walk_sound:
+		walk_sound.stop()
+	print("Foxy: Zapadła cisza. Przygotowuje szarżę.")
 
 func _enter_charging():
 	current_state = State.CHARGING
 	state_timer = charge_max_duration
+	
+	# Pobranie AKTUALNEJ pozycji gracza tuż przed szarżą
+	var player_root = get_tree().get_first_node_in_group("player")
+	if player_root:
+		var camera = player_root.get_node_or_null("XROrigin3D/XRCamera3D")
+		if camera:
+			target_position = camera.global_position
+		else:
+			target_position = player_root.global_position
 	
 	# Obrót w stronę targetu
 	var direction = (target_position - global_position)
@@ -78,6 +91,8 @@ func _enter_idle():
 	velocity = Vector3.ZERO
 	if run_sound:
 		run_sound.stop()
+	if walk_sound:
+		walk_sound.stop()
 	print("Foxy: Odpoczynek po szarży. Przestaje nasłuchiwać na ", cooldown_time, "s.")
 
 func _physics_process(delta: float):
@@ -96,8 +111,37 @@ func _physics_process(delta: float):
 			if current_noise > 0:
 				current_noise -= noise_decay_rate * delta
 				current_noise = max(current_noise, 0)
-			velocity.x = 0
-			velocity.z = 0
+			
+			# Powolne podążanie w stronę gracza podczas nasłuchu
+			var player_root = get_tree().get_first_node_in_group("player")
+			if player_root:
+				var p_pos = player_root.global_position
+				var dir = (p_pos - global_position)
+				dir.y = 0
+				if dir.length() > 2.0:
+					dir = dir.normalized()
+					velocity.x = dir.x * 1.5
+					velocity.z = dir.z * 1.5
+					
+					if walk_sound and not walk_sound.playing:
+						walk_sound.play()
+					
+					# Powolny obrót w stronę gracza
+					var look_pos = global_position + dir
+					if look_pos.distance_squared_to(global_position) > 0.01:
+						var current_transform = global_transform
+						var target_transform = current_transform.looking_at(look_pos, Vector3.UP)
+						global_transform = current_transform.interpolate_with(target_transform, 5.0 * delta)
+				else:
+					velocity.x = 0
+					velocity.z = 0
+					if walk_sound:
+						walk_sound.stop()
+			else:
+				velocity.x = 0
+				velocity.z = 0
+				if walk_sound:
+					walk_sound.stop()
 			
 		State.PREPARING_CHARGE:
 			state_timer -= delta
@@ -145,5 +189,7 @@ func _on_body_entered(body: Node3D):
 		velocity = Vector3.ZERO
 		if run_sound:
 			run_sound.stop()
+		if walk_sound:
+			walk_sound.stop()
 		print("Foxy: Jumpscare!")
 		await JumpscareHelper.execute(self, jumpscare_sound, [mesh_instance])

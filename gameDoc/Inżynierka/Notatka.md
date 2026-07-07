@@ -99,8 +99,12 @@ Przeprowadzono pełną analizę projektu (szczegóły w pliku `gameDoc/Inżynier
 
 13. **Globalny system emisji dźwięku i demon Foxy:**
    - Wprowadzono węzeł Autoload `EventBus` w projekcie, który pośredniczy w wysyłaniu informacji o hałasie.
-   - Menedżer audio gracza nasłuchuje kroków (oraz uwzględnia prędkość - sprint jest głośniejszy) i emituje ten hałas globalnie.
-   - Nowy przeciwnik, **Foxy**, nasłuchuje zdarzeń `noise_emitted`. Każdy krok podnosi jego pasek "irytacji". Gdy zostanie przekroczony próg hałasu (np. nadmierne bieganie), Foxy milknie na 2 sekundy po czym wykonuje z ogromną prędkością szarżę w linii prostej na ostatnią pozycję gracza.
+   - Nowy przeciwnik, **Foxy**, nasłuchuje zdarzeń `noise_emitted`. Każdy krok podnosi jego pasek "irytacji". Gdy zostanie przekroczony próg hałasu, Foxy milknie na 2 sekundy.
+   - W trakcie nasłuchiwania Foxy powoli porusza się w stronę gracza, wydając ciężkie robotyczne kroki.
+   - Szarża Foxy'ego namierza gracza dopiero w momencie samego uderzenia (nie podczas zbierania irytacji), co czyni go groźniejszym.
+
+14. **Kolizja dłoni gracza z otoczeniem:**
+   - Zainstalowano fizyczne dłonie (`physics_hand_low.tscn`) z pakietu XR Tools w miejsce zwykłych. Zapobiega to wizualnemu przenikaniu rąk przez ściany i obiekty, co symuluje odczucie znane np. z *FNaF Help Wanted*.
 
 ### Zadania do wykonania
 
