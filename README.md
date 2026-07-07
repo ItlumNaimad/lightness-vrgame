@@ -3,6 +3,7 @@
 **Lightness** to autorski, inżynierski projekt gry w wirtualnej rzeczywistości (VR) utworzony w silniku Godot Engine. Gra jest survival horrorem zaprojektowanym w taki sposób, aby była w pełni dostępna dla osób niewidomych – bodźce wizualne dają minimalną (lub żadną) przewagę rozgrywki.
 
 ## Najnowsze zmiany (Version Log)
+- **v0.4.0** - Optymalizacja audio przy starcie mapy, wdrożenie "Kompasu Dźwiękowego", efekt zniekształcenia dźwięku Ambient (Distortion) w zależności od bliskości wrogów oraz re-balans AI (naprawa kolizji między wrogami, crescendo dla Marionetki, wibracje haptyczne HMD).
 - **v0.3.0** - Wdrożenie logiki przeciwników (Balora, Marionette) bazującej na wektorach kierunkowych (VR) i systemie punktów nawigacyjnych (NavMesh) oraz wspólnego systemu JumpscareHelper.
 - **v0.2.0** - Zaprojektowanie założeń koncepcyjnych oraz opracowanie customowego systemu zarządzania scenami (SceneLoader) rozwiązującego problemy fizyki XR podczas przeładowywania map.
 

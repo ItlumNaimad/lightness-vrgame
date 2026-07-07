@@ -20,15 +20,36 @@ func _ready():
 func _physics_process(delta: float):
 	if origin:
 		var current_rotation_y = origin.global_transform.basis.get_euler().y
-		var diff = abs(rad_to_deg(angle_difference(_last_rotation_y, current_rotation_y)))
+		var angle_diff = angle_difference(_last_rotation_y, current_rotation_y)
+		var diff = abs(rad_to_deg(angle_diff))
 		
 		# Sprawdzamy czy zmiana kąta w jednej klatce jest większa niż próg (skokowy obrót)
 		# Snap turning działa poprzez nagłą zmianę rotacji
 		if diff >= rotation_threshold_degrees:
-			if turn_audio_player and not turn_audio_player.playing:
+			if turn_audio_player:
+				if angle_diff > 0:
+					turn_audio_player.pitch_scale = 0.8 # Obrót w lewo
+				else:
+					turn_audio_player.pitch_scale = 1.2 # Obrót w prawo
+				
 				turn_audio_player.play()
 				
+				# Kompas dźwiękowy: Północ (0) -> wysoki ton, Południe (+/- PI) -> niski ton
+				var compass_pitch = remap(abs(current_rotation_y), 0.0, PI, 1.5, 0.5)
+				_trigger_compass_ping(compass_pitch)
+				
 		_last_rotation_y = current_rotation_y
+
+func _trigger_compass_ping(pitch: float):
+	# Dźwięk pingu jest opóźniony względem whoosha
+	await get_tree().create_timer(0.2).timeout
+	var compass_player = AudioStreamPlayer.new()
+	compass_player.stream = preload("res://assets/sounds/nice-sfx.mp3")
+	compass_player.volume_db = -8.0
+	compass_player.pitch_scale = pitch
+	add_child(compass_player)
+	compass_player.play()
+	compass_player.finished.connect(compass_player.queue_free)
 
 func _on_footstep(surface_name: String):
 	# Zarejestrowano krok. W tym miejscu możemy dodać powiadomienie dla Foxy'ego o hałasie.

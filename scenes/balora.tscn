@@ -20,7 +20,9 @@ height = 2.778
 [sub_resource type="SphereShape3D" id="SphereShape3D_jumpscare"]
 radius = 1.3971037
 
-[node name="Balora" type="CharacterBody3D" unique_id=1656694762]
+[node name="Balora" type="CharacterBody3D" unique_id=1656694762 groups=["enemy"]]
+collision_layer = 2
+collision_mask = 1
 script = ExtResource("1_2mo37")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=237287144]

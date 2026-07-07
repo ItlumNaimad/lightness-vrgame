@@ -38,3 +38,11 @@ renderer/rendering_method="mobile"
 
 openxr/enabled=true
 shaders/enabled=true
+
+[layer_names]
+
+3d_physics/layer_1="World"
+3d_physics/layer_2="Balora"
+3d_physics/layer_3="Foxy"
+3d_physics/layer_18="PlayerHand"
+3d_physics/layer_20="Player"

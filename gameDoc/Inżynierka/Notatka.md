@@ -106,6 +106,14 @@ Przeprowadzono pełną analizę projektu (szczegóły w pliku `gameDoc/Inżynier
 14. **Kolizja dłoni gracza z otoczeniem:**
    - Zainstalowano fizyczne dłonie (`physics_hand_low.tscn`) z pakietu XR Tools w miejsce zwykłych. Zapobiega to wizualnemu przenikaniu rąk przez ściany i obiekty, co symuluje odczucie znane np. z *FNaF Help Wanted*.
 
+15. **Szlify optymalizacyjne, audio i wibracje (v0.4.0):**
+   - **Bake NavMesh**: Przeniesiono `bake_navigation_mesh()` do `call_deferred`, co likwiduje lag renderowania w pierwszej klatce. Foxy otrzymał stan początkowy `IDLE`, odciążając RAM ze swoich ogromnych plików WAV w pierwszych sekundach gry.
+   - **Kompas Dźwiękowy**: Do menadżera dodano absolutną rotację - każdy obrót o odpowiedni próg (Snap Turn) generuje zminimalizowany sygnał ("ping"), którego wysokość tonu (`pitch`) informuje gracza w którą stronę patrzy (Północ = najwyższy, Południe = najniższy). `whoosh.mp3` zamieniono na `whoosh2.mp3` odgrywany w 2 wariantach pitcha dla rozróżnienia prawej/lewej strony.
+   - **Warstwy Kolizji**: Uporządkowano i przypisano maski w `project.godot`. Balora ma warstwę "Balora", a Foxy "Foxy" - usunięto kolizje pomiędzy wrogami, zapobiegając blokowaniu się Foxy'ego o innych przeciwników.
+   - **Distortion Effect**: Dynamicznie modyfikowany ton Ambientu zależny od najkrótszego wektora odległości od dowolnego wroga. Im niższy dystans (<10m), tym mroczniejszy i niższy pitch_scale zniekształcający tło muzyczne gry.
+   - **Balans Wrogów**: Foxy przed samą szarżą gra głośne powiadomienie-warning, a Marionette dostała potężne okno błędu dla gracza (`grace_time` 4.0s) i efekt "Crescendo" (dźwięk płynnie redukuje swój dystans o połowę na symulację przybliżania). Za skuteczne zablokowanie wróg nagradza gracza satysfakcjonującym `nice-sfx.mp3`.
+   - **Naprawa API Haptyki**: Użyto `trigger_haptic_pulse` z Godota 4 dla dłoni XR, umożliwiając natywne potężne wibracje zderzenia przy Jumpscarze na SteamVR i natywnych sprzętach.
+
 ### Zadania do wykonania
 
 | Priorytet | Zadanie                                                                                       | Status       |
@@ -115,4 +123,4 @@ Przeprowadzono pełną analizę projektu (szczegóły w pliku `gameDoc/Inżynier
 | 🟡 WYSOKI | Zaawansowane dźwięki kroków gracza (zależne od powierzchni podłogi + triggery dla Foxy)       | Zrobione     |
 | 🟡 WYSOKI | Dźwiękowa informacja zwrotna przy obracaniu się joystickiem (zapobieganie utracie orientacji) | Zrobione     |
 | 🔵 NISKI  | Nazwa projektu "Inżynierka" → "Lightness" w `project.godot`                                   | Do zrobienia |
-| 🔵 NISKI  | Nazwy warstw kolizji w `project.godot`                                                        | Do zrobienia |
+| 🔵 NISKI  | Nazwy warstw kolizji w `project.godot`                                                        | Zrobione     |

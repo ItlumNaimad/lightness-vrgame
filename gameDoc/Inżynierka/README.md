@@ -9,6 +9,8 @@
 - **Zderzenia / Game Over**: Popełnienie błędu (np. zignorowanie atakującego przeciwnika lub kolizja z nim) kończy grę głośnym Jumpscarem. Na Ekranie Game Over gracz wybiera czy spróbować ponownie, czy powrócić do menu głównego.
 
 ## 🚀 Log Zmian (Changelog)
+- **v0.4.0** - Wdrożenie poprawek ułatwiających nawigację (Kompas Dźwiękowy, Whoosh) oraz ulepszenia Audio (efekt Distortion w tle). Rebalans przeciwników, kolizji oraz wsparcie natywnych wibracji XR.
+- **v0.3.0** - Wdrożenie logiki przeciwników (Balora, Marionette) ze sztuczną inteligencją reagującą na akcje, wektory wzroku, odległość i hałas. Powstanie globalnych menadżerów zdarzeń.
 - **v0.2.0** - Przebudowa architektury na system **SceneLoader**. Rezygnacja z węzła nadrzędnego `Main` na rzecz pełnej podmiany scen (`change_scene_to_packed`). Rozwiązanie problemów z fizyką XR i stabilnością gracza podczas przeładowywania map.
 - **v0.1.0** - Zaprojektowanie założeń koncepcyjnych oraz opracowanie customowego systemu zarządzania scenami (Staging).
 
@@ -19,14 +21,14 @@
 - **Kontra**: Należy natychmiast uciec na większą odległość, aby Balora zgubiła "trop". Jej słuch bazuje na naszej bliskości. 
 
 ### 2. Marionette
-- **Zachowanie**: Śledzi z pozycji obrzeża mapy (ściany). Powoli otacza gracza i w końcu wydaje szepty otaczające.
+- **Zachowanie**: Śledzi z pozycji obrzeża mapy (ściany). Powoli otacza gracza i w końcu wydaje szepty otaczające. Dźwięk posiada efekt _crescendo_ (płynnego, narastającego zbliżania się do ucha).
 - **Sygnał**: Szepty, lub bliżej nieokreślony losowy dźwięk niepokoju blisko głowy gracza.
-- **Kontra**: Należy zatrzymać się w miejscu, po czym odwrócić głowę od głównego źródła szeptów (unikać patrzenia na źródło dźwięku). Brak jakiejkolwiek wymuszonej interakcji lub zbyt długie zwlekanie skutkuje atakiem.
+- **Kontra**: Należy zatrzymać się w miejscu, po czym odwrócić głowę od głównego źródła szeptów (unikać patrzenia na źródło dźwięku). Brak jakiejkolwiek wymuszonej interakcji lub zbyt długie zwlekanie (zwiększony czas na reakcję do ~5.5s, `grace_time` 4s) skutkuje atakiem. Zakończenie sekwencji obrony kwitowane jest nagradzającym dźwiękiem _nice-sfx_.
 
 ### 3. Foxy
-- **Zachowanie**: Skupia się na impulsach hałasu.
-- **Sygnał**: Wydać głośny dźwięk np. poprzez zaczenie sprintu (bieganie głośniejsze niż chodzenie) lub poprzez kolizję ze ścianą czy istotną przeszkodą. Wówczas jego własne dźwięki całkowicie się wyciszają. Następuje szarża w linii prostej na lokację gracza w której doszło do rzekomego dźwięku.
-- **Kontra**: Po nasłuchaniu ciszy Foxy'ego należy zrobić krok z dala od ścieżki uderzenia ORAZ/ALBO skutecznie wyciągnąć kontroler (jako osłonę / odepchnięcie / nakierowanie z dystansu) w stronę nadbiegającej szarży by zanegować uderzenie.
+- **Zachowanie**: Skupia się na impulsach hałasu, ignorując samą pozycję gracza w czasie rzeczywistym.
+- **Sygnał**: Wydać głośny dźwięk np. poprzez zaczenie sprintu (bieganie głośniejsze niż chodzenie) lub poprzez kolizję ze ścianą czy istotną przeszkodą. Wówczas jego własne dźwięki całkowicie się wyciszają. Po krótkim ułamku sekundy, przerywanym ostrym sygnałem alarmowym, następuje szarża w linii prostej na lokację gracza w której doszło do rzekomego dźwięku.
+- **Kontra**: Po nasłuchaniu ostrzeżenia i ciszy Foxy'ego należy zrobić krok z dala od ścieżki uderzenia ORAZ/ALBO skutecznie wyciągnąć kontroler (jako osłonę / blok dłonią) w stronę nadbiegającej szarży by zanegować uderzenie. Udane zablokowanie emituje satysfakcjonujący dźwięk nagrody.
 
 ---
 
@@ -39,13 +41,13 @@
 - [ ] Dodać zhardcodowane obrócenia gracza w menu głównym wstronę menu z przyciskami
 
 ### Faza 2: Kontroler Gracza Rozszerzony
-- [ ] Obsługa logiki generowania dźwięków gracza (podział cichy uchył, chód, sprint powodujący alarm).
-- [ ] Rozpoznawanie uderzeń (Body kolizje i uderzenia w ściany dla mechaniki hałasu dla Foxiego).
-- [ ] Kolizja ręki z menu, tak by gracz nie musiał perfekcyjne celować ręką by była idealnie przed guzikiem, a żeby ręka na tym menu się blokowała tak by móc wcisnąć przycisk
+- [x] Obsługa logiki generowania dźwięków gracza (podział cichy uchył, chód, sprint powodujący alarm).
+- [x] Rozpoznawanie uderzeń (Body kolizje i uderzenia w ściany dla mechaniki hałasu dla Foxiego).
+- [x] Kolizja ręki z menu, tak by gracz nie musiał perfekcyjne celować ręką by była idealnie przed guzikiem, a żeby ręka na tym menu się blokowała tak by móc wcisnąć przycisk
 ### Faza 3: SI Przeciwników
-- [x] **Balora**: NavMeshAgent do swobodnego chodzenia - System detekcji proximity i wywołanie stanu Jumpscare.
+- [x] **Balora**: NavMeshAgent do swobodnego chodzenia - System detekcji proximity i wywołanie stanu Jumpscare. Kolizja oddzielona na odrębną warstwę.
 - [x] **Marionette**: Logika Spawnów przyległych do ściany -> system orientacyjny kierunku wzroku na głowie gracza (wektory XRCamera3D) oraz badanie dystansu w poziomie.
-- [ ] **Foxy**: System alertowy na głośne dźwięki -> zatrzymanie Audio -> szarża wektorem prostej ze ślepej strugi. Obsługa detekcji ręki do przerwania szarży.
+- [x] **Foxy**: System alertowy na głośne dźwięki -> zatrzymanie Audio -> dźwięk przygotowania -> szarża wektorem prostej ze ślepej strugi. Obsługa detekcji ręki do przerwania szarży z dźwiękową nagrodą.
 
 ### Faza 4: Gameplay Loop i Audio
 - [ ] Główny Menadzer przetrwania i timera (liczenie czasu z narastającą presją przeciwników).
