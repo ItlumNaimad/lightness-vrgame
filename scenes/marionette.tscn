@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://b3t54b22cxxxx"]
+
+[ext_resource type="Script" uid="uid://b7ny004tb164f" path="res://scripts/marionette.gd" id="1_marnin"]
+[ext_resource type="AudioStream" uid="uid://dn1d2v8onqbl" path="res://assets/sounds/marionette/257784__xtrgamr__ominous-whispers.wav" id="2_y05hy"]
+[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="3_jump"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_y05hy"]
+
+[node name="Marionette" type="Node3D" unique_id=1428825871]
+script = ExtResource("1_marnin")
+
+[node name="WhisperSound" type="AudioStreamPlayer3D" parent="." unique_id=279718808]
+stream = ExtResource("2_y05hy")
+unit_size = 15.0
+max_distance = 25.0
+
+[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=1378429979]
+stream = ExtResource("3_jump")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1773076115]
+mesh = SubResource("SphereMesh_y05hy")

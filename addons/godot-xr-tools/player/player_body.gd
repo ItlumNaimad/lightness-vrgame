@@ -101,6 +101,9 @@ const NEAR_GROUND_DISTANCE := 1.0
 ## Option for specifying when ground control is allowed
 @export var ground_control : GroundControl = GroundControl.ON_GROUND
 
+## What node dictates the forward direction of movement
+@export_enum("Camera", "Left Controller", "Right Controller") var movement_direction : int = 0
+
 
 ## Player 3D Velocity - modified by [XRToolsMovementProvider] nodes
 #var velocity : Vector3 = Vector3.ZERO
@@ -819,9 +822,14 @@ func _apply_velocity_and_control(delta: float):
 	if _can_apply_ground_control() and ground_control_velocity.length() >= 0.1:
 		# If ground control is being supplied then update the horizontal velocity
 		var control_velocity := Vector3.ZERO
-		var camera_transform := camera_node.global_transform
-		var dir_forward := camera_transform.basis.z.slide(up_gravity).normalized()
-		var dir_right := camera_transform.basis.x.slide(up_gravity).normalized()
+		var dir_transform := camera_node.global_transform
+		if movement_direction == 1 and left_hand_node:
+			dir_transform = left_hand_node.global_transform
+		elif movement_direction == 2 and right_hand_node:
+			dir_transform = right_hand_node.global_transform
+			
+		var dir_forward := dir_transform.basis.z.slide(up_gravity).normalized()
+		var dir_right := dir_transform.basis.x.slide(up_gravity).normalized()
 		control_velocity = (
 				dir_forward * -ground_control_velocity.y +
 				dir_right * ground_control_velocity.x

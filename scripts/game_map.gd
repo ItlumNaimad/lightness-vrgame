@@ -7,10 +7,9 @@ var next_milestone: int = 10
 
 @onready var timer_label: Label3D = $"Player/XROrigin3D/XRCamera3D/TimerLabel"
 @onready var milestone_audio: AudioStreamPlayer3D = $"Player/XROrigin3D/XRCamera3D/MilestoneAudio"
+@onready var nav_region: NavigationRegion3D = $NavigationRegion3D
 
 
-# Nadpisujemy funkcję z klasy bazowej, aby uniknąć szukania $XROrigin3D/XRCamera3D wewnątrz mapy.
-# Gracz jest zarządzany globalnie przez Staging.
 func _ready():
 	if Engine.is_editor_hint():
 		return
@@ -18,7 +17,13 @@ func _ready():
 	if timer_label == null or milestone_audio == null:
 		printerr("HUD nie został zainicjowany. Sprawdzić \"Editable Children\".")
 		return
-	# Reset stan przy starcie mapy
+	
+	# Automatyczny bake NavMesh przy starcie mapy, jeśli nie został zbudowany wcześniej.
+	# Zapewnia to poprawną nawigację AI (Balora) nawet po modyfikacji geometrii sceny.
+	if nav_region and nav_region.navigation_mesh:
+		nav_region.bake_navigation_mesh()
+	
+	# Reset stanu przy starcie mapy (każda scena jest samowystarczalna).
 	time_survived = 0.0
 	next_milestone = 10
 	is_timer_running = true
@@ -42,7 +47,7 @@ func _process(delta: float):
 		_trigger_milestone_event()
 		
 func _trigger_milestone_event():
-	# PRzesuwamy próg o kolejne 10 sekund
+	# Przesuwamy próg o kolejne 10 sekund
 	next_milestone += 10
 	# Odtworzenie sygnału dźwiękowego bezpośrednio przy uchu gracza
 	if milestone_audio and not milestone_audio.playing:

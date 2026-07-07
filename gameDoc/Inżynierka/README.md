@@ -36,14 +36,15 @@
 - [ ] **Accessibility Menu System**: Zaprojektowanie struktury menu obsługującego VR-Pointer z Godot XR Tools i dodatkowo wejścia D-pada/Joysticka. Zintegrowanie z Godot UI oraz systemem TextToSpeech / AudioStreamPlayer wymawiającym buttony.
 - [x] **Scene Staging / SceneLoader**: Wdrożenie asynchronicznego ładowania scen z przejściami Fade.
 - [ ] **Ekran Game Over**: Interfejs z logicznym powrotem dający możliwość na reset gry.
+- [ ] Dodać zhardcodowane obrócenia gracza w menu głównym wstronę menu z przyciskami
 
 ### Faza 2: Kontroler Gracza Rozszerzony
 - [ ] Obsługa logiki generowania dźwięków gracza (podział cichy uchył, chód, sprint powodujący alarm).
 - [ ] Rozpoznawanie uderzeń (Body kolizje i uderzenia w ściany dla mechaniki hałasu dla Foxiego).
-
+- [ ] Kolizja ręki z menu, tak by gracz nie musiał perfekcyjne celować ręką by była idealnie przed guzikiem, a żeby ręka na tym menu się blokowała tak by móc wcisnąć przycisk
 ### Faza 3: SI Przeciwników
-- [ ] **Balora**: NavMeshAgent do swobodnego chodzenia - System detekcji proximiiti i zmiana stanu audio na Chase.
-- [ ] **Marionette**: Logika Spawnów przyległych do ściany najbliżej gracza -> system orientacyjny kierunku wzroku na głowie gracza (HMD Transform).
+- [x] **Balora**: NavMeshAgent do swobodnego chodzenia - System detekcji proximity i wywołanie stanu Jumpscare.
+- [x] **Marionette**: Logika Spawnów przyległych do ściany -> system orientacyjny kierunku wzroku na głowie gracza (wektory XRCamera3D) oraz badanie dystansu w poziomie.
 - [ ] **Foxy**: System alertowy na głośne dźwięki -> zatrzymanie Audio -> szarża wektorem prostej ze ślepej strugi. Obsługa detekcji ręki do przerwania szarży.
 
 ### Faza 4: Gameplay Loop i Audio

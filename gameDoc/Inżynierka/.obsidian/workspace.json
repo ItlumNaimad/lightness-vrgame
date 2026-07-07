@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "README.md",
+                "file": "Notatka.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "README"
+              "title": "Notatka"
             }
           }
         ],
@@ -198,10 +198,13 @@
       "bases:Stwórz nową bazę danych": false
     }
   },
-  "active": "dcfc310f04f8ddf6",
+  "active": "074e7cb1a55b69f2",
   "lastOpenFiles": [
     "Notatka.md",
+    "AGENT_zalecenia.md",
+    "Dokumentacja.pdf",
     "README.md",
+    "Audit.md",
     "Witaj.md"
   ]
 }

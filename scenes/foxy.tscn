@@ -1,0 +1,73 @@
+[gd_scene format=3 uid="uid://cxabcf23t8foo"]
+
+[ext_resource type="Script" uid="uid://bebk6fhspwj0v" path="res://scripts/foxy.gd" id="1_foxy"]
+[ext_resource type="AudioStream" uid="uid://buv1fya4k5bwa" path="res://assets/sounds/foxy_runing.mp3" id="2_run"]
+[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="3_jump"]
+[ext_resource type="AudioStream" path="res://assets/sounds/foxy_walking.wav" id="4_walk"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_foxy_col"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_foxy_mat"]
+albedo_color = Color(1, 0.2, 0, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_foxy_mesh"]
+material = SubResource("StandardMaterial3D_foxy_mat")
+radius = 0.4
+height = 1.8
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_foxy_trig"]
+height = 1.9
+radius = 0.6
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_block"]
+size = Vector3(1.5, 1.8, 1.5)
+
+[node name="Foxy" type="CharacterBody3D" unique_id=2065885202 groups=["enemy"]]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_foxy")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=839306087]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_foxy_col")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1730761299]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_foxy_mesh")
+
+[node name="RunSound" type="AudioStreamPlayer3D" parent="." unique_id=693784785]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+stream = ExtResource("2_run")
+volume_db = 15.0
+unit_size = 14.25
+max_distance = 25.0
+
+[node name="WalkSound" type="AudioStreamPlayer3D" parent="." unique_id=998877665]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+stream = ExtResource("4_walk")
+volume_db = 10.0
+unit_size = 14.0
+max_distance = 25.0
+
+[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=1594056728]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+stream = ExtResource("3_jump")
+volume_db = 9.019
+
+[node name="JumpscareTrigger" type="Area3D" parent="." unique_id=1994404484]
+collision_layer = 0
+collision_mask = 524289
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpscareTrigger" unique_id=829897168]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+shape = SubResource("CylinderShape3D_foxy_trig")
+
+[node name="BlockTrigger" type="Area3D" parent="." unique_id=1234567890]
+collision_layer = 0
+collision_mask = 131072
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BlockTrigger" unique_id=820912904]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -1.0)
+shape = SubResource("BoxShape3D_block")

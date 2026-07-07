@@ -2,23 +2,35 @@
 
 [ext_resource type="PackedScene" uid="uid://diyu06cw06syv" path="res://addons/godot-xr-tools/player/player_body.tscn" id="1_g2els"]
 [ext_resource type="PackedScene" uid="uid://btknduttnmoxf" path="res://addons/godot-xr-tools/misc/vr_common_shader_cache.tscn" id="2_qhqgy"]
-[ext_resource type="PackedScene" uid="uid://b4kad2kuba1yn" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_hand_low.tscn" id="3_dqkch"]
+[ext_resource type="PackedScene" uid="uid://bdwmserhqai5h" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_physics_hand_low.tscn" id="3_dqkch"]
 [ext_resource type="PackedScene" uid="uid://b6bk2pj8vbj28" path="res://addons/godot-xr-tools/functions/movement_turn.tscn" id="4_fjrip"]
-[ext_resource type="PackedScene" uid="uid://l2n30mpbkdyw" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn" id="4_qlg0r"]
+[ext_resource type="PackedScene" uid="uid://btf05hjpw6k05" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_physics_hand_low.tscn" id="4_qlg0r"]
 [ext_resource type="PackedScene" uid="uid://bl2nuu3qhlb5k" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="6_smehm"]
 [ext_resource type="PackedScene" uid="uid://do1wif8rpqtwj" path="res://addons/godot-xr-tools/functions/function_gaze_pointer.tscn" id="10_gaze"]
+[ext_resource type="PackedScene" uid="uid://drs4eeq721ojn" path="res://addons/godot-xr-tools/functions/movement_sprint.tscn" id="11_sprint"]
+[ext_resource type="Script" uid="uid://ddgofpxlmq1d3" path="res://scripts/player_audio_manager.gd" id="12_audio_mgr"]
+[ext_resource type="AudioStream" uid="uid://nxwcy3rpkag7" path="res://assets/sounds/whoosh.mp3" id="13_whoosh"]
+[ext_resource type="PackedScene" uid="uid://0xlsitpu17r1" path="res://addons/godot-xr-tools/functions/movement_footstep.tscn" id="14_footstep"]
+[ext_resource type="Resource" uid="uid://dbsq5a4220b3" path="res://assets/sounds/default_surface.tres" id="15_surface"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tuyoq"]
 
-[node name="Player" type="Node3D" unique_id=998281425]
+[node name="Player" type="Node3D" unique_id=998281425 groups=["player"]]
 
 [node name="XROrigin3D" type="XROrigin3D" parent="." unique_id=1544298595]
 
 [node name="PlayerBody" parent="XROrigin3D" unique_id=147226604 instance=ExtResource("1_g2els")]
 collision_layer = 524289
+movement_direction = 2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="XROrigin3D/PlayerBody" unique_id=550881090]
 shape = SubResource("CapsuleShape3D_tuyoq")
+
+[node name="MovementSprint" parent="XROrigin3D" unique_id=1804724567 instance=ExtResource("11_sprint")]
+controller = 1
+
+[node name="MovementFootstep" parent="XROrigin3D" unique_id=118507568 instance=ExtResource("14_footstep")]
+default_surface_audio_type = ExtResource("15_surface")
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D" unique_id=639605948]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06774485, 0.47796416, -0.18833774)
@@ -47,6 +59,7 @@ tracker = &"left_hand"
 
 [node name="FunctionGazePointer" parent="XROrigin3D/left_hand" unique_id=1737039443 instance=ExtResource("10_gaze")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.1)
+visible = false
 distance = 0.15
 suppress_radius = 0.0
 click_on_hold = true
@@ -58,10 +71,18 @@ tracker = &"right_hand"
 [node name="RightHand" parent="XROrigin3D/right_hand" unique_id=496257248 instance=ExtResource("4_qlg0r")]
 
 [node name="MovementDirect" parent="XROrigin3D/right_hand" unique_id=883431152 instance=ExtResource("6_smehm")]
+strafe = true
 
 [node name="FunctionGazePointer" parent="XROrigin3D/right_hand" unique_id=1943132758 instance=ExtResource("10_gaze")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.1)
 distance = 0.15
 suppress_radius = 0.0
 click_on_hold = true
-hold_time = 0.7
+hold_time = 1.0
+
+[node name="PlayerAudioManager" type="Node" parent="." unique_id=863448654]
+script = ExtResource("12_audio_mgr")
+
+[node name="TurnAudioPlayer" type="AudioStreamPlayer" parent="PlayerAudioManager" unique_id=745962780]
+stream = ExtResource("13_whoosh")
+volume_db = 15.0
