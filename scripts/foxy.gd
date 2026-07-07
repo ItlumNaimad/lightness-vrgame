@@ -18,7 +18,7 @@ enum State { IDLE, LISTENING, PREPARING_CHARGE, CHARGING, JUMPSCARE }
 @export var charge_max_duration: float = 4.0
 
 ## Czas odpoczynku (odnowienia) po wykonaniu szarży
-@export var cooldown_time: float = 10.0
+@export var cooldown_time: float = 4.0
 
 @onready var jumpscare_sound: AudioStreamPlayer3D = $JumpscareSound
 @onready var run_sound: AudioStreamPlayer3D = $RunSound

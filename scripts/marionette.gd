@@ -11,8 +11,8 @@ var current_state: State = State.HIDDEN
 @export var map_bounds_max: Vector3 = Vector3(9.0, 3.0, 9.0)
 
 ## Dystans spawnu od gracza
-@export var spawn_distance_min: float = 1.0
-@export var spawn_distance_max: float = 1.5
+@export var spawn_distance_min: float = 0.5
+@export var spawn_distance_max: float = 0.8
 
 ## Próg kąta patrzenia (cos 45 stopni = 0.707)
 @export var look_threshold: float = 0.707

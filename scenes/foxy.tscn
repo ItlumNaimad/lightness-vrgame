@@ -22,7 +22,7 @@ height = 1.9
 radius = 0.6
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_block"]
-size = Vector3(1.2, 1.8, 1)
+size = Vector3(1.5, 1.8, 1.5)
 
 [node name="Foxy" type="CharacterBody3D" unique_id=2065885202 groups=["enemy"]]
 collision_layer = 4
@@ -69,5 +69,5 @@ collision_layer = 0
 collision_mask = 131072
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="BlockTrigger" unique_id=820912904]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -1.0)
 shape = SubResource("BoxShape3D_block")
