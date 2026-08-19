@@ -23,7 +23,7 @@ func _ready():
 	if origin:
 		_last_rotation_y = origin.global_transform.basis.get_euler().y
 
-func _physics_process(delta: float):
+func _physics_process(_delta: float):
 	if origin:
 		var current_rotation_y = origin.global_transform.basis.get_euler().y
 		var angle_diff = angle_difference(_last_rotation_y, current_rotation_y)
@@ -65,7 +65,7 @@ func _trigger_compass_ping(pitch: float):
 	compass_player.play()
 	compass_player.finished.connect(compass_player.queue_free)
 
-func _on_footstep(surface_name: String):
+func _on_footstep(_surface_name: String):
 	# Zarejestrowano krok. Zliczamy statystykę w SceneLoader.
 	SceneLoader.steps_taken += 1
 	var noise_level = 1.0

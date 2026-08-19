@@ -1,3 +1,5 @@
+[gd_scene format=3 uid="uid://cg2xvyk5lm41o"]
+
 [ext_resource type="Script" path="res://scripts/game_over_ui.gd" id="1_ui_script"]
 [ext_resource type="Script" path="res://scripts/hold_button.gd" id="2_hold_btn"]
 
