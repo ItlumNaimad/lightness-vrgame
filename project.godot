@@ -14,7 +14,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 [application]
 
-config/name="Inżynierka"
+config/name="Lightness"
 run/main_scene="res://scenes/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
@@ -25,6 +25,7 @@ XRToolsUserSettings="*uid://bqgb8i74tm0t"
 XRToolsRumbleManager="*uid://by853dk86g1qw"
 SceneLoader="*res://scripts/scene_loader.gd"
 EventBus="*res://scripts/event_bus.gd"
+TTSManager="*res://scripts/tts_manager.gd"
 
 [editor_plugins]
 

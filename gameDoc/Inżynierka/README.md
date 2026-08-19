@@ -9,6 +9,7 @@
 - **Zderzenia / Game Over**: Popełnienie błędu (np. zignorowanie atakującego przeciwnika lub kolizja z nim) kończy grę głośnym Jumpscarem. Na Ekranie Game Over gracz wybiera czy spróbować ponownie, czy powrócić do menu głównego.
 
 ## 🚀 Log Zmian (Changelog)
+- **v0.5.0** - Wdrożenie dedykowanego ekranu Game Over (`scenes/game_over.tscn`), systemu telemetrii w `SceneLoader` i integracji z `DESIGN.md`.
 - **v0.4.0** - Wdrożenie poprawek ułatwiających nawigację (Kompas Dźwiękowy, Whoosh) oraz ulepszenia Audio (efekt Distortion w tle). Rebalans przeciwników, kolizji oraz wsparcie natywnych wibracji XR.
 - **v0.3.0** - Wdrożenie logiki przeciwników (Balora, Marionette) ze sztuczną inteligencją reagującą na akcje, wektory wzroku, odległość i hałas. Powstanie globalnych menadżerów zdarzeń.
 - **v0.2.0** - Przebudowa architektury na system **SceneLoader**. Rezygnacja z węzła nadrzędnego `Main` na rzecz pełnej podmiany scen (`change_scene_to_packed`). Rozwiązanie problemów z fizyką XR i stabilnością gracza podczas przeładowywania map.
@@ -37,7 +38,7 @@
 ### Faza 1: Interfejs i Przejścia (Foundation)
 - [ ] **Accessibility Menu System**: Zaprojektowanie struktury menu obsługującego VR-Pointer z Godot XR Tools i dodatkowo wejścia D-pada/Joysticka. Zintegrowanie z Godot UI oraz systemem TextToSpeech / AudioStreamPlayer wymawiającym buttony.
 - [x] **Scene Staging / SceneLoader**: Wdrożenie asynchronicznego ładowania scen z przejściami Fade.
-- [ ] **Ekran Game Over**: Interfejs z logicznym powrotem dający możliwość na reset gry.
+- [x] **Ekran Game Over**: Interfejs z logicznym powrotem dający możliwość na reset gry.
 - [ ] Dodać zhardcodowane obrócenia gracza w menu głównym wstronę menu z przyciskami
 
 ### Faza 2: Kontroler Gracza Rozszerzony

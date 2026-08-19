@@ -35,8 +35,9 @@ func _physics_process(delta: float):
 				turn_audio_player.play()
 				
 				# Kompas dźwiękowy: Północ (0) -> wysoki ton, Południe (+/- PI) -> niski ton
-				var compass_pitch = remap(abs(current_rotation_y), 0.0, PI, 1.5, 0.5)
-				_trigger_compass_ping(compass_pitch)
+				if TTSManager == null or TTSManager.sound_compass_enabled:
+					var compass_pitch = remap(abs(current_rotation_y), 0.0, PI, 1.5, 0.5)
+					_trigger_compass_ping(compass_pitch)
 				
 		_last_rotation_y = current_rotation_y
 

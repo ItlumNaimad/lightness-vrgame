@@ -112,14 +112,23 @@ Przeprowadzono pełną analizę projektu (szczegóły w pliku `gameDoc/Inżynier
    - **Warstwy Kolizji**: Uporządkowano i przypisano maski w `project.godot`. Balora ma warstwę "Balora", a Foxy "Foxy" - usunięto kolizje pomiędzy wrogami, zapobiegając blokowaniu się Foxy'ego o innych przeciwników.
    - **Distortion Effect**: Dynamicznie modyfikowany ton Ambientu zależny od najkrótszego wektora odległości od dowolnego wroga. Im niższy dystans (<10m), tym mroczniejszy i niższy pitch_scale zniekształcający tło muzyczne gry.
    - **Balans Wrogów**: Foxy przed samą szarżą gra głośne powiadomienie-warning, a Marionette dostała potężne okno błędu dla gracza (`grace_time` 4.0s) i efekt "Crescendo" (dźwięk płynnie redukuje swój dystans o połowę na symulację przybliżania). Za skuteczne zablokowanie wróg nagradza gracza satysfakcjonującym `nice-sfx.mp3`.
-   - **Naprawa API Haptyki**: Użyto `trigger_haptic_pulse` z Godota 4 dla dłoni XR, umożliwiając natywne potężne wibracje zderzenia przy Jumpscarze na SteamVR i natywnych sprzętach.
+16. **Dedykowany Ekran Game Over i Telemetria Sesji (v0.5.0):**
+   - **Zamknięcie pętli śmierci**: Po jumpscarze gracz nie jest już natychmiastowo wyrzucany do Menu Głównego, lecz trafia na dedykowaną scenę `scenes/game_over.tscn` ze szklanym, wysokokontrastowym panelem `Viewport2Din3D` (`scenes/game_over_ui.tscn`).
+   - **Telemetria sesji**: Do `SceneLoader.gd` dodano zmienne rejestrujące osiągnięty czas przetrwania (`last_survival_time`), wykonane kroki (`steps_taken`), liczbę odpartych Marionetek (`marionettes_defended`), zablokowanych szarż Foxy'ego (`foxy_charges_blocked`) oraz przyczynę porażki (`last_death_reason`). Statystyki są zerowane funkcją `reset_session_stats()` przy każdym starcie `game_map.gd`.
+   - **Przyczyny porażki**: Wrogowie przekazują teraz szczegółowe powody do helpera (np. *"Balora — Wejście w strefę krytyczną"*, *"Foxy — Niezablokowana szarża"*, *"Marionette — Nieodwrócony wzrok lub ruch"*).
+   - **Przyciski akcji**: Panel zawiera duże przyciski dotykowe VR: *⟳ Zagraj Ponownie* (natychmiastowy restart na `game_map.tscn`) oraz *⌂ Menu Główne* (powrót do `main_menu.tscn`).
+
+17. **Naprawy stabilności i parsera Godot 4.x:**
+   - W `viewport_2d_in_3d.gd` dodano gałąź domyślną `_: return null` w `_property_get_revert()`, co naprawiło błąd parsowania *"not all code paths return a value"*.
+   - W `event_bus.gd` wyciszono ostrzeżenie o sygnale adnotacją `@warning_ignore("unused_signal")`.
+   - W `jumpscare_helper.gd` usunięto nieużywaną zmienną lokalną `left`.
 
 ### Zadania do wykonania
 
 | Priorytet | Zadanie                                                                                       | Status       |
 | --------- | --------------------------------------------------------------------------------------------- | ------------ |
-| 🟡 WYSOKI | Ekran Game Over (dedykowana scena / UI)                                                       | Do zrobienia |
-| 🟡 WYSOKI | System TTS / lektora w menu (Accessibility) + menu wybierane kontrolerem                      | Do zrobienia |
+| 🟡 WYSOKI | Ekran Game Over (dedykowana scena / UI)                                                       | Zrobione     |
+| 🟡 WYSOKI | System TTS / lektora w menu (Accessibility) + menu wybierane kontrolerem                      | W trakcie    |
 | 🟡 WYSOKI | Zaawansowane dźwięki kroków gracza (zależne od powierzchni podłogi + triggery dla Foxy)       | Zrobione     |
 | 🟡 WYSOKI | Dźwiękowa informacja zwrotna przy obracaniu się joystickiem (zapobieganie utracie orientacji) | Zrobione     |
 | 🔵 NISKI  | Nazwa projektu "Inżynierka" → "Lightness" w `project.godot`                                   | Do zrobienia |

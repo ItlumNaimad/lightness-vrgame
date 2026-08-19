@@ -18,9 +18,10 @@ func _ready() -> void:
 			await viewport_2d.ready
 		var ui = viewport_2d.get_scene_instance()
 		if ui:
-			ui.start_pressed.connect(_on_start_pressed)
-			ui.exit_pressed.connect(_on_exit_pressed)
-			ui.settings_pressed.connect(_on_settings_pressed)
+			if ui.has_signal("start_pressed") and not ui.start_pressed.is_connected(_on_start_pressed):
+				ui.start_pressed.connect(_on_start_pressed)
+			if ui.has_signal("exit_pressed") and not ui.exit_pressed.is_connected(_on_exit_pressed):
+				ui.exit_pressed.connect(_on_exit_pressed)
 
 func _on_start_pressed():
 	# Używamy nowego SceneLoader do płynnego przejścia
@@ -28,6 +29,3 @@ func _on_start_pressed():
 
 func _on_exit_pressed():
 	get_tree().quit()
-
-func _on_settings_pressed():
-	print("Settings not implemented yet")

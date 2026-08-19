@@ -10,8 +10,25 @@ signal menu_pressed
 @onready var foxy_label: Label = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/StatsGrid/FoxyValue
 @onready var reason_label: Label = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ReasonBadge/DeathReasonValue
 
+@onready var restart_button: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsContainer/RestartButton
+@onready var menu_button: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsContainer/MenuButton
+
 func _ready() -> void:
 	_update_stats()
+	_setup_accessibility()
+
+func _setup_accessibility() -> void:
+	if not Engine.is_editor_hint() and TTSManager:
+		TTSManager.setup_button(restart_button, "Zagraj Ponownie")
+		TTSManager.setup_button(menu_button, "Menu Główne")
+		
+		# Odczytanie komunikatu o końcu gry po ułamku sekundy
+		await get_tree().create_timer(0.3).timeout
+		var total_seconds: int = int(SceneLoader.last_survival_time)
+		var minutes: int = int(total_seconds / 60.0)
+		var seconds: int = total_seconds % 60
+		var summary_text = "Koniec gry. Przeżyłeś %d minut i %d sekund. Przyczyna: %s." % [minutes, seconds, SceneLoader.last_death_reason]
+		TTSManager.speak(summary_text, false)
 
 func _update_stats() -> void:
 	var total_seconds: int = int(SceneLoader.last_survival_time)
