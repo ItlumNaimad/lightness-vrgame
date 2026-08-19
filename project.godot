@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Inżynierka"
 run/main_scene="res://scenes/main_menu.tscn"
-config/features=PackedStringArray("4.6", "Mobile")
+config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
 [autoload]
@@ -30,6 +30,14 @@ EventBus="*res://scripts/event_bus.gd"
 
 enabled=PackedStringArray("res://addons/godot-xr-tools/plugin.cfg")
 
+[layer_names]
+
+3d_physics/layer_1="World"
+3d_physics/layer_2="Balora"
+3d_physics/layer_3="Foxy"
+3d_physics/layer_18="PlayerHand"
+3d_physics/layer_20="Player"
+
 [rendering]
 
 renderer/rendering_method="mobile"
@@ -38,11 +46,3 @@ renderer/rendering_method="mobile"
 
 openxr/enabled=true
 shaders/enabled=true
-
-[layer_names]
-
-3d_physics/layer_1="World"
-3d_physics/layer_2="Balora"
-3d_physics/layer_3="Foxy"
-3d_physics/layer_18="PlayerHand"
-3d_physics/layer_20="Player"

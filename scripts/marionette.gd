@@ -37,12 +37,12 @@ var current_state: State = State.HIDDEN
 @export var max_whisper_rounds: int = 4
 
 ## Przerwa między szeptami w serii (sekundy)
-@export var series_pause_min: float = 3.0
-@export var series_pause_max: float = 6.0
+@export var series_pause_min: float = 1.0
+@export var series_pause_max: float = 3.0
 
 ## Przerwa między seriami (sekundy)
-@export var long_pause_min: float = 15.0
-@export var long_pause_max: float = 30.0
+@export var long_pause_min: float = 10.0
+@export var long_pause_max: float = 20.0
 
 @onready var whisper_sound: AudioStreamPlayer3D = $WhisperSound
 @onready var jumpscare_sound: AudioStreamPlayer3D = $JumpscareSound
