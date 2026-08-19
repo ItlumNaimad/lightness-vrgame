@@ -34,9 +34,21 @@
               "icon": "lucide-file",
               "title": "Notatka"
             }
+          },
+          {
+            "id": "e29220ff57d8c398",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.13.7"
+              },
+              "icon": "lucide-book-up",
+              "title": "Informacje o wersji 1.13.7"
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -56,7 +68,9 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
               "title": "Przeglądarka plików"
@@ -189,16 +203,16 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "command-palette:Otwórz paletę poleceń": false,
       "switcher:Otwórz okno szybkiego wyboru": false,
       "graph:Otwórz podgląd grafu": false,
       "canvas:Stwórz nową tablicę": false,
       "daily-notes:Otwórz dzisiejszy dziennik": false,
       "templates:Wstaw szablon": false,
-      "command-palette:Otwórz listę poleceń": false,
       "bases:Stwórz nową bazę danych": false
     }
   },
-  "active": "074e7cb1a55b69f2",
+  "active": "e29220ff57d8c398",
   "lastOpenFiles": [
     "DESIGN.md",
     "Audit.md",

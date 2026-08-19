@@ -1,17 +1,23 @@
 extends Node
 class_name PlayerAudioManager
 
-@export var rotation_threshold_degrees: float = 10.0
+@export var rotation_threshold_degrees: float = 8.0
 
-@onready var origin: XROrigin3D = $"../XROrigin3D"
+@onready var origin: XROrigin3D = get_node_or_null("../XROrigin3D")
 @onready var turn_audio_player: AudioStreamPlayer = $TurnAudioPlayer
-@onready var footstep_provider = $"../XROrigin3D/MovementFootstep"
+@onready var footstep_provider = get_node_or_null("../XROrigin3D/MovementFootstep")
 
 var _last_rotation_y: float = 0.0
+var _accumulated_turn: float = 0.0
 
 func _ready():
-	# Podłącz sygnały jeśli komponenty istnieją
-	if footstep_provider:
+	if origin == null and get_parent():
+		origin = get_parent().get_node_or_null("XROrigin3D")
+		
+	if footstep_provider == null and origin:
+		footstep_provider = origin.get_node_or_null("MovementFootstep")
+		
+	if footstep_provider and not footstep_provider.footstep.is_connected(_on_footstep):
 		footstep_provider.footstep.connect(_on_footstep)
 		
 	if origin:
@@ -23,14 +29,21 @@ func _physics_process(delta: float):
 		var angle_diff = angle_difference(_last_rotation_y, current_rotation_y)
 		var diff = abs(rad_to_deg(angle_diff))
 		
-		# Sprawdzamy czy zmiana kąta w jednej klatce jest większa niż próg (skokowy obrót)
-		# Snap turning działa poprzez nagłą zmianę rotacji
-		if diff >= rotation_threshold_degrees:
+		_accumulated_turn += diff
+		
+		# Wykrywanie obrotu skokowego (duży skok w 1 klatce) lub płynnego (nagromadzony obrót)
+		if diff >= rotation_threshold_degrees or _accumulated_turn >= 20.0:
+			_accumulated_turn = 0.0
 			if turn_audio_player:
-				if angle_diff > 0:
-					turn_audio_player.pitch_scale = 0.8 # Obrót w lewo
+				if TTSManager:
+					turn_audio_player.volume_db = TTSManager.whoosh_volume_db
 				else:
-					turn_audio_player.pitch_scale = 1.2 # Obrót w prawo
+					turn_audio_player.volume_db = 3.0
+					
+				if angle_diff > 0:
+					turn_audio_player.pitch_scale = 0.85 # Obrót w lewo (niższy ton)
+				else:
+					turn_audio_player.pitch_scale = 1.15 # Obrót w prawo (wyższy ton)
 				
 				turn_audio_player.play()
 				
@@ -43,10 +56,10 @@ func _physics_process(delta: float):
 
 func _trigger_compass_ping(pitch: float):
 	# Dźwięk pingu jest opóźniony względem whoosha
-	await get_tree().create_timer(0.2).timeout
+	await get_tree().create_timer(0.18).timeout
 	var compass_player = AudioStreamPlayer.new()
 	compass_player.stream = preload("res://assets/sounds/nice-sfx.mp3")
-	compass_player.volume_db = -8.0
+	compass_player.volume_db = -6.0
 	compass_player.pitch_scale = pitch
 	add_child(compass_player)
 	compass_player.play()
@@ -57,11 +70,11 @@ func _on_footstep(surface_name: String):
 	SceneLoader.steps_taken += 1
 	var noise_level = 1.0
 	
-	# Szukamy PlayerBody by sprawdzić prędkość
-	var player_body = origin.get_node_or_null("PlayerBody")
-	if player_body:
-		if player_body.ground_control_velocity.length() > 2.0:
-			noise_level = 2.5 # Bieg jest dużo głośniejszy
+	if origin:
+		var player_body = origin.get_node_or_null("PlayerBody")
+		if player_body:
+			if player_body.ground_control_velocity.length() > 2.0:
+				noise_level = 2.5 # Bieg jest dużo głośniejszy
 	
 	if EventBus:
-		EventBus.noise_emitted.emit(origin.global_position, noise_level)
+		EventBus.noise_emitted.emit(origin.global_position if origin else Vector3.ZERO, noise_level)

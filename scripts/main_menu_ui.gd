@@ -14,22 +14,32 @@ signal exit_pressed
 @onready var guide_button: Button = $CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/GuideButton
 @onready var exit_button: Button = $CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/ExitButton
 
-# Kontrolki ustawień
-@onready var master_slider: HSlider = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/MasterVolumeContainer/MasterSlider
-@onready var whoosh_slider: HSlider = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/WhooshVolumeContainer/WhooshSlider
-@onready var compass_toggle: CheckButton = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/TogglesContainer/CompassToggle
-@onready var tts_toggle: CheckButton = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/TogglesContainer/TTSToggle
-@onready var back_from_settings_button: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/BackFromSettingsButton
+# Kontrolki ustawień (Step Buttons)
+@onready var master_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/MasterRow/MasterMinusBtn
+@onready var master_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/MasterRow/MasterPlusBtn
+@onready var master_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/MasterRow/MasterValueLabel
+
+@onready var whoosh_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/WhooshRow/WhooshMinusBtn
+@onready var whoosh_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/WhooshRow/WhooshPlusBtn
+@onready var whoosh_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/WhooshRow/WhooshValueLabel
+
+@onready var compass_toggle_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/CompassToggleBtn
+@onready var tts_toggle_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/TTSToggleBtn
+@onready var back_from_settings_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/BackFromSettingsButton
 
 # Kontrolki poradnika
-@onready var back_from_guide_button: Button = $CenterContainer/PanelContainer/MarginContainer/GuidePanel/BackFromGuideButton
+@onready var back_from_guide_btn: Button = $CenterContainer/PanelContainer/MarginContainer/GuidePanel/BackFromGuideButton
 
 # Telemetria
-@onready var last_time_label: Label = $CenterContainer/PanelContainer/MarginContainer/MainPanel/TelemetryContainer/LastTimeValue
+@onready var last_time_label: Label = $CenterContainer/PanelContainer/MarginContainer/MainPanel/TelemetryContainer/HBoxContainer/LastTimeValue
+
+var _master_volume_percent: int = 80
+var _whoosh_volume_db: float = 3.0
 
 func _ready() -> void:
 	_show_panel("main")
 	_update_telemetry()
+	_update_settings_ui()
 	_setup_accessibility()
 
 func _update_telemetry() -> void:
@@ -42,6 +52,18 @@ func _update_telemetry() -> void:
 		else:
 			last_time_label.text = "--:--"
 
+func _update_settings_ui() -> void:
+	if master_value_label:
+		master_value_label.text = "%d%%" % _master_volume_percent
+	if whoosh_value_label:
+		whoosh_value_label.text = "%+.1f dB" % _whoosh_volume_db
+	if compass_toggle_btn:
+		var is_on = TTSManager.sound_compass_enabled if TTSManager else true
+		compass_toggle_btn.text = "Kompas Dźwiękowy: " + ("WŁĄCZONY" if is_on else "WYŁĄCZONY")
+	if tts_toggle_btn:
+		var is_on = TTSManager.tts_enabled if TTSManager else true
+		tts_toggle_btn.text = "Lektor TTS: " + ("WŁĄCZONY" if is_on else "WYŁĄCZONY")
+
 func _setup_accessibility() -> void:
 	if Engine.is_editor_hint() or TTSManager == null:
 		return
@@ -50,8 +72,16 @@ func _setup_accessibility() -> void:
 	TTSManager.setup_button(settings_button, "Ustawienia")
 	TTSManager.setup_button(guide_button, "Sterowanie i poradnik")
 	TTSManager.setup_button(exit_button, "Wyjście z gry")
-	TTSManager.setup_button(back_from_settings_button, "Powrót do menu")
-	TTSManager.setup_button(back_from_guide_button, "Powrót do menu")
+	
+	# Ustawienia z dynamicznym odczytem
+	TTSManager.setup_button(master_minus_btn, func(): return "Zmniejsz głośność główną. Aktualnie %d procent" % _master_volume_percent)
+	TTSManager.setup_button(master_plus_btn, func(): return "Zwiększ głośność główną. Aktualnie %d procent" % _master_volume_percent)
+	TTSManager.setup_button(whoosh_minus_btn, func(): return "Zmniejsz głośność obrotu. Aktualnie %.1f decybeli" % _whoosh_volume_db)
+	TTSManager.setup_button(whoosh_plus_btn, func(): return "Zwiększ głośność obrotu. Aktualnie %.1f decybeli" % _whoosh_volume_db)
+	TTSManager.setup_button(compass_toggle_btn, func(): return "Kompas dźwiękowy. Aktualnie " + ("włączony" if (TTSManager and TTSManager.sound_compass_enabled) else "wyłączony"))
+	TTSManager.setup_button(tts_toggle_btn, func(): return "Lektor syntezatora. Aktualnie " + ("włączony" if (TTSManager and TTSManager.tts_enabled) else "wyłączony"))
+	TTSManager.setup_button(back_from_settings_btn, "Powrót do menu głównego")
+	TTSManager.setup_button(back_from_guide_btn, "Powrót do menu głównego")
 
 func _show_panel(panel_name: String) -> void:
 	if main_panel:
@@ -67,12 +97,12 @@ func _on_start_button_pressed() -> void:
 func _on_settings_button_pressed() -> void:
 	_show_panel("settings")
 	if TTSManager:
-		TTSManager.speak("Panel ustawień", true)
+		TTSManager.announce_panel("Ekran ustawień. Użyj przycisków plus i minus aby dostosować głośność.")
 
 func _on_guide_button_pressed() -> void:
 	_show_panel("guide")
 	if TTSManager:
-		TTSManager.speak("Sterowanie i poradnik. Lewy kontroler: obrót i sprint. Prawy kontroler: ruch i blokowanie szarży dłonią.", true)
+		TTSManager.announce_panel("Sterowanie i poradnik. Lewy kontroler: obrót i sprint. Prawy kontroler: ruch i blokowanie szarży dłonią.")
 
 func _on_exit_button_pressed() -> void:
 	exit_pressed.emit()
@@ -80,22 +110,55 @@ func _on_exit_button_pressed() -> void:
 func _on_back_pressed() -> void:
 	_show_panel("main")
 	if TTSManager:
-		TTSManager.speak("Menu główne", true)
+		TTSManager.announce_panel("Menu główne")
 
-func _on_master_slider_value_changed(value: float) -> void:
+# Obsługa przycisków głośności głównej
+func _on_master_minus_pressed() -> void:
+	_master_volume_percent = clamp(_master_volume_percent - 10, 0, 100)
+	_apply_master_volume()
+	_update_settings_ui()
+	if TTSManager:
+		TTSManager.speak("Głośność główna: %d procent" % _master_volume_percent, true)
+
+func _on_master_plus_pressed() -> void:
+	_master_volume_percent = clamp(_master_volume_percent + 10, 0, 100)
+	_apply_master_volume()
+	_update_settings_ui()
+	if TTSManager:
+		TTSManager.speak("Głośność główna: %d procent" % _master_volume_percent, true)
+
+func _apply_master_volume() -> void:
 	var bus_idx = AudioServer.get_bus_index("Master")
 	if bus_idx >= 0:
-		# Mapowanie suwaka (0.0 - 1.0) na dB (-40 dB do 0 dB)
-		var db = linear_to_db(value)
+		var linear = _master_volume_percent / 100.0
+		var db = linear_to_db(linear) if linear > 0.01 else -80.0
 		AudioServer.set_bus_volume_db(bus_idx, db)
 
-func _on_compass_toggle_toggled(toggled_on: bool) -> void:
+# Obsługa przycisków głośności whoosh
+func _on_whoosh_minus_pressed() -> void:
+	_whoosh_volume_db = clamp(_whoosh_volume_db - 2.0, -10.0, 15.0)
 	if TTSManager:
-		TTSManager.sound_compass_enabled = toggled_on
-		TTSManager.speak("Kompas dźwiękowy " + ("włączony" if toggled_on else "wyłączony"), true)
+		TTSManager.whoosh_volume_db = _whoosh_volume_db
+		TTSManager.speak("Głośność obrotu: %.0f decybeli" % _whoosh_volume_db, true)
+	_update_settings_ui()
 
-func _on_tts_toggle_toggled(toggled_on: bool) -> void:
+func _on_whoosh_plus_pressed() -> void:
+	_whoosh_volume_db = clamp(_whoosh_volume_db + 2.0, -10.0, 15.0)
 	if TTSManager:
-		TTSManager.tts_enabled = toggled_on
-		if toggled_on:
+		TTSManager.whoosh_volume_db = _whoosh_volume_db
+		TTSManager.speak("Głośność obrotu: %.0f decybeli" % _whoosh_volume_db, true)
+	_update_settings_ui()
+
+# Obsługa przełączników
+func _on_compass_toggle_pressed() -> void:
+	if TTSManager:
+		TTSManager.sound_compass_enabled = not TTSManager.sound_compass_enabled
+		_update_settings_ui()
+		TTSManager.speak("Kompas dźwiękowy " + ("włączony" if TTSManager.sound_compass_enabled else "wyłączony"), true)
+
+func _on_tts_toggle_pressed() -> void:
+	if TTSManager:
+		TTSManager.tts_enabled = not TTSManager.tts_enabled
+		_update_settings_ui()
+		if TTSManager.tts_enabled:
 			TTSManager.speak("Lektor włączony", true)

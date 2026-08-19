@@ -1,6 +1,5 @@
-[gd_scene format=3 uid="uid://cg2xvyk5lm41o"]
-
 [ext_resource type="Script" path="res://scripts/game_over_ui.gd" id="1_ui_script"]
+[ext_resource type="Script" path="res://scripts/hold_button.gd" id="2_hold_btn"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 bg_color = Color(0.0431373, 0.054902, 0.0823529, 0.921569)
@@ -176,6 +175,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_hover_color = Color(0, 1, 0.639216, 1)
 theme_override_font_sizes/font_size = 20
 text = "⟳ Zagraj Ponownie"
+script = ExtResource("2_hold_btn")
 
 [node name="MenuButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsContainer"]
 custom_minimum_size = Vector2(380, 75)
@@ -184,6 +184,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_hover_color = Color(0, 0.823529, 1, 1)
 theme_override_font_sizes/font_size = 20
 text = "⌂ Menu Główne"
+script = ExtResource("2_hold_btn")
 
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsContainer/RestartButton" to="." method="_on_restart_button_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsContainer/MenuButton" to="." method="_on_menu_button_pressed"]
