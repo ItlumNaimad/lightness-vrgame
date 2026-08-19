@@ -24,6 +24,7 @@ func _ready():
 		call_deferred("_deferred_bake_navmesh")
 	
 	# Reset stanu przy starcie mapy (każda scena jest samowystarczalna).
+	SceneLoader.reset_session_stats()
 	time_survived = 0.0
 	next_milestone = 10
 	is_timer_running = true

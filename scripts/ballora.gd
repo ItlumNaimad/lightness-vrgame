@@ -71,6 +71,5 @@ func _trigger_jumpscare(_player_body: Node3D):
 	velocity = Vector3.ZERO
 	audio_player.stop()
 	
-	# Delegacja do wspólnego helpera (reparenting, haptyka, powrót do menu)
-	# ![ASK] Co to JumpspcareHelper i jak działa await w Godocie i co w ogóle robi linijka poniżej
-	await JumpscareHelper.execute(self, jumpscare_sound, [mesh_instance, audio_player])
+	# Delegacja do wspólnego helpera (reparenting, haptyka, ekran Game Over)
+	await JumpscareHelper.execute(self, jumpscare_sound, [mesh_instance, audio_player], "Balora — Wejście w strefę krytyczną")

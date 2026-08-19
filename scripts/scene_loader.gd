@@ -1,8 +1,19 @@
 extends Node
 
 var last_survival_time: float = 0.0
+var last_death_reason: String = "Nieznane zagrożenie"
+var steps_taken: int = 0
+var marionettes_defended: int = 0
+var foxy_charges_blocked: int = 0
 var scene_path: String
 var is_loading: bool = false
+
+func reset_session_stats():
+	last_survival_time = 0.0
+	last_death_reason = "Nieznane zagrożenie"
+	steps_taken = 0
+	marionettes_defended = 0
+	foxy_charges_blocked = 0
 
 func load_scene(path: String):
 	# Blokada wielokrotnego wywołania (zapobiega podwójnemu ładowaniu)

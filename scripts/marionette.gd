@@ -155,6 +155,7 @@ func _process(delta: float):
 ## Gracz odpędził jeden szept — sprawdź czy seria trwa dalej
 func _whisper_survived():
 	_rounds_remaining -= 1
+	SceneLoader.marionettes_defended += 1
 	whisper_sound.stop()
 	if _debug_mesh:
 		_debug_mesh.visible = false
@@ -220,5 +221,5 @@ func _trigger_jumpscare(reason: String):
 	
 	whisper_sound.stop()
 	
-	# Delegacja do wspólnego helpera (zatrzymanie timera, reparenting, haptyka, powrót do menu)
-	await JumpscareHelper.execute(self, jumpscare_sound)
+	# Delegacja do wspólnego helpera (zatrzymanie timera, reparenting, haptyka, ekran Game Over)
+	await JumpscareHelper.execute(self, jumpscare_sound, [], "Marionette — " + reason)

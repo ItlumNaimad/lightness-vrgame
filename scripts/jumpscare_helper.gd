@@ -2,23 +2,28 @@
 ## Wydzielony helper do obsługi sekwencji Jumpscare.
 class_name JumpscareHelper
 
+const GAME_OVER_PATH = "res://scenes/game_over.tscn"
 const MAIN_MENU_PATH = "res://scenes/main_menu.tscn"
 
 static var is_jumpscaring_global: bool = false
 
 ## Wywołuje pełną sekwencję Jumpscare:
-## 1. Zatrzymuje timer przetrwania (jeśli istnieje).
+## 1. Zatrzymuje timer przetrwania i zapisuje statystyki.
 ## 2. Reparentuje dźwięk jumpscare'a do kamery gracza.
-## 3. Wibruje kontrolerami (jeśli XRToolsRumbleManager jest dostępny).
-## 4. Odtwarza dźwięk i czeka, po czym ładuje Menu Główne.
+## 3. Wibruje kontrolerami (trigger_haptic_pulse).
+## 4. Odtwarza dźwięk i czeka, po czym ładuje Ekran Game Over.
 static func execute(
 	caller: Node,
 	jumpscare_sound: AudioStreamPlayer3D,
-	extra_nodes_to_reparent: Array[Node3D] = []
+	extra_nodes_to_reparent: Array[Node3D] = [],
+	death_reason: String = "Nieznane zagrożenie"
 ) -> void:
 	if is_jumpscaring_global:
 		return
 	is_jumpscaring_global = true
+	
+	# Zapisanie przyczyny porażki w SceneLoader
+	SceneLoader.last_death_reason = death_reason
 	
 	# 1. Zatrzymanie timera
 	var game_map = caller.get_tree().current_scene
@@ -70,9 +75,9 @@ static func execute(
 	if jumpscare_sound:
 		jumpscare_sound.play()
 
-	# 7. Czekamy na zakończenie sekwencji i wracamy do menu
+	# 7. Czekamy na zakończenie sekwencji i przechodzimy do Game Over
 	await caller.get_tree().create_timer(2.0).timeout
-	SceneLoader.load_scene(MAIN_MENU_PATH)
+	SceneLoader.load_scene(GAME_OVER_PATH)
 
 
 static func _trigger_rumble(caller: Node) -> void:

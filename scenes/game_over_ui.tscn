@@ -1,0 +1,189 @@
+[gd_scene format=3 uid="uid://cg2xvyk5lm41o"]
+
+[ext_resource type="Script" path="res://scripts/game_over_ui.gd" id="1_ui_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.0431373, 0.054902, 0.0823529, 0.921569)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 1, 0.639216, 0.352941)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_badge"]
+bg_color = Color(0.0941176, 0.117647, 0.172549, 0.941176)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 1, 0.639216, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_reason"]
+bg_color = Color(0.2, 0.05, 0.08, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.2, 0.4, 0.6)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="GameOverUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ui_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0156863, 0.0156863, 0.0235294, 0.941176)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(920, 600)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.2, 0.4, 1)
+theme_override_font_sizes/font_size = 40
+text = "KONIEC GRY"
+horizontal_alignment = 1
+
+[node name="TimeBadge" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_badge")
+
+[node name="TimeSurvivedValue" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TimeBadge"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.639216, 1)
+theme_override_font_sizes/font_size = 28
+text = "00:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="StatsGrid" type="GridContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/h_separation = 30
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="StepsLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.627451, 0.682353, 0.752941, 1)
+theme_override_font_sizes/font_size = 18
+text = "Przebyte kroki:"
+
+[node name="StepsValue" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "0"
+horizontal_alignment = 2
+
+[node name="MarionetteLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.627451, 0.682353, 0.752941, 1)
+theme_override_font_sizes/font_size = 18
+text = "Odparte Marionetki:"
+
+[node name="MarionetteValue" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "0"
+horizontal_alignment = 2
+
+[node name="FoxyLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.627451, 0.682353, 0.752941, 1)
+theme_override_font_sizes/font_size = 18
+text = "Zablokowane szarże Foxy'ego:"
+
+[node name="FoxyValue" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/StatsGrid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "0"
+horizontal_alignment = 2
+
+[node name="ReasonBadge" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_reason")
+
+[node name="DeathReasonValue" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ReasonBadge"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6, 0.7, 1)
+theme_override_font_sizes/font_size = 16
+text = "Przyczyna: Nieznane zagrożenie"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="RestartButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsContainer"]
+custom_minimum_size = Vector2(380, 75)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0, 1, 0.639216, 1)
+theme_override_font_sizes/font_size = 20
+text = "⟳ Zagraj Ponownie"
+
+[node name="MenuButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsContainer"]
+custom_minimum_size = Vector2(380, 75)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0, 0.823529, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "⌂ Menu Główne"
+
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsContainer/RestartButton" to="." method="_on_restart_button_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsContainer/MenuButton" to="." method="_on_menu_button_pressed"]

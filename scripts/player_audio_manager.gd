@@ -52,7 +52,8 @@ func _trigger_compass_ping(pitch: float):
 	compass_player.finished.connect(compass_player.queue_free)
 
 func _on_footstep(surface_name: String):
-	# Zarejestrowano krok. W tym miejscu możemy dodać powiadomienie dla Foxy'ego o hałasie.
+	# Zarejestrowano krok. Zliczamy statystykę w SceneLoader.
+	SceneLoader.steps_taken += 1
 	var noise_level = 1.0
 	
 	# Szukamy PlayerBody by sprawdzić prędkość

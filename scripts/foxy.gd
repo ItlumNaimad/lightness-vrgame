@@ -203,13 +203,14 @@ func _on_body_entered(body: Node3D):
 		if walk_sound:
 			walk_sound.stop()
 		print("Foxy: Jumpscare!")
-		await JumpscareHelper.execute(self, jumpscare_sound, [mesh_instance])
+		await JumpscareHelper.execute(self, jumpscare_sound, [mesh_instance], "Foxy — Niezablokowana szarża")
 
 func _on_block_entered(body: Node3D):
 	if is_jumpscaring:
 		return
 	if current_state == State.CHARGING:
 		print("Foxy: Zablokowany przez rękę (", body.name, ")!")
+		SceneLoader.foxy_charges_blocked += 1
 		
 		var success_player = AudioStreamPlayer.new()
 		success_player.stream = preload("res://assets/sounds/nice-sfx.mp3")
