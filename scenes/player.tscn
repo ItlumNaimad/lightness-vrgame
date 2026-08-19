@@ -8,7 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://bkv43ec6chcf3" path="res://addons/godot-xr-tools/hands/scenes/collision/collision_hand_left.tscn" id="5_col_l"]
 [ext_resource type="PackedScene" uid="uid://c3uoohvnshach" path="res://addons/godot-xr-tools/hands/scenes/collision/collision_hand_right.tscn" id="6_col_r"]
 [ext_resource type="PackedScene" uid="uid://bl2nuu3qhlb5k" path="res://addons/godot-xr-tools/functions/movement_direct.tscn" id="6_smehm"]
-[ext_resource type="PackedScene" uid="uid://do1wif8rpqtwj" path="res://addons/godot-xr-tools/functions/function_gaze_pointer.tscn" id="10_gaze"]
+[ext_resource type="PackedScene" uid="uid://cqhw276realc" path="res://addons/godot-xr-tools/functions/function_pointer.tscn" id="10_pointer"]
 [ext_resource type="PackedScene" uid="uid://drs4eeq721ojn" path="res://addons/godot-xr-tools/functions/movement_sprint.tscn" id="11_sprint"]
 [ext_resource type="Script" uid="uid://ddgofpxlmq1d3" path="res://scripts/player_audio_manager.gd" id="12_audio_mgr"]
 [ext_resource type="AudioStream" path="res://assets/sounds/whoosh.mp3" id="13_whoosh"]
@@ -63,12 +63,11 @@ tracker = &"left_hand"
 
 [node name="MovementTurn" parent="XROrigin3D/left_hand" unique_id=186636919 instance=ExtResource("4_fjrip")]
 
-[node name="FunctionGazePointer" parent="XROrigin3D/left_hand" unique_id=1737039443 instance=ExtResource("10_gaze")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.1)
-visible = false
-distance = 0.15
-suppress_radius = 0.0
-click_on_hold = false
+[node name="FunctionPointer" parent="XROrigin3D/left_hand" unique_id=1737039443 instance=ExtResource("10_pointer")]
+show_laser = 2
+laser_length = 1
+show_target = true
+distance = 6.0
 
 [node name="right_hand" type="XRController3D" parent="XROrigin3D" unique_id=1054815896]
 tracker = &"right_hand"
@@ -80,11 +79,11 @@ tracker = &"right_hand"
 [node name="MovementDirect" parent="XROrigin3D/right_hand" unique_id=883431152 instance=ExtResource("6_smehm")]
 strafe = true
 
-[node name="FunctionGazePointer" parent="XROrigin3D/right_hand" unique_id=1943132758 instance=ExtResource("10_gaze")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -0.1)
-distance = 0.15
-suppress_radius = 0.0
-click_on_hold = false
+[node name="FunctionPointer" parent="XROrigin3D/right_hand" unique_id=1943132758 instance=ExtResource("10_pointer")]
+show_laser = 2
+laser_length = 1
+show_target = true
+distance = 6.0
 
 [node name="PlayerAudioManager" type="Node" parent="." unique_id=863448654]
 script = ExtResource("12_audio_mgr")
