@@ -1,20 +1,16 @@
-E 0:00:13:741   game_map.gd:8 @ @implicit_ready(): Node not found: "Player/XRCamera3D/TimerLabel3D" (relative to "/root/GameMap").
-  <Błąd C++>    Method/function failed. Returning: nullptr
-  <Źródło C++>  scene/main/node.cpp:1963 @ get_node()
-  <Ślad stosu>  game_map.gd:8 @ @implicit_ready()
+W 0:00:04:029   load: res://scenes/main_menu.tscn:5 - ext_resource, invalid UID: uid://cy68k7ne84230 - using text path instead: res://scenes/main_menu_ui.tscn
+  <Źródło C++>  scene/resources/resource_format_text.cpp:501 @ load()
 
-E 0:00:13:741   game_map.gd:9 @ @implicit_ready(): Node not found: "Player/XRCamera3D/MilestoneAudio" (relative to "/root/GameMap").
-  <Błąd C++>    Method/function failed. Returning: nullptr
-  <Źródło C++>  scene/main/node.cpp:1963 @ get_node()
-  <Ślad stosu>  game_map.gd:9 @ @implicit_ready()
-
-E 0:00:13:872   _process: Invalid assignment of property or key 'text' with value of type 'String' on a base object of type 'null instance'.
-  <Źródło GDScript>game_map.gd:31 @ _process()
-  <Ślad stosu>  game_map.gd:31 @ _process()
-
-W 0:00:04:173   load: res://scenes/main_menu_ui.tscn:3 - ext_resource, invalid UID: uid://banvge4jxluwm - using text path instead: res://scripts/main_menu_ui.gd
-  <Źródło C++>  scene/resources/resource_format_text.cpp:500 @ load()
-
-W 0:00:13:602   GDScript::reload: Narrowing conversion (float is converted to int and loses precision).
-  <Błąd GDScript>NARROWING_CONVERSION
-  <Źródło GDScript>game_map.gd:29 @ GDScript::reload()
+E 0:00:04:030   _printerr: res://scenes/main_menu_ui.tscn:1 - Parse Error: Unrecognized file type 'ext_resource'.
+  <Źródło C++>  scene/resources/resource_format_text.cpp:41 @ _printerr()
+E 0:00:04:030   _load: Failed loading resource: res://scenes/main_menu_ui.tscn.
+  <Błąd C++>    Condition "found" is true. Returning: Ref<Resource>()
+  <Źródło C++>  core/io/resource_loader.cpp:317 @ _load()
+W 0:00:04:325   GDScript::reload: The parameter "delta" is never used in the function "_physics_process()". If this is intended, prefix it with an underscore: "_delta".
+  <Błąd GDScript>UNUSED_PARAMETER
+  <Źródło GDScript>player_audio_manager.gd:26 @ GDScript::reload()
+W 0:00:04:325   GDScript::reload: The parameter "surface_name" is never used in the function "_on_footstep()". If this is intended, prefix it with an underscore: "_surface_name".
+  <Błąd GDScript>UNUSED_PARAMETER
+  <Źródło GDScript>player_audio_manager.gd:68 @ GDScript::reload()
+E 0:00:04:365   _printerr: res://scenes/main_menu.tscn:51 - Parse Error: [ext_resource] referenced non-existent resource at: res://scenes/main_menu_ui.tscn.
+  <Źródło C++>  scene/resources/resource_format_text.cpp:41 @ _printerr()
