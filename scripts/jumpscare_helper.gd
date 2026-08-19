@@ -81,8 +81,6 @@ static func execute(
 
 
 static func _trigger_rumble(caller: Node) -> void:
-	# Próba użycia XRToolsRumbleManager (jest w Autoload)
-	var left = caller.get_viewport().find_world_3d()
 	# Szukamy kontrolerów XR
 	var controllers = caller.get_tree().get_nodes_in_group("player")
 	if controllers.size() == 0:
