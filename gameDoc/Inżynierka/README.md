@@ -1,14 +1,15 @@
-# Dziennik projektu i Kontekst "Lightness VR"
+# Dziennik projektu i Kontekst "Lightless VR"
 
 > Ten plik służy jako dziennik procesu powstawania gry, dokumentujący workflow, log zmian i aktualny plan działania. Poniżej znajduje się kontekst projektu dla szybkiego wczytania ułatwiającego powrót do pracy po przerwie.
 
 ## 📝 Kontekst i Założenia Gry
-**Lightness VR** to gra (survival horror) dostępna w pełni dla osób niewidomych – bodźce wizualne nie dają przewagi, a gracz polega w 100% na informacjach dźwiękowych (i haptycznych). Czas odmierzany jest według przetrwanych sekwencji (surviving timer/clock).
-- **Zasada ogólna**: Gra podzielona jest na sekcje Menu -> Ekran Ładowania (Loading) -> Gra -> (Game Over) -> Menu.
-- **Nawigacja w menu i ekranie ładowania**: Ograniczona mobilność (brak chodu). Interfejs obsługiwany wskazaniem wirtualnej dłoni lub (co ważne dla sprawności działania) obsługiwany joystickiem kontrolera, po którym porusza się lektor (nagrany dźwięk lub syntezator TTS odczytujący zaznaczony tekst).
-- **Zderzenia / Game Over**: Popełnienie błędu (np. zignorowanie atakującego przeciwnika lub kolizja z nim) kończy grę głośnym Jumpscarem. Na Ekranie Game Over gracz wybiera czy spróbować ponownie, czy powrócić do menu głównego.
+**Lightless VR** to gra (survival horror) dostępna w pełni dla osób niewidomych – bodźce wizualne nie dają przewagi, a gracz polega w 100% na informacjach dźwiękowych (i haptycznych). Czas odmierzany jest według przetrwanych sekwencji (surviving timer/clock).
+- **Zasada ogólna**: Gra podzielona jest na sekcje Menu -> Gra -> (Game Over) -> Menu.
+- **Nawigacja w menu i ustawieniach**: Interfejs wkomponowany w industrialną ścianę 3D, obsługiwany wskaźnikiem VR (`FunctionPointer`) ze spustem kontrolera lub funkcją Hold-to-Click (0.6s), a także fizycznym dotknięciem dłonią. Każdy element jest automatycznie udźwiękowiony przez lektora TTS (`TTSManager`) z buforowaniem Dwell Debounce zapobiegającym lagom.
+- **Zderzenia / Game Over**: Popełnienie błędu (np. zignorowanie atakującego przeciwnika lub kolizja z nim) kończy grę głośnym Jumpscarem i przenosi na ekran Game Over, gdzie prezentowana jest telemetria (czas, statystyki, powód śmierci).
 
 ## 🚀 Log Zmian (Changelog)
+- **v0.5.1** - Przebudowa Menu Głównego na styl industrialnej ściany 3D z wyrytymi napisami (inspirowane projektem z Google Stitch), dynamiczny efekt animacji glitch tytułu "LIGHTLESS", komponent `HoldButton` (Hold-to-Click 0.6s) na wszystkich przyciskach, eliminacja lagów TTS przez Dwell Debounce (80ms), fizyczne blokowanie rąk gracza (`CollisionHandLeft`/`CollisionHandRight`), nowy subtelny wskaźnik VR w chłodnej błękitnej tonacji (`FunctionPointer`), zmiana nazwy projektu na Lightless.
 - **v0.5.0** - Wdrożenie dedykowanego ekranu Game Over (`scenes/game_over.tscn`), systemu telemetrii w `SceneLoader` i integracji z `DESIGN.md`.
 - **v0.4.0** - Wdrożenie poprawek ułatwiających nawigację (Kompas Dźwiękowy, Whoosh) oraz ulepszenia Audio (efekt Distortion w tle). Rebalans przeciwników, kolizji oraz wsparcie natywnych wibracji XR.
 - **v0.3.0** - Wdrożenie logiki przeciwników (Balora, Marionette) ze sztuczną inteligencją reagującą na akcje, wektory wzroku, odległość i hałas. Powstanie globalnych menadżerów zdarzeń.
@@ -17,41 +18,46 @@
 
 ## 👻 Przeciwnicy
 ### 1. Balora
-- **Zachowanie**: Patruje / Chodzi po pokoju.
-- **Sygnał**: Gdy gracz wejdzie w określony promień detekcji, odtwarzana jest przyspieszona muzyka oznaczająca początek gonitwy.
-- **Kontra**: Należy natychmiast uciec na większą odległość, aby Balora zgubiła "trop". Jej słuch bazuje na naszej bliskości. 
+- **Zachowanie**: Patroluje mapę po wyznaczonej siatce NavMesh.
+- **Sygnał**: Pozytywka (music box). Gdy gracz wejdzie w strefę Alertu, tempo pozytywki przyspiesza, a Balora idzie w jego stronę.
+- **Kontra**: Należy natychmiast uciec na większą odległość sprintem, aby Balora wróciła do patrolu. Jej uwaga bazuje wyłącznie na bliskości gracza, nie na hałasie.
 
 ### 2. Marionette
-- **Zachowanie**: Śledzi z pozycji obrzeża mapy (ściany). Powoli otacza gracza i w końcu wydaje szepty otaczające. Dźwięk posiada efekt _crescendo_ (płynnego, narastającego zbliżania się do ucha).
-- **Sygnał**: Szepty, lub bliżej nieokreślony losowy dźwięk niepokoju blisko głowy gracza.
-- **Kontra**: Należy zatrzymać się w miejscu, po czym odwrócić głowę od głównego źródła szeptów (unikać patrzenia na źródło dźwięku). Brak jakiejkolwiek wymuszonej interakcji lub zbyt długie zwlekanie (zwiększony czas na reakcję do ~5.5s, `grace_time` 4s) skutkuje atakiem. Zakończenie sekwencji obrony kwitowane jest nagradzającym dźwiękiem _nice-sfx_.
+- **Zachowanie**: Pojawia się w przestrzeni blisko gracza i emituje szepty otaczające. Dźwięk narasta i przybliża się do ucha (efekt crescendo).
+- **Sygnał**: Szepty do ucha i narastające napięcie.
+- **Kontra**: Należy zlokalizować źródło dźwięku i zdecydowanie machnąć ręką (kontrolerem) w jego stronę, aby odpędzić Marionetkę. Sukces nagradzany jest unikalnym dźwiękiem rozproszenia.
 
 ### 3. Foxy
-- **Zachowanie**: Skupia się na impulsach hałasu, ignorując samą pozycję gracza w czasie rzeczywistym.
-- **Sygnał**: Wydać głośny dźwięk np. poprzez zaczenie sprintu (bieganie głośniejsze niż chodzenie) lub poprzez kolizję ze ścianą czy istotną przeszkodą. Wówczas jego własne dźwięki całkowicie się wyciszają. Po krótkim ułamku sekundy, przerywanym ostrym sygnałem alarmowym, następuje szarża w linii prostej na lokację gracza w której doszło do rzekomego dźwięku.
-- **Kontra**: Po nasłuchaniu ostrzeżenia i ciszy Foxy'ego należy zrobić krok z dala od ścieżki uderzenia ORAZ/ALBO skutecznie wyciągnąć kontroler (jako osłonę / blok dłonią) w stronę nadbiegającej szarży by zanegować uderzenie. Udane zablokowanie emituje satysfakcjonujący dźwięk nagrody.
+- **Zachowanie**: Skupia się na impulsach skumulowanego hałasu gracza (sprint, zderzenia ze ścianami).
+- **Sygnał**: Po przekroczeniu progu hałasu Foxy nagle całkowicie milknie na ~2 sekundy (sygnał ostrzegawczy), po czym następuje gwałtowna szarża w linii prostej na lokację gracza.
+- **Kontra**: Po usłyszeniu ciszy należy wykonać odskok w bok LUB wystawić dłoń z kontrolerem w stronę szarży, wykonując blok. Udany blok emituje dźwięk odrzucenia.
 
 ---
 
 ## 🛠️ Plan Działania / Workflow (To-Do)
 
 ### Faza 1: Interfejs i Przejścia (Foundation)
-- [ ] **Accessibility Menu System**: Zaprojektowanie struktury menu obsługującego VR-Pointer z Godot XR Tools i dodatkowo wejścia D-pada/Joysticka. Zintegrowanie z Godot UI oraz systemem TextToSpeech / AudioStreamPlayer wymawiającym buttony.
-- [x] **Scene Staging / SceneLoader**: Wdrożenie asynchronicznego ładowania scen z przejściami Fade.
-- [x] **Ekran Game Over**: Interfejs z logicznym powrotem dający możliwość na reset gry.
-- [ ] Dodać zhardcodowane obrócenia gracza w menu głównym wstronę menu z przyciskami
+- [x] **Accessibility Menu System**: Zaprojektowanie struktury menu obsługującego VR-Pointer z Godot XR Tools i dodatkowo wejścia D-pada/Joysticka. Zintegrowanie z Godot UI oraz systemem TextToSpeech (`TTSManager`) z buforowaniem Dwell Debounce (80ms).
+- [x] **HoldButton Component**: Pasek postępu przytrzymania na każdym przycisku (0.6s) z powtarzaniem kroków `+`/`-`.
+- [x] **Scene Staging / SceneLoader**: Wdrożenie asynchronicznego ładowania scen z przejściami Fade (`SceneLoader.gd`).
+- [x] **Ekran Game Over**: Dedykowany interfejs z telemetrią sesji i opcją restartu / powrotu do menu (`scenes/game_over.tscn`).
+- [x] **Industrialne Menu Główne**: Zbudowanie scenerii ściany 3D, wyrytych napisów i glitchującego tytułu "LIGHTLESS" na bazie projektu Google Stitch.
 
 ### Faza 2: Kontroler Gracza Rozszerzony
 - [x] Obsługa logiki generowania dźwięków gracza (podział cichy uchył, chód, sprint powodujący alarm).
-- [x] Rozpoznawanie uderzeń (Body kolizje i uderzenia w ściany dla mechaniki hałasu dla Foxiego).
-- [x] Kolizja ręki z menu, tak by gracz nie musiał perfekcyjne celować ręką by była idealnie przed guzikiem, a żeby ręka na tym menu się blokowała tak by móc wcisnąć przycisk
+- [x] Rozpoznawanie uderzeń (kolizje ciała i uderzenia w ściany dla mechaniki hałasu dla Foxy'ego).
+- [x] Fizyczne blokowanie rąk gracza (`CollisionHandLeft`/`CollisionHandRight`) zapobiegające przenikaniu przez ściany i interfejsy.
+- [x] Subtelne wskaźniki VR (`FunctionPointer`) w chłodnej błękitnej tonacji z bezpośrednim trigger_click.
+
 ### Faza 3: SI Przeciwników
 - [x] **Balora**: NavMeshAgent do swobodnego chodzenia - System detekcji proximity i wywołanie stanu Jumpscare. Kolizja oddzielona na odrębną warstwę.
-- [x] **Marionette**: Logika Spawnów przyległych do ściany -> system orientacyjny kierunku wzroku na głowie gracza (wektory XRCamera3D) oraz badanie dystansu w poziomie.
-- [x] **Foxy**: System alertowy na głośne dźwięki -> zatrzymanie Audio -> dźwięk przygotowania -> szarża wektorem prostej ze ślepej strugi. Obsługa detekcji ręki do przerwania szarży z dźwiękową nagrodą.
+- [x] **Marionette**: Logika szeptów kierunkowych i mechanika odpędzania machnięciem kontrolera.
+- [x] **Foxy**: System alertowy na głośne dźwięki -> nagła cisza -> szarża w linii prostej. Obsługa detekcji ręki do przerwania szarży z dźwiękową nagrodą.
 
-### Faza 4: Gameplay Loop i Audio
-- [ ] Główny Menadzer przetrwania i timera (liczenie czasu z narastającą presją przeciwników).
-- [ ] Globalne zasoby audio (SFX chodzenia, ambisentów, jumpscareów upewnienie się co do pozycjonowania dźwięku).
+### Faza 4: Threat Director i Pacing
+- [ ] Oś czasu pojawiania się wrogów (0:20 Balora, 0:50 Marionette, 1:30 Foxy).
+- [ ] Stopniowe podbijanie trudności (np. wielokrotne szepty Marionette, szybsza Balora).
+- [ ] Nowy przeciwnik **Phantom Grasp** (macki chwytające kontroler, wibracje i wyszarpywanie).
+- [ ] Menu Pauzy w grze (`scenes/pause_menu.tscn`).
 
-*Ostatnia aktualizacja:* Plik roboczy dopasowany do planu deweloperskiego dla spójności pracy inżynierskiej.
+*Ostatnia aktualizacja:* v0.5.1 — Pełna synchronizacja dokumentacji po wdrożeniu nowego menu i optymalizacji VR.

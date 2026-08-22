@@ -1,27 +1,70 @@
-[gd_scene format=3 uid="uid://cy68k7ne84230"]
+[gd_scene load_steps=12 format=3 uid="uid://cy68k7ne84230"]
 
 [ext_resource type="Script" path="res://scripts/main_menu_ui.gd" id="1_script"]
 [ext_resource type="Script" path="res://scripts/hold_button.gd" id="2_hold_btn"]
+[ext_resource type="Script" path="res://scripts/glitch_title.gd" id="3_glitch"]
+[ext_resource type="FontFile" uid="uid://c6j2yvx8h0k6q" path="res://assets/fonts/Nosifer-Regular.ttf" id="4_font_nosifer"]
+[ext_resource type="FontFile" uid="uid://dqgvx11j78y2l" path="res://assets/fonts/CinzelDecorative-Bold.ttf" id="5_font_cinzel"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.0431373, 0.054902, 0.0823529, 0.941176)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_btn_normal"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+bg_color = Color(0.12, 0.25, 0.45, 0.25)
 border_width_bottom = 2
-border_color = Color(0, 1, 0.639216, 0.4)
+border_color = Color(0.4, 0.7, 1, 0.7)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_left = 12.0
+expand_margin_top = 4.0
+expand_margin_right = 12.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
+bg_color = Color(0.15, 0.4, 0.7, 0.4)
+border_width_bottom = 2
+border_color = Color(0.6, 0.85, 1, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_left = 12.0
+expand_margin_top = 4.0
+expand_margin_right = 12.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel_dark"]
+bg_color = Color(0.03, 0.04, 0.06, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.35, 0.55, 0.5)
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_telemetry"]
-bg_color = Color(0.08, 0.1, 0.14, 0.85)
+bg_color = Color(0.04, 0.06, 0.09, 0.6)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0, 1, 0.639216, 0.3)
+border_color = Color(0.25, 0.4, 0.6, 0.3)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_step_btn"]
+bg_color = Color(0.08, 0.12, 0.18, 0.8)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.5, 0.75, 0.5)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
@@ -36,14 +79,28 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="BackgroundTint" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0156863, 0.0156863, 0.0235294, 0.95)
+color = Color(0.01, 0.015, 0.025, 0.2)
+
+[node name="WatermarkLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = -42.0
+offset_right = 450.0
+offset_bottom = -14.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.4, 0.46, 0.54, 0.7)
+theme_override_font_sizes/font_size = 14
+text = "by Damian Skonieczny version 0.5"
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
 layout_mode = 1
@@ -54,38 +111,50 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
-custom_minimum_size = Vector2(980, 640)
+custom_minimum_size = Vector2(1040, 640)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_btn_normal")
 
 [node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer"]
 layout_mode = 2
-theme_override_constants/margin_left = 40
-theme_override_constants/margin_top = 25
-theme_override_constants/margin_right = 40
-theme_override_constants/margin_bottom = 25
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 20
 
 [node name="MainPanel" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 16
+alignment = 1
 
-[node name="TitleLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel"]
+[node name="TitleContainer" type="Control" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel"]
+custom_minimum_size = Vector2(0, 110)
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 1, 0.639216, 1)
-theme_override_font_sizes/font_size = 38
-text = "LIGHTNESS VR"
-horizontal_alignment = 1
 
-[node name="SubtitleLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.627451, 0.682353, 0.752941, 1)
-theme_override_font_sizes/font_size = 18
-text = "Dźwiękowy Survival Horror w Wirtualnej Rzeczywistości"
+[node name="TitleLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/TitleContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.88, 0.84, 0.76, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.95)
+theme_override_colors/font_outline_color = Color(0.12, 0.08, 0.05, 0.9)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 5
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("4_font_nosifer")
+theme_override_font_sizes/font_size = 64
+text = "LIGHTLESS"
 horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("3_glitch")
 
 [node name="TelemetryContainer" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel"]
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(360, 36)
 layout_mode = 2
+size_flags_horizontal = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_telemetry")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/TelemetryContainer"]
@@ -94,61 +163,99 @@ alignment = 1
 
 [node name="LastTimeLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/TelemetryContainer/HBoxContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.627451, 0.682353, 0.752941, 1)
-theme_override_font_sizes/font_size = 16
-text = "Ostatnia próba przetrwania: "
+theme_override_colors/font_color = Color(0.55, 0.62, 0.7, 0.9)
+theme_override_font_sizes/font_size = 15
+text = "Last Survival: "
 
 [node name="LastTimeValue" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/TelemetryContainer/HBoxContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 1, 0.639216, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.3, 0.75, 1, 1)
+theme_override_font_sizes/font_size = 15
 text = "--:--"
-
-[node name="HSeparator" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel"]
-layout_mode = 2
 
 [node name="ButtonsContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 14
+alignment = 1
 
 [node name="StartButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer"]
-custom_minimum_size = Vector2(560, 68)
+custom_minimum_size = Vector2(500, 62)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(0, 1, 0.639216, 1)
-theme_override_font_sizes/font_size = 22
-text = "▶ Rozpocznij Grę"
+theme_override_colors/font_color = Color(0.78, 0.82, 0.88, 0.9)
+theme_override_colors/font_pressed_color = Color(0.4, 0.8, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 3
+theme_override_fonts/font = ExtResource("5_font_cinzel")
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+text = "start game"
 script = ExtResource("2_hold_btn")
 
 [node name="SettingsButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer"]
-custom_minimum_size = Vector2(560, 68)
+custom_minimum_size = Vector2(500, 56)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(0, 0.823529, 1, 1)
-theme_override_font_sizes/font_size = 20
-text = "⚙ Ustawienia"
+theme_override_colors/font_color = Color(0.65, 0.7, 0.76, 0.85)
+theme_override_colors/font_pressed_color = Color(0.4, 0.8, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 3
+theme_override_fonts/font = ExtResource("5_font_cinzel")
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+text = "settings"
 script = ExtResource("2_hold_btn")
 
 [node name="GuideButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer"]
-custom_minimum_size = Vector2(560, 68)
+custom_minimum_size = Vector2(500, 56)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.721569, 0, 1)
-theme_override_font_sizes/font_size = 20
-text = "🎮 Sterowanie i Poradnik"
+theme_override_colors/font_color = Color(0.65, 0.7, 0.76, 0.85)
+theme_override_colors/font_pressed_color = Color(0.4, 0.8, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 3
+theme_override_fonts/font = ExtResource("5_font_cinzel")
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+text = "guide"
 script = ExtResource("2_hold_btn")
 
 [node name="ExitButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer"]
-custom_minimum_size = Vector2(560, 68)
+custom_minimum_size = Vector2(500, 56)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.2, 0.4, 1)
-theme_override_font_sizes/font_size = 20
-text = "✕ Wyjście z Gry"
+theme_override_colors/font_color = Color(0.65, 0.7, 0.76, 0.85)
+theme_override_colors/font_pressed_color = Color(1, 0.3, 0.4, 1)
+theme_override_colors/font_hover_color = Color(1, 0.4, 0.5, 1)
+theme_override_colors/font_focus_color = Color(1, 0.4, 0.5, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 3
+theme_override_fonts/font = ExtResource("5_font_cinzel")
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+text = "exit"
 script = ExtResource("2_hold_btn")
 
 [node name="SettingsPanel" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
@@ -156,108 +263,134 @@ visible = false
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="SettingsTitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel"]
+[node name="SettingsBg" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0.823529, 1, 1)
-theme_override_font_sizes/font_size = 30
-text = "USTAWIENIA DŹWIĘKU I DOSTĘPNOŚCI"
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel_dark")
+
+[node name="Margin" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 20
+
+[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="SettingsTitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.75, 1, 1)
+theme_override_fonts/font = ExtResource("5_font_cinzel")
+theme_override_font_sizes/font_size = 24
+text = "AUDIO & ACCESSIBILITY SETTINGS"
 horizontal_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel"]
+[node name="HSeparator" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
 layout_mode = 2
 
-[node name="MasterRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel"]
+[node name="MasterRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
 layout_mode = 2
 theme_override_constants/separation = 15
 alignment = 1
 
-[node name="MasterLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/MasterRow"]
-custom_minimum_size = Vector2(250, 0)
+[node name="MasterLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterRow"]
+custom_minimum_size = Vector2(260, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Głośność Główna:"
+text = "Master Volume:"
 
-[node name="MasterMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/MasterRow"]
-custom_minimum_size = Vector2(80, 50)
+[node name="MasterMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterRow"]
+custom_minimum_size = Vector2(80, 48)
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 text = "− 10%"
 script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
 
-[node name="MasterValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/MasterRow"]
+[node name="MasterValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterRow"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 1, 0.639216, 1)
+theme_override_colors/font_color = Color(0.3, 0.75, 1, 1)
 theme_override_font_sizes/font_size = 20
 text = "80%"
 horizontal_alignment = 1
 
-[node name="MasterPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/MasterRow"]
-custom_minimum_size = Vector2(80, 50)
+[node name="MasterPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterRow"]
+custom_minimum_size = Vector2(80, 48)
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 text = "+ 10%"
 script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
 
-[node name="WhooshRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel"]
+[node name="WhooshRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
 layout_mode = 2
 theme_override_constants/separation = 15
 alignment = 1
 
-[node name="WhooshLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/WhooshRow"]
-custom_minimum_size = Vector2(250, 0)
+[node name="WhooshLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshRow"]
+custom_minimum_size = Vector2(260, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Głośność Obrotu (Whoosh):"
+text = "Turn Sound (Whoosh):"
 
-[node name="WhooshMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/WhooshRow"]
-custom_minimum_size = Vector2(80, 50)
+[node name="WhooshMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshRow"]
+custom_minimum_size = Vector2(80, 48)
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 text = "− 2dB"
 script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
 
-[node name="WhooshValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/WhooshRow"]
+[node name="WhooshValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshRow"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 1, 0.639216, 1)
+theme_override_colors/font_color = Color(0.3, 0.75, 1, 1)
 theme_override_font_sizes/font_size = 20
 text = "+3.0 dB"
 horizontal_alignment = 1
 
-[node name="WhooshPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/WhooshRow"]
-custom_minimum_size = Vector2(80, 50)
+[node name="WhooshPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshRow"]
+custom_minimum_size = Vector2(80, 48)
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 text = "+ 2dB"
 script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
 
-[node name="CompassToggleBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel"]
-custom_minimum_size = Vector2(560, 58)
+[node name="CompassToggleBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
+custom_minimum_size = Vector2(560, 52)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
-text = "Kompas Dźwiękowy: WŁĄCZONY"
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+text = "Sound Compass: ON"
 script = ExtResource("2_hold_btn")
 
-[node name="TTSToggleBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel"]
-custom_minimum_size = Vector2(560, 58)
+[node name="TTSToggleBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
+custom_minimum_size = Vector2(560, 52)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
-text = "Lektor TTS: WŁĄCZONY"
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+text = "TTS Voice: ON"
 script = ExtResource("2_hold_btn")
 
-[node name="BackFromSettingsButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel"]
-custom_minimum_size = Vector2(400, 58)
+[node name="BackFromSettingsButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
+custom_minimum_size = Vector2(400, 54)
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("5_font_cinzel")
 theme_override_font_sizes/font_size = 20
-text = "⮌ Powrót do Menu"
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+text = "⮌ Back to Menu"
 script = ExtResource("2_hold_btn")
 
 [node name="GuidePanel" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
@@ -265,70 +398,90 @@ visible = false
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="GuideTitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel"]
+[node name="GuideBg" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.721569, 0, 1)
-theme_override_font_sizes/font_size = 30
-text = "STEROWANIE I TAKTYKA NA WROGÓW"
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel_dark")
+
+[node name="Margin" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 20
+
+[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="GuideTitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.2, 1)
+theme_override_fonts/font = ExtResource("5_font_cinzel")
+theme_override_font_sizes/font_size = 24
+text = "CONTROLS & SURVIVAL GUIDE"
 horizontal_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel"]
+[node name="HSeparator" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content"]
 layout_mode = 2
 
-[node name="ScrollContainer" type="ScrollContainer" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel"]
-custom_minimum_size = Vector2(0, 360)
+[node name="ScrollContainer" type="ScrollContainer" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content"]
+custom_minimum_size = Vector2(0, 340)
 layout_mode = 2
 
-[node name="GuideContent" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/ScrollContainer"]
+[node name="GuideContent" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="ControlsHeader" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/ScrollContainer/GuideContent"]
+[node name="ControlsHeader" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/ScrollContainer/GuideContent"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 1, 0.639216, 1)
+theme_override_colors/font_color = Color(0.3, 0.75, 1, 1)
 theme_override_font_sizes/font_size = 18
-text = "1. STEROWANIE VR:"
+text = "1. VR CONTROLS:"
 
-[node name="ControlsText" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/ScrollContainer/GuideContent"]
+[node name="ControlsText" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/ScrollContainer/GuideContent"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 15
-text = "• Lewy kontroler: Snap Turn (obrót skokowy z dwutonowym whooshem i kompasem). Wciśnięcie gałki = Sprint (generuje hałas!).
-• Prawy kontroler: Płynne poruszanie się w stronę wyciągniętego kontrolera.
-• Przyciski menu: Dotknij fizycznie wirtualną dłonią, wciśnij spust kontrolera lub przytrzymaj wskaźnik na przycisku (0.6s)."
+text = "• Left Controller: Snap Turn (turn sound with audio compass). Click Stick = Sprint (generates loud noise!).
+• Right Controller: Smooth movement in direction of hand.
+• Menu Interactions: Point and hold (0.6s), pull trigger or touch physically with virtual hand."
 autowrap_mode = 2
 
-[node name="EnemiesHeader" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/ScrollContainer/GuideContent"]
+[node name="EnemiesHeader" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/ScrollContainer/GuideContent"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.2, 0.4, 1)
+theme_override_colors/font_color = Color(1, 0.3, 0.45, 1)
 theme_override_font_sizes/font_size = 18
-text = "2. ZAGROŻENIA I KONTRA:"
+text = "2. THREATS & COUNTERMEASURES:"
 
-[node name="EnemiesText" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/ScrollContainer/GuideContent"]
+[node name="EnemiesText" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/ScrollContainer/GuideContent"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 15
-text = "• Balora: Patroluje mapę. Reaguje na BLISKOŚĆ (tempo pozytywki rośnie). Uciekaj sprintem!
-• Foxy: Reaguje na HAŁAS kroków. Gdy zapadnie nagła cisza, po 2 sekundach szarżuje. Wystaw dłoń w stronę szarży by zablokować atak!
-• Marionette: Szepty przy uchu z narastaniem. Zastygnij w bezruchu na 4s i odwróć głowę od dźwięku."
+text = "• Balora: Constantly patrols on NavMesh. Reacts to PROXIMITY (music box tempo accelerates). Run away!
+• Foxy: Reacts to player NOISE. Sudden complete silence signals incoming charge in 2s. Raise & wave controller hand towards charge to BLOCK!
+• Marionette: Whispers escalating near ear. Identify direction and firmly wave hand towards the sound to dispel."
 autowrap_mode = 2
 
-[node name="BackFromGuideButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel"]
-custom_minimum_size = Vector2(400, 60)
+[node name="BackFromGuideButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content"]
+custom_minimum_size = Vector2(400, 54)
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("5_font_cinzel")
 theme_override_font_sizes/font_size = 20
-text = "⮌ Powrót do Menu"
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+text = "⮌ Back to Menu"
 script = ExtResource("2_hold_btn")
 
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/StartButton" to="." method="_on_start_button_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/SettingsButton" to="." method="_on_settings_button_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/GuideButton" to="." method="_on_guide_button_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/ExitButton" to="." method="_on_exit_button_pressed"]
-[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/MasterRow/MasterMinusBtn" to="." method="_on_master_minus_pressed"]
-[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/MasterRow/MasterPlusBtn" to="." method="_on_master_plus_pressed"]
-[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/WhooshRow/WhooshMinusBtn" to="." method="_on_whoosh_minus_pressed"]
-[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/WhooshRow/WhooshPlusBtn" to="." method="_on_whoosh_plus_pressed"]
-[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/CompassToggleBtn" to="." method="_on_compass_toggle_pressed"]
-[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/TTSToggleBtn" to="." method="_on_tts_toggle_pressed"]
-[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/BackFromSettingsButton" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/GuidePanel/BackFromGuideButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterRow/MasterMinusBtn" to="." method="_on_master_minus_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterRow/MasterPlusBtn" to="." method="_on_master_plus_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshRow/WhooshMinusBtn" to="." method="_on_whoosh_minus_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshRow/WhooshPlusBtn" to="." method="_on_whoosh_plus_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassToggleBtn" to="." method="_on_compass_toggle_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/TTSToggleBtn" to="." method="_on_tts_toggle_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/BackFromSettingsButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/BackFromGuideButton" to="." method="_on_back_pressed"]

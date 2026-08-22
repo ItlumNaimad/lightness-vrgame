@@ -118,18 +118,44 @@ Przeprowadzono pełną analizę projektu (szczegóły w pliku `gameDoc/Inżynier
    - **Przyczyny porażki**: Wrogowie przekazują teraz szczegółowe powody do helpera (np. *"Balora — Wejście w strefę krytyczną"*, *"Foxy — Niezablokowana szarża"*, *"Marionette — Nieodwrócony wzrok lub ruch"*).
    - **Przyciski akcji**: Panel zawiera duże przyciski dotykowe VR: *⟳ Zagraj Ponownie* (natychmiastowy restart na `game_map.tscn`) oraz *⌂ Menu Główne* (powrót do `main_menu.tscn`).
 
-17. **Naprawy stabilności i parsera Godot 4.x:**
-   - W `viewport_2d_in_3d.gd` dodano gałąź domyślną `_: return null` w `_property_get_revert()`, co naprawiło błąd parsowania *"not all code paths return a value"*.
-   - W `event_bus.gd` wyciszono ostrzeżenie o sygnale adnotacją `@warning_ignore("unused_signal")`.
-   - W `jumpscare_helper.gd` usunięto nieużywaną zmienną lokalną `left`.
+18. **Przebudowa Menu Głównego na styl industrialny (v0.5.1):**
+   - Zrealizowano projekt menu na bazie makiety Google Stitch — w miejsce dawnego jednolicie ciemnego panelu stworzono **scenerię zniszczonej ściany betonowej 3D** ([`Plaster006_2K-PNG`](file:///c:/Users/naimad/Documents/lightness-vrgame/assets/textures/Plaster006_2K-PNG/)) z rurami i nastrojowym oświetleniem punktowym (`SpotLight3D`).
+   - **Glitch Title**: Skrypt [`scripts/glitch_title.gd`](file:///c:/Users/naimad/Documents/lightness-vrgame/scripts/glitch_title.gd) z czcionką `Nosifer-Regular.ttf` generuje mikro-offsety 25 Hz oraz gwałtowne zniekształcenia tekstu co 4 sekundy.
+   - **Napisy wyryte w ścianie**: Przyciski `start game`, `settings`, `guide`, `exit` (czcionka `CinzelDecorative-Bold.ttf`) wkomponowano w ścianę jako płaskie etykiety rozświetlające się na biało po najechaniu.
+   - **Podpis**: W lewym dolnym rogu dodano stały znak wodny *"by Damian Skonieczny version 0.5"*.
+   - **Zmiana nazwy**: Zmieniono globalnie nazwę projektu na **Lightless** (`project.godot`, `README.md`).
+
+19. **Komponent `HoldButton` i stabilna interakcja VR (v0.5.1):**
+   - Wdrożono komponent [`scripts/hold_button.gd`](file:///c:/Users/naimad/Documents/lightness-vrgame/scripts/hold_button.gd), który rysuje błękitny pasek postępu przytrzymania wyłącznie na aktywnym przycisku (czas: 0.6s) i automatycznie wyzwala sygnał `pressed`.
+   - Dodano wsparcie dla `allow_repeat_on_hold = true` (płynna regulacja głośności przyciskami `+` / `−`).
+   - W `scenes/player.tscn` zastąpiono `FunctionGazePointer` dedykowanym `FunctionPointer` (`function_pointer.tscn`), co przywróciło natywną obsługę spustu kontrolera (`trigger_click`) i bezpośrednich kliknięć w `Viewport2DIn3D`.
+
+20. **Eliminacja lagów TTS przez Dwell Debounce (v0.5.1):**
+   - Zidentyfikowano wąskie gardło silnika syntezy mowy Windows SAPI, który przy szybkim przesuwaniu lasera po przyciskach blokował główny wątek Godota.
+   - W [`scripts/tts_manager.gd`](file:///c:/Users/naimad/Documents/lightness-vrgame/scripts/tts_manager.gd) wprowadzono buforowanie `DWELL_THRESHOLD = 0.08s` — syntezator uruchamia się dopiero po zatrzymaniu wskaźnika na przycisku na 80ms, eliminując wszelkie spadki klatek.
+
+21. **Fizyczne dłonie gracza (CollisionHand) (v0.5.1):**
+   - W [`scenes/player.tscn`](file:///c:/Users/naimad/Documents/lightness-vrgame/scenes/player.tscn) wdrożono `CollisionHandLeft` i `CollisionHandRight` (`XRToolsCollisionHand`).
+   - Model ręki blokuje się na obiektach i ścianach o warstwie 1 (World) za pomocą `move_and_slide()`, nie przenikając przez przeszkody (wzorem *FNaF: Help Wanted*).
+
+22. **Subtelny wskaźnik VR (Pointer Style) (v0.5.1):**
+   - Zmodyfikowano [`addons/godot-xr-tools/materials/pointer.tres`](file:///c:/Users/naimad/Documents/lightness-vrgame/addons/godot-xr-tools/materials/pointer.tres) i [`function_pointer.tscn`](file:///c:/Users/naimad/Documents/lightness-vrgame/addons/godot-xr-tools/functions/function_pointer.tscn).
+   - Zastąpiono gruby czerwony promień i wielką kulę cienką wiązką (1.2mm) w chłodnym błękitnym kolorze (`Color(0.15, 0.55, 1, 0.6)`) oraz miniaturową świecącą kropką celownika.
 
 ### Zadania do wykonania
 
 | Priorytet | Zadanie                                                                                       | Status       |
 | --------- | --------------------------------------------------------------------------------------------- | ------------ |
-| 🟡 WYSOKI | Ekran Game Over (dedykowana scena / UI)                                                       | Zrobione     |
-| 🟡 WYSOKI | System TTS / lektora w menu (Accessibility) + menu wybierane kontrolerem                      | W trakcie    |
-| 🟡 WYSOKI | Zaawansowane dźwięki kroków gracza (zależne od powierzchni podłogi + triggery dla Foxy)       | Zrobione     |
-| 🟡 WYSOKI | Dźwiękowa informacja zwrotna przy obracaniu się joystickiem (zapobieganie utracie orientacji) | Zrobione     |
-| 🔵 NISKI  | Nazwa projektu "Inżynierka" → "Lightness" w `project.godot`                                   | Do zrobienia |
-| 🔵 NISKI  | Nazwy warstw kolizji w `project.godot`                                                        | Zrobione     |
+| 🟢 WYSOKI | Ekran Game Over (dedykowana scena / UI / telemetria)                                         | Zrobione     |
+| 🟢 WYSOKI | System TTS / lektora w menu (Accessibility z Dwell Debounce) + HoldButton                      | Zrobione     |
+| 🟢 WYSOKI | Przebudowa Menu Głównego (industrialna ściana 3D + glitch "LIGHTLESS")                       | Zrobione     |
+| 🟢 WYSOKI | Fizyczne blokowanie rąk gracza (`CollisionHand`)                                             | Zrobione     |
+| 🟢 WYSOKI | Zaawansowane dźwięki kroków gracza (zależne od powierzchni podłogi + triggery dla Foxy)       | Zrobione     |
+| 🟢 WYSOKI | Dźwiękowa informacja zwrotna przy obracaniu się joystickiem (Whoosh + Kompas Dźwiękowy)       | Zrobione     |
+| 🟢 WYSOKI | Subtelne wskaźniki VR w chłodnym błękicie (`FunctionPointer`)                                | Zrobione     |
+| 🟢 NISKI  | Nazwa projektu → "Lightless" w `project.godot` i dokumentacji                                 | Zrobione     |
+| 🟢 NISKI  | Nazwy warstw kolizji w `project.godot`                                                        | Zrobione     |
+| 🟡 WYSOKI | Threat Director (pacing wrogów: Balora 0:20, Marionette 0:50, Foxy 1:30)                      | Do zrobienia |
+| 🟡 WYSOKI | Nowy przeciwnik Phantom Grasp (macki / chwyt kontrolera i wyszarpywanie)                      | Do zrobienia |
+| 🟡 ŚREDNI | Menu Pauzy w grze (`scenes/pause_menu.tscn`)                                                  | Do zrobienia |
+

@@ -1,18 +1,19 @@
-# Lightness VR
+# Lightless VR
 
-**Lightness** to autorski, inżynierski projekt gry w wirtualnej rzeczywistości (VR) utworzony w silniku Godot Engine. Gra jest survival horrorem zaprojektowanym w taki sposób, aby była w pełni dostępna dla osób niewidomych – bodźce wizualne dają minimalną (lub żadną) przewagę rozgrywki.
+**Lightless** to autorski, inżynierski projekt gry w wirtualnej rzeczywistości (VR) utworzony w silniku Godot Engine. Gra jest survival horrorem zaprojektowanym w taki sposób, aby była w pełni dostępna dla osób niewidomych – bodźce wizualne dają minimalną (lub żadną) przewagę rozgrywki.
 
 ## Najnowsze zmiany (Version Log)
+- **v0.5.1** - Przebudowa Menu Głównego na styl industrialnej ściany 3D z wyrytymi napisami (inspirowane projektem z Google Stitch), dynamiczny efekt animacji glitch tytułu "LIGHTLESS", komponent `HoldButton` (Hold-to-Click 0.6s), eliminacja lagów TTS przez Dwell Debounce (80ms), fizyczne blokowanie rąk gracza (`CollisionHand`), subtelniejsze wskaźniki laserowe VR w chłodnej błękitnej tonacji oraz podpis autorski.
 - **v0.5.0** - Wdrożenie dedykowanego ekranu Game Over (`scenes/game_over.tscn`), systemu śledzenia telemetrii sesji w `SceneLoader` (czas przetrwania, statystyki obrony, powód porażki) oraz integracji z Google Stitch i `DESIGN.md`.
 - **v0.4.0** - Optymalizacja audio przy starcie mapy, wdrożenie "Kompasu Dźwiękowego", efekt zniekształcenia dźwięku Ambient (Distortion) w zależności od bliskości wrogów oraz re-balans AI (naprawa kolizji między wrogami, crescendo dla Marionetki, wibracje haptyczne HMD).
 - **v0.3.0** - Wdrożenie logiki przeciwników (Balora, Marionette) bazującej na wektorach kierunkowych (VR) i systemie punktów nawigacyjnych (NavMesh) oraz wspólnego systemu JumpscareHelper.
 - **v0.2.0** - Zaprojektowanie założeń koncepcyjnych oraz opracowanie customowego systemu zarządzania scenami (SceneLoader) rozwiązującego problemy fizyki XR podczas przeładowywania map.
 
 ## O projekcie
-Głównym założeniem technologicznym było zbudowanie solidnego szkieletu ("Stagingu") dla VR, gdzie Gracz i jego wirtualne dłonie nie muszą być fizycznie resetowane czy przenoszone przy każdej zmianie lokacji. Rozgrywka opiera się na dźwiękowej orientacji przestrzennej i odpowiednich interakcjach z trójką specjalnych przeciwników.
+Głównym założeniem technologicznym było zbudowanie stabilnego szkieletu scen w VR z wykorzystaniem asynchronicznego menedżera `SceneLoader`, w którym każda scena jest w 100% samowystarczalna (zawiera własne instancje `Player`, `StartXR` i `Fade`). Zapobiega to błędom fizyki i kolizji przy przeładowaniach. Rozgrywka opiera się na dźwiękowej orientacji przestrzennej i odpowiednich interakcjach z przeciwnikami.
 
 ## Stack technologiczny
-- **Godot Engine 4.x** (wersja Godot 4.6, ustawienia Mobile Renderer dla płynności)
+- **Godot Engine 4.x** (wersja Godot 4.7 / 4.x, ustawienia Mobile Renderer dla płynności)
 - **OpenXR** (Główna biblioteka do połączenia z goglami VR)
 - **Godot XR Tools** - standardowe pakiety fizyki dłoni i bazowych obiektów, dostosowane na potrzeby projektu.
 

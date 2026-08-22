@@ -37,7 +37,7 @@ func _create_progress_bar() -> void:
 		
 		# Styl paska fosforowego
 		var style_fill = StyleBoxFlat.new()
-		style_fill.bg_color = Color(0.0, 1.0, 0.64, 0.95)
+		style_fill.bg_color = Color(0.2, 0.65, 1.0, 0.95)
 		style_fill.set_corner_radius_all(2)
 		_progress_bar.add_theme_stylebox_override("fill", style_fill)
 		

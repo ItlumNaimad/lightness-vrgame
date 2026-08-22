@@ -1,4 +1,4 @@
-# Audyt Projektu Lightness VR — Raport
+# Audyt Projektu Lightless VR — Raport
 
 Poniżej zebrałem wszystko, co znalazłem po analizie każdego skryptu, każdej sceny `.tscn`, konfiguracji `project.godot`, zawartości `error.md` oraz logiki Game Design.
 

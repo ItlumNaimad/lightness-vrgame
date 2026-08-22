@@ -14,21 +14,21 @@ signal exit_pressed
 @onready var guide_button: Button = $CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/GuideButton
 @onready var exit_button: Button = $CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/ExitButton
 
-# Kontrolki ustawień (Step Buttons)
-@onready var master_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/MasterRow/MasterMinusBtn
-@onready var master_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/MasterRow/MasterPlusBtn
-@onready var master_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/MasterRow/MasterValueLabel
+# Kontrolki ustawień
+@onready var master_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterRow/MasterMinusBtn
+@onready var master_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterRow/MasterPlusBtn
+@onready var master_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterRow/MasterValueLabel
 
-@onready var whoosh_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/WhooshRow/WhooshMinusBtn
-@onready var whoosh_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/WhooshRow/WhooshPlusBtn
-@onready var whoosh_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/WhooshRow/WhooshValueLabel
+@onready var whoosh_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshRow/WhooshMinusBtn
+@onready var whoosh_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshRow/WhooshPlusBtn
+@onready var whoosh_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshRow/WhooshValueLabel
 
-@onready var compass_toggle_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/CompassToggleBtn
-@onready var tts_toggle_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/TTSToggleBtn
-@onready var back_from_settings_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/BackFromSettingsButton
+@onready var compass_toggle_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassToggleBtn
+@onready var tts_toggle_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/TTSToggleBtn
+@onready var back_from_settings_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/BackFromSettingsButton
 
 # Kontrolki poradnika
-@onready var back_from_guide_btn: Button = $CenterContainer/PanelContainer/MarginContainer/GuidePanel/BackFromGuideButton
+@onready var back_from_guide_btn: Button = $CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/BackFromGuideButton
 
 # Telemetria
 @onready var last_time_label: Label = $CenterContainer/PanelContainer/MarginContainer/MainPanel/TelemetryContainer/HBoxContainer/LastTimeValue
@@ -59,19 +59,19 @@ func _update_settings_ui() -> void:
 		whoosh_value_label.text = "%+.1f dB" % _whoosh_volume_db
 	if compass_toggle_btn:
 		var is_on = TTSManager.sound_compass_enabled if TTSManager else true
-		compass_toggle_btn.text = "Kompas Dźwiękowy: " + ("WŁĄCZONY" if is_on else "WYŁĄCZONY")
+		compass_toggle_btn.text = "Sound Compass: " + ("ON" if is_on else "OFF")
 	if tts_toggle_btn:
 		var is_on = TTSManager.tts_enabled if TTSManager else true
-		tts_toggle_btn.text = "Lektor TTS: " + ("WŁĄCZONY" if is_on else "WYŁĄCZONY")
+		tts_toggle_btn.text = "TTS Voice: " + ("ON" if is_on else "OFF")
 
 func _setup_accessibility() -> void:
 	if Engine.is_editor_hint() or TTSManager == null:
 		return
 		
-	TTSManager.setup_button(start_button, "Rozpocznij grę")
-	TTSManager.setup_button(settings_button, "Ustawienia")
-	TTSManager.setup_button(guide_button, "Sterowanie i poradnik")
-	TTSManager.setup_button(exit_button, "Wyjście z gry")
+	TTSManager.setup_button(start_button, "Start game - Rozpocznij grę")
+	TTSManager.setup_button(settings_button, "Settings - Ustawienia")
+	TTSManager.setup_button(guide_button, "Guide - Sterowanie i poradnik")
+	TTSManager.setup_button(exit_button, "Exit - Wyjście z gry")
 	
 	# Ustawienia z dynamicznym odczytem
 	TTSManager.setup_button(master_minus_btn, func(): return "Zmniejsz głośność główną. Aktualnie %d procent" % _master_volume_percent)
