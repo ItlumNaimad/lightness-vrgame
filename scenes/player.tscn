@@ -11,10 +11,10 @@
 [ext_resource type="PackedScene" uid="uid://cqhw276realc" path="res://addons/godot-xr-tools/functions/function_pointer.tscn" id="10_pointer"]
 [ext_resource type="PackedScene" uid="uid://drs4eeq721ojn" path="res://addons/godot-xr-tools/functions/movement_sprint.tscn" id="11_sprint"]
 [ext_resource type="Script" uid="uid://ddgofpxlmq1d3" path="res://scripts/player_audio_manager.gd" id="12_audio_mgr"]
-[ext_resource type="AudioStream" path="res://assets/sounds/whoosh.mp3" id="13_whoosh"]
+[ext_resource type="AudioStream" uid="uid://nxwcy3rpkag7" path="res://assets/sounds/whoosh.mp3" id="13_whoosh"]
 [ext_resource type="PackedScene" uid="uid://0xlsitpu17r1" path="res://addons/godot-xr-tools/functions/movement_footstep.tscn" id="14_footstep"]
 [ext_resource type="Resource" uid="uid://dbsq5a4220b3" path="res://assets/sounds/default_surface.tres" id="15_surface"]
-[ext_resource type="AudioStream" path="res://assets/sounds/danger.wav" id="16_danger"]
+[ext_resource type="AudioStream" uid="uid://c7yasims5j5dg" path="res://assets/sounds/danger.wav" id="16_danger"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tuyoq"]
 
@@ -57,22 +57,23 @@ stream = ExtResource("16_danger")
 [node name="left_hand" type="XRController3D" parent="XROrigin3D" unique_id=806941292]
 tracker = &"left_hand"
 
-[node name="CollisionHandLeft" parent="XROrigin3D/left_hand" instance=ExtResource("5_col_l")]
+[node name="CollisionHandLeft" parent="XROrigin3D/left_hand" unique_id=2089909562 instance=ExtResource("5_col_l")]
 
 [node name="LeftHand" parent="XROrigin3D/left_hand/CollisionHandLeft" unique_id=922969339 instance=ExtResource("3_dqkch")]
 
 [node name="MovementTurn" parent="XROrigin3D/left_hand" unique_id=186636919 instance=ExtResource("4_fjrip")]
 
 [node name="FunctionPointer" parent="XROrigin3D/left_hand" unique_id=1737039443 instance=ExtResource("10_pointer")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.02, 0.05, -0.1)
+distance = 6.0
 show_laser = 2
 laser_length = 1
 show_target = true
-distance = 6.0
 
 [node name="right_hand" type="XRController3D" parent="XROrigin3D" unique_id=1054815896]
 tracker = &"right_hand"
 
-[node name="CollisionHandRight" parent="XROrigin3D/right_hand" instance=ExtResource("6_col_r")]
+[node name="CollisionHandRight" parent="XROrigin3D/right_hand" unique_id=1482878259 instance=ExtResource("6_col_r")]
 
 [node name="RightHand" parent="XROrigin3D/right_hand/CollisionHandRight" unique_id=496257248 instance=ExtResource("4_qlg0r")]
 
@@ -80,10 +81,11 @@ tracker = &"right_hand"
 strafe = true
 
 [node name="FunctionPointer" parent="XROrigin3D/right_hand" unique_id=1943132758 instance=ExtResource("10_pointer")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.02, 0.05, -0.1)
+distance = 6.0
 show_laser = 2
 laser_length = 1
 show_target = true
-distance = 6.0
 
 [node name="PlayerAudioManager" type="Node" parent="." unique_id=863448654]
 script = ExtResource("12_audio_mgr")
