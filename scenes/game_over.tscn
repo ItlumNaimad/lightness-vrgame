@@ -1,8 +1,8 @@
-﻿[gd_scene load_steps=18 format=3 uid="uid://c8m5vkp1q8u3e"]
+[gd_scene format=3 uid="uid://b04jluv2vffeg"]
 
-[ext_resource type="Script" path="res://scripts/game_over.gd" id="1_game_over_script"]
+[ext_resource type="Script" uid="uid://ckr1jiigqdojl" path="res://scripts/game_over.gd" id="1_game_over_script"]
 [ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="2_viewport2d"]
-[ext_resource type="PackedScene" uid="uid://cg2xvyk5lm41o" path="res://scenes/game_over_ui.tscn" id="3_game_over_ui"]
+[ext_resource type="PackedScene" path="res://scenes/game_over_ui.tscn" id="3_game_over_ui"]
 [ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="4_player"]
 [ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="5_startxr"]
 [ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="6_fade"]
@@ -25,6 +25,17 @@ sky = SubResource("Sky_game_over")
 ambient_light_source = 2
 ambient_light_color = Color(0.01, 0.01, 0.015, 1)
 ambient_light_energy = 0.2
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(24, 1, 24)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.06, 0.06, 0.07, 1)
+roughness = 0.95
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
+material = SubResource("StandardMaterial3D_floor")
+size = Vector2(24, 24)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
 albedo_color = Color(0.38, 0.38, 0.4, 1)
@@ -57,87 +68,76 @@ size = Vector3(10.2, 0.2, 9.2)
 [sub_resource type="BoxShape3D" id="BoxShape3D_ceiling"]
 size = Vector3(10.2, 0.2, 9.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
-albedo_color = Color(0.06, 0.06, 0.07, 1)
-roughness = 0.95
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
-material = SubResource("StandardMaterial3D_floor")
-size = Vector2(24, 24)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
-size = Vector3(24, 1, 24)
-
-[node name="GameOver" type="Node3D"]
+[node name="GameOver" type="Node3D" unique_id=1022717988]
 script = ExtResource("1_game_over_script")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1876011870]
 environment = SubResource("Environment_game_over")
 
-[node name="GameOverSpotLight" type="SpotLight3D" parent="."]
+[node name="GameOverSpotLight" type="SpotLight3D" parent="." unique_id=44774654]
 transform = Transform3D(1, 0, 0, 0, 0.9563048, 0.2923717, 0, -0.2923717, 0.9563048, 0, 3.5, -0.7)
 light_color = Color(0.85, 0.88, 0.92, 1)
 light_energy = 2.0
 spot_range = 6.5
-spot_angle = 38.0
 spot_attenuation = 1.2
+spot_angle = 38.0
 
-[node name="Floor" type="StaticBody3D" parent="."]
+[node name="Floor" type="StaticBody3D" parent="." unique_id=1364582937]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=2023623606]
 shape = SubResource("BoxShape3D_floor")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor" unique_id=26614265]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 mesh = SubResource("PlaneMesh_floor")
 
-[node name="FrontWall" type="StaticBody3D" parent="."]
+[node name="FrontWall" type="StaticBody3D" parent="." unique_id=1587903695]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -2.8)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="FrontWall"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="FrontWall" unique_id=1256374738]
 mesh = SubResource("BoxMesh_wall")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="FrontWall"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FrontWall" unique_id=2011750583]
 shape = SubResource("BoxShape3D_wall")
 
-[node name="BackWall" type="StaticBody3D" parent="."]
+[node name="BackWall" type="StaticBody3D" parent="." unique_id=1279537003]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 6.2)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="BackWall"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="BackWall" unique_id=868718202]
 mesh = SubResource("BoxMesh_wall")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="BackWall"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BackWall" unique_id=1232081722]
 shape = SubResource("BoxShape3D_wall")
 
-[node name="LeftWall" type="StaticBody3D" parent="."]
+[node name="LeftWall" type="StaticBody3D" parent="." unique_id=1356541557]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 2.2, 1.7)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="LeftWall"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LeftWall" unique_id=823979233]
 mesh = SubResource("BoxMesh_wall_side")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="LeftWall"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LeftWall" unique_id=435880008]
 shape = SubResource("BoxShape3D_wall_side")
 
-[node name="RightWall" type="StaticBody3D" parent="."]
+[node name="RightWall" type="StaticBody3D" parent="." unique_id=608977951]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2.2, 1.7)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="RightWall"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RightWall" unique_id=1360486219]
 mesh = SubResource("BoxMesh_wall_side")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RightWall"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RightWall" unique_id=370302663]
 shape = SubResource("BoxShape3D_wall_side")
 
-[node name="Ceiling" type="StaticBody3D" parent="."]
+[node name="Ceiling" type="StaticBody3D" parent="." unique_id=385229542]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 1.7)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Ceiling"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ceiling" unique_id=1543042893]
 mesh = SubResource("BoxMesh_ceiling")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling" unique_id=1435904030]
 shape = SubResource("BoxShape3D_ceiling")
 
-[node name="Viewport2Din3D" parent="." instance=ExtResource("2_viewport2d")]
+[node name="Viewport2Din3D" parent="." unique_id=494244748 instance=ExtResource("2_viewport2d")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.15, -2.68)
 screen_size = Vector2(2.4, 1.45)
 scene = ExtResource("3_game_over_ui")
@@ -146,9 +146,8 @@ input_gamepad = true
 unshaded = true
 scene_properties_keys = PackedStringArray("game_over_ui.gd")
 
-[node name="StartXR" parent="." instance=ExtResource("5_startxr")]
+[node name="StartXR" parent="." unique_id=1473059896 instance=ExtResource("5_startxr")]
 
-[node name="Player" parent="." instance=ExtResource("4_player")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+[node name="Player" parent="." unique_id=845576995 instance=ExtResource("4_player")]
 
-[node name="Fade" parent="." instance=ExtResource("6_fade")]
+[node name="Fade" parent="." unique_id=584986121 instance=ExtResource("6_fade")]
