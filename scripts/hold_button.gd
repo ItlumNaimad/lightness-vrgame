@@ -3,16 +3,14 @@ class_name HoldButton
 
 ## HoldButton — Interaktywny przycisk VR stylizowany na wyryty w betonowej ścianie.
 ## Po najechaniu wskaźnikiem napis delikatnie wysuwa się w stronę gracza (scale-up) i rozbłyska.
-## Zatwierdzenie opcji następuje po przytrzymaniu spustu (trigger), przycisku "A" lub przytrzymaniu wskaźnika,
-## czemu towarzyszy cyberpunkowo-eldrytcka animacja napełniającego się paska energii.
+## Samo najechanie NIE aktywuje opcji. Aby zatwierdzić, gracz musi PRZYTRZYMAĆ spust (trigger)
+## lub przycisk "A" na kontrolerze tak długo, aż pasek energii napełni się w 100%.
 
-@export var charge_time_hold: float = 0.45   # Czas przytrzymania triggera / przycisku "A"
-@export var charge_time_dwell: float = 0.85  # Czas automatycznego zatwierdzenia samym wskaźnikiem
-@export var allow_repeat_on_hold: bool = false
+@export var charge_time_hold: float = 0.55   # Czas przytrzymania spustu (trigger) do zatwierdzenia
 
 var _is_hovered: bool = false
+var _is_input_holding: bool = false
 var _charge: float = 0.0
-var _hover_dwell_timer: float = 0.0
 var _current_scale: float = 1.0
 var _target_scale: float = 1.0
 var _tween: Tween
@@ -28,7 +26,7 @@ const COLOR_GLOW_NEON := Color(0.0, 1.0, 0.64, 1.0)
 const COLOR_GLOW_AURA := Color(0.0, 1.0, 0.64, 0.6)
 
 func _ready() -> void:
-	# Usuwamy wszelkie prostokątne tła — napis ma leżeć bezpośrednio na ścianie
+	# Usuwamy wszelkie prostokątne tła — napis leży bezpośrednio na ścianie
 	var empty_style := StyleBoxEmpty.new()
 	add_theme_stylebox_override("normal", empty_style)
 	add_theme_stylebox_override("hover", empty_style)
@@ -64,46 +62,40 @@ func _process(delta: float) -> void:
 	_current_scale = lerp(_current_scale, _target_scale, delta * 12.0)
 	scale = Vector2(_current_scale, _current_scale)
 	
+	# Jeśli gracz nie najeżdża na napis:
 	if not _is_hovered:
+		_is_input_holding = false
 		if _charge > 0.0:
 			_charge = max(0.0, _charge - delta * 4.0)
 			queue_redraw()
-		_hover_dwell_timer = 0.0
 		return
 
-	# Gracz celuje we wskaźnik
-	var is_pressing := _is_action_active()
+	# Gracz najeżdża na napis — sprawdzamy CZY TRZYMA SPUST / PRZYCISK:
+	var holding := _is_input_holding or _is_xr_trigger_held()
 	
-	if is_pressing:
-		# Gracz trzyma spust (trigger), przycisk A lub lewy klik -> szybkie ładowanie (0.45s)
+	if holding:
+		# Ładowanie postępuje TYLKO wtedy, gdy trigger/przycisk jest aktywnie trzymany!
 		_charge += delta / max(0.05, charge_time_hold)
 		queue_redraw()
+		
+		# Sprawdzenie warunku zatwierdzenia (100% naładowania)
+		if _charge >= 1.0:
+			_trigger_activation()
 	else:
-		# Gracz celuje samym laserem bez wciskania przycisków -> dwell charge
-		_hover_dwell_timer += delta
-		if _hover_dwell_timer > 0.2:
-			_charge += delta / max(0.1, charge_time_dwell)
+		# Gracz tylko najeżdża laserem LUB puścił trigger przed dojściem do 100%:
+		# Pasek energii cofa się do zera. Samo najechanie NIE ładuje opcji!
+		if _charge > 0.0:
+			_charge = max(0.0, _charge - delta * 3.5)
 			queue_redraw()
-		elif _charge > 0.0:
-			_charge = max(0.0, _charge - delta * 2.0)
-			queue_redraw()
-
-	# Warunek aktywacji (100% naładowania)
-	if _charge >= 1.0:
-		_trigger_activation()
 
 func _trigger_activation() -> void:
 	_charge = 0.0
-	_hover_dwell_timer = 0.0
+	_is_input_holding = false
 	queue_redraw()
 	
 	# Efekt rozbłysku potwierdzenia
 	_current_scale = 1.14
 	scale = Vector2(_current_scale, _current_scale)
-	
-	# Dźwięk potwierdzenia
-	if TTSManager:
-		TTSManager.play_turn_sound(0.1)
 	
 	# Wibracja w kontrolerze (haptics)
 	_trigger_haptic_feedback()
@@ -111,12 +103,12 @@ func _trigger_activation() -> void:
 	# Wywołanie akcji
 	emit_signal("pressed")
 
-func _is_action_active() -> bool:
-	# 1. Odpytanie serwera OpenXR o kontrolery VR (spust, przycisk A, przycisk B)
+func _is_xr_trigger_held() -> bool:
+	# 1. Sprawdzenie serwera OpenXR dla prawej i lewej ręki
 	for tracker_name in [&"right_hand", &"left_hand"]:
 		var tracker = XRServer.get_tracker(tracker_name)
 		if tracker:
-			# Spust analogowy
+			# Spust analogowy (trigger)
 			var trig = tracker.get_input(&"trigger")
 			if trig is float and trig >= 0.25:
 				return true
@@ -137,7 +129,21 @@ func _is_action_active() -> bool:
 			if (grip is bool and grip) or (grip is float and grip >= 0.25):
 				return true
 
-	# 2. Tradycyjne zdarzenia myszy i klawiatury
+	# 2. Sprawdzenie węzłów kontrolera gracza w drzewie
+	var player = get_tree().get_first_node_in_group("player")
+	if player:
+		for hand_name in ["XROrigin3D/right_hand", "XROrigin3D/left_hand"]:
+			var ctrl = player.get_node_or_null(hand_name) as XRController3D
+			if ctrl and ctrl.get_is_active():
+				if ctrl.get_float("trigger") >= 0.25 \
+						or ctrl.is_button_pressed("trigger_click") \
+						or ctrl.is_button_pressed("trigger") \
+						or ctrl.is_button_pressed("primary_click") \
+						or ctrl.is_button_pressed("ax_button") \
+						or ctrl.is_button_pressed("by_button"):
+					return true
+
+	# 3. Wejście z klawiatury / myszy (desktop)
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		return true
 	if Input.is_action_pressed("ui_accept"):
@@ -149,7 +155,7 @@ func _trigger_haptic_feedback() -> void:
 	for tracker_name in [&"right_hand", &"left_hand"]:
 		var tracker = XRServer.get_tracker(tracker_name)
 		if tracker and tracker.has_method("trigger_haptic_pulse"):
-			tracker.trigger_haptic_pulse("haptic", 100.0, 0.6, 0.1, 0.0)
+			tracker.trigger_haptic_pulse("haptic", 100.0, 0.7, 0.12, 0.0)
 
 func _on_hover_started() -> void:
 	_is_hovered = true
@@ -171,6 +177,7 @@ func _on_hover_started() -> void:
 
 func _on_hover_ended() -> void:
 	_is_hovered = false
+	_is_input_holding = false
 	_target_scale = 1.0  # Powrót do poziomu ściany
 	
 	if _tween and _tween.is_valid():
@@ -187,15 +194,13 @@ func _on_hover_ended() -> void:
 	queue_redraw()
 
 func _on_gui_input(event: InputEvent) -> void:
-	# Kliknięcie natychmiastowe (tap)
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		if not event.pressed and _is_hovered:
-			_trigger_activation()
-	elif event is InputEventScreenTouch and event.pressed:
-		_trigger_activation()
+		_is_input_holding = event.pressed
+	elif event is InputEventScreenTouch:
+		_is_input_holding = event.pressed
 
 func _draw() -> void:
-	# Rysowanie wyrytego rowka napełniającego się energią pod napisem
+	# Rysowanie wyrytego rowka i napełniającego się paska energii pod napisem
 	if not _is_hovered and _charge <= 0.01:
 		return
 		
@@ -212,13 +217,13 @@ func _draw() -> void:
 	var groove_rect := Rect2(groove_x, groove_y, groove_w, groove_h)
 	draw_rect(groove_rect, Color(0.02, 0.04, 0.06, 0.6), true)
 	
-	# 2. Napełniający się strumień energii (#00ffa3)
+	# 2. Napełniający się strumień energii (#00ffa3) — widoczny TYLKO gdy trigger jest trzymany!
 	if _charge > 0.01:
 		var fill_w: float = groove_w * clamp(_charge, 0.0, 1.0)
 		var fill_rect := Rect2(groove_x, groove_y, fill_w, groove_h)
 		# Poświata
-		draw_rect(Rect2(groove_x, groove_y - 1.0, fill_w, groove_h + 2.0), Color(0.0, 1.0, 0.64, 0.25), true)
+		draw_rect(Rect2(groove_x, groove_y - 1.0, fill_w, groove_h + 2.0), Color(0.0, 1.0, 0.64, 0.3), true)
 		# Rdzeń
 		draw_rect(fill_rect, COLOR_GLOW_NEON, true)
 		# Iskra na czele ładowania
-		draw_circle(Vector2(groove_x + fill_w, groove_y + groove_h * 0.5), 3.0, Color(1.0, 1.0, 1.0, 0.95))
+		draw_circle(Vector2(groove_x + fill_w, groove_y + groove_h * 0.5), 3.5, Color(1.0, 1.0, 1.0, 0.95))
