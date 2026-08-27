@@ -15,16 +15,18 @@ signal exit_pressed
 @onready var exit_button: Button = $CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/ExitButton
 
 # Kontrolki ustawień
-@onready var master_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterRow/MasterMinusBtn
-@onready var master_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterRow/MasterPlusBtn
-@onready var master_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterRow/MasterValueLabel
+@onready var master_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterMinusBtn
+@onready var master_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterPlusBtn
+@onready var master_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterValueLabel
+@onready var master_progress_bar: ProgressBar = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterProgressBar
 
-@onready var whoosh_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshRow/WhooshMinusBtn
-@onready var whoosh_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshRow/WhooshPlusBtn
-@onready var whoosh_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshRow/WhooshValueLabel
+@onready var whoosh_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshMinusBtn
+@onready var whoosh_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshPlusBtn
+@onready var whoosh_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshValueLabel
+@onready var whoosh_progress_bar: ProgressBar = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshProgressBar
 
-@onready var compass_toggle_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassToggleBtn
-@onready var tts_toggle_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/TTSToggleBtn
+@onready var compass_toggle_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassCard/Margin/HBox/CompassToggleBtn
+@onready var tts_toggle_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/TTSCard/Margin/HBox/TTSToggleBtn
 @onready var back_from_settings_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/BackFromSettingsButton
 
 # Kontrolki poradnika
@@ -55,8 +57,14 @@ func _update_telemetry() -> void:
 func _update_settings_ui() -> void:
 	if master_value_label:
 		master_value_label.text = "%d%%" % _master_volume_percent
+	if master_progress_bar:
+		master_progress_bar.value = _master_volume_percent
+		
 	if whoosh_value_label:
 		whoosh_value_label.text = "%+.1f dB" % _whoosh_volume_db
+	if whoosh_progress_bar:
+		whoosh_progress_bar.value = clamp((_whoosh_volume_db + 10.0) / 25.0 * 100.0, 0.0, 100.0)
+		
 	if compass_toggle_btn:
 		var is_on = TTSManager.sound_compass_enabled if TTSManager else true
 		compass_toggle_btn.text = "Sound Compass: " + ("ON" if is_on else "OFF")
@@ -162,4 +170,3 @@ func _on_tts_toggle_pressed() -> void:
 		_update_settings_ui()
 		if TTSManager.tts_enabled:
 			TTSManager.speak("TTS voice enabled", true)
-

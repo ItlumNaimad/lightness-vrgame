@@ -101,7 +101,7 @@ script = ExtResource("1_script")
 environment = SubResource("Environment_menu")
 
 [node name="MenuSpotLight" type="SpotLight3D" parent="." unique_id=1738064566]
-transform = Transform3D(1, 0, 0, 0, 0.9702957, 0.2419219, 0, -0.2419219, 0.9702957, 0, 3.2, -0.8)
+transform = Transform3D(1, 0, 0, 0, 0.9563048, 0.2923717, 0, -0.2923717, 0.9563048, 0, 3.5, -0.7)
 light_color = Color(0.88, 0.93, 1, 1)
 light_energy = 2.6
 spot_range = 6.0
@@ -196,7 +196,7 @@ omni_range = 5.5
 omni_attenuation = 1.2
 
 [node name="Viewport2Din3D" parent="." unique_id=1130208441 instance=ExtResource("2_bqqt6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, -2.68)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.15, -2.68)
 screen_size = Vector2(2.4, 1.45)
 scene = ExtResource("3_ui")
 viewport_size = Vector2(1280, 720)
@@ -214,6 +214,7 @@ autoplay = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Fade" parent="." unique_id=1653293877 instance=ExtResource("7_fade")]
+
 
 
 

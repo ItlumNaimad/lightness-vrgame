@@ -11,10 +11,10 @@
 [ext_resource type="Texture2D" uid="uid://dnum5txu5gvmk" path="res://assets/textures/Plaster006_2K-PNG/Plaster006_2K-PNG_Roughness.png" id="9_wall_rough"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_game_over"]
-sky_top_color = Color(0.02, 0.015, 0.02, 1)
-sky_horizon_color = Color(0.06, 0.02, 0.025, 1)
-ground_bottom_color = Color(0.01, 0.01, 0.015, 1)
-ground_horizon_color = Color(0.06, 0.02, 0.025, 1)
+sky_top_color = Color(0.01, 0.01, 0.015, 1)
+sky_horizon_color = Color(0.02, 0.02, 0.025, 1)
+ground_bottom_color = Color(0.005, 0.005, 0.008, 1)
+ground_horizon_color = Color(0.02, 0.02, 0.025, 1)
 
 [sub_resource type="Sky" id="Sky_game_over"]
 sky_material = SubResource("ProceduralSkyMaterial_game_over")
@@ -23,11 +23,11 @@ sky_material = SubResource("ProceduralSkyMaterial_game_over")
 background_mode = 2
 sky = SubResource("Sky_game_over")
 ambient_light_source = 2
-ambient_light_color = Color(0.12, 0.06, 0.08, 1)
-ambient_light_energy = 0.5
+ambient_light_color = Color(0.01, 0.01, 0.015, 1)
+ambient_light_energy = 0.2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
-albedo_color = Color(0.42, 0.38, 0.38, 1)
+albedo_color = Color(0.38, 0.38, 0.4, 1)
 albedo_texture = ExtResource("7_wall_color")
 roughness = 0.95
 roughness_texture = ExtResource("9_wall_rough")
@@ -57,22 +57,9 @@ size = Vector3(10.2, 0.2, 9.2)
 [sub_resource type="BoxShape3D" id="BoxShape3D_ceiling"]
 size = Vector3(10.2, 0.2, 9.2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lamp"]
-albedo_color = Color(0.9, 0.2, 0.25, 1)
-emission_enabled = true
-emission = Color(0.9, 0.15, 0.2, 1)
-emission_energy_multiplier = 2.5
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_lamp"]
-material = SubResource("StandardMaterial3D_lamp")
-top_radius = 0.2
-bottom_radius = 0.25
-height = 0.1
-radial_segments = 16
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
-albedo_color = Color(0.07, 0.06, 0.07, 1)
-roughness = 0.9
+albedo_color = Color(0.06, 0.06, 0.07, 1)
+roughness = 0.95
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
 material = SubResource("StandardMaterial3D_floor")
@@ -88,18 +75,12 @@ script = ExtResource("1_game_over_script")
 environment = SubResource("Environment_game_over")
 
 [node name="GameOverSpotLight" type="SpotLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9702957, 0.2419219, 0, -0.2419219, 0.9702957, 0, 3.2, -0.8)
-light_color = Color(1, 0.45, 0.5, 1)
-light_energy = 2.4
+transform = Transform3D(1, 0, 0, 0, 0.9563048, 0.2923717, 0, -0.2923717, 0.9563048, 0, 3.5, -0.7)
+light_color = Color(0.85, 0.88, 0.92, 1)
+light_energy = 2.0
 spot_range = 6.5
-spot_angle = 48.0
-spot_attenuation = 1.1
-
-[node name="EmergencyLight" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -1.2)
-light_color = Color(0.95, 0.15, 0.25, 1)
-light_energy = 0.6
-omni_range = 7.0
+spot_angle = 38.0
+spot_attenuation = 1.2
 
 [node name="Floor" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
@@ -156,18 +137,8 @@ mesh = SubResource("BoxMesh_ceiling")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling"]
 shape = SubResource("BoxShape3D_ceiling")
 
-[node name="CeilingLampFixture" type="MeshInstance3D" parent="Ceiling"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
-mesh = SubResource("CylinderMesh_lamp")
-
-[node name="CeilingLight" type="OmniLight3D" parent="Ceiling"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0)
-light_color = Color(0.9, 0.2, 0.3, 1)
-light_energy = 0.9
-omni_range = 10.0
-
 [node name="Viewport2Din3D" parent="." instance=ExtResource("2_viewport2d")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, -2.68)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.15, -2.68)
 screen_size = Vector2(2.4, 1.45)
 scene = ExtResource("3_game_over_ui")
 viewport_size = Vector2(1280, 720)

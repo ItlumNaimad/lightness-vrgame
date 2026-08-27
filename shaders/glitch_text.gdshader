@@ -4,9 +4,14 @@ uniform float glitch_intensity : hint_range(0.0, 1.0) = 0.0;
 uniform float color_split_dist : hint_range(0.0, 0.06) = 0.02;
 uniform float scanline_density : hint_range(10.0, 300.0) = 140.0;
 uniform float block_size : hint_range(0.01, 0.2) = 0.04;
+uniform vec2 jitter_offset = vec2(0.0, 0.0);
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+
+void vertex() {
+	VERTEX += jitter_offset;
 }
 
 void fragment() {

@@ -1,101 +1,22 @@
-@tool
-extends Button
+﻿extends Button
 class_name HoldButton
 
-## HoldButton — Przycisk z wizualnym wskaźnikiem ładowania (Hold-to-Click)
-## Animacja paska ładowania pojawia się TYLKO na przycisku po najechaniu i zatwierdza wybór po hold_time.
+## HoldButton — Przycisk interfejsu VR reagujący na kliknięcie spustu (trigger) kontrolera.
+## Zgodnie z wytycznymi, zrezygnowano z uciążliwego auto-klikania po przytrzymaniu wzroku/wskaźnika.
 
-@export var hold_time: float = 0.6
-@export var auto_click_on_hold: bool = true
-@export var allow_repeat_on_hold: bool = false # Włączone dla przycisków +/-
+@export var auto_click_on_hold: bool = false
+@export var allow_repeat_on_hold: bool = false
 
-var _time_held: float = 0.0
 var _is_hovered: bool = false
-var _has_clicked: bool = false
-var _repeat_cooldown: float = 0.0
-
-var _progress_bar: ProgressBar
 
 func _ready() -> void:
 	mouse_entered.connect(_on_hover_started)
 	focus_entered.connect(_on_hover_started)
 	mouse_exited.connect(_on_hover_ended)
 	focus_exited.connect(_on_hover_ended)
-	pressed.connect(_on_pressed_manually)
-	
-	_create_progress_bar()
-
-func _create_progress_bar() -> void:
-	if _progress_bar == null:
-		_progress_bar = ProgressBar.new()
-		_progress_bar.show_percentage = false
-		_progress_bar.max_value = 1.0
-		_progress_bar.value = 0.0
-		_progress_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_progress_bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-		_progress_bar.custom_minimum_size = Vector2(0, 5)
-		
-		# Styl paska fosforowego
-		var style_fill = StyleBoxFlat.new()
-		style_fill.bg_color = Color(0.2, 0.65, 1.0, 0.95)
-		style_fill.set_corner_radius_all(2)
-		_progress_bar.add_theme_stylebox_override("fill", style_fill)
-		
-		var style_bg = StyleBoxFlat.new()
-		style_bg.bg_color = Color(0.0, 0.0, 0.0, 0.4)
-		_progress_bar.add_theme_stylebox_override("background", style_bg)
-		
-		add_child(_progress_bar)
-		_progress_bar.visible = false
-
-func _process(delta: float) -> void:
-	if Engine.is_editor_hint():
-		return
-		
-	if _repeat_cooldown > 0.0:
-		_repeat_cooldown -= delta
-		return
-		
-	if _is_hovered and auto_click_on_hold:
-		if not _has_clicked or allow_repeat_on_hold:
-			_time_held += delta
-			if _progress_bar:
-				_progress_bar.visible = true
-				_progress_bar.value = clamp(_time_held / hold_time, 0.0, 1.0)
-				
-			if _time_held >= hold_time:
-				_has_clicked = true
-				_time_held = 0.0
-				if _progress_bar:
-					_progress_bar.visible = false
-				
-				emit_signal("pressed")
-				
-				if allow_repeat_on_hold:
-					_repeat_cooldown = 0.4 # Odczekaj 400ms przed kolejnym krokiem przytrzymania
-	else:
-		if _progress_bar and not _is_hovered:
-			_progress_bar.visible = false
-			_progress_bar.value = 0.0
 
 func _on_hover_started() -> void:
 	_is_hovered = true
-	_has_clicked = false
-	_time_held = 0.0
-	_repeat_cooldown = 0.0
 
 func _on_hover_ended() -> void:
 	_is_hovered = false
-	_has_clicked = false
-	_time_held = 0.0
-	_repeat_cooldown = 0.0
-	if _progress_bar:
-		_progress_bar.visible = false
-		_progress_bar.value = 0.0
-
-func _on_pressed_manually() -> void:
-	_has_clicked = true
-	_time_held = 0.0
-	_repeat_cooldown = 0.3
-	if _progress_bar:
-		_progress_bar.visible = false
