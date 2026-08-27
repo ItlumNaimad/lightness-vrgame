@@ -233,8 +233,8 @@ theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
 theme_override_font_sizes/font_size = 32
 theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
 text = "start game"
 script = ExtResource("2_hold_btn")
 
@@ -248,8 +248,8 @@ theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
 theme_override_font_sizes/font_size = 26
 theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
 text = "settings"
 script = ExtResource("2_hold_btn")
 
@@ -263,8 +263,8 @@ theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
 theme_override_font_sizes/font_size = 26
 theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
 text = "guide"
 script = ExtResource("2_hold_btn")
 
@@ -278,8 +278,8 @@ theme_override_colors/font_focus_color = Color(1, 0.4, 0.5, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
 theme_override_font_sizes/font_size = 26
 theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
 text = "exit"
 script = ExtResource("2_hold_btn")
 
@@ -376,8 +376,8 @@ custom_minimum_size = Vector2(46, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
 text = "−"
 script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
@@ -404,8 +404,8 @@ custom_minimum_size = Vector2(46, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
 text = "+"
 script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
@@ -440,8 +440,8 @@ custom_minimum_size = Vector2(46, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
 text = "−"
 script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
@@ -468,8 +468,8 @@ custom_minimum_size = Vector2(46, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
 text = "+"
 script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
@@ -615,4 +615,5 @@ script = ExtResource("2_hold_btn")
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassCard/Margin/HBox/CompassToggleBtn" to="." method="_on_compass_toggle_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/BackFromSettingsButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/BackFromGuideButton" to="." method="_on_back_pressed"]
+
 
