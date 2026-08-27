@@ -125,6 +125,7 @@ corner_radius_bottom_right = 20
 corner_radius_bottom_left = 20
 
 [node name="MainMenuUI" type="Control"]
+script = ExtResource("1_ui_script")
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
