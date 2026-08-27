@@ -39,24 +39,24 @@ uv1_scale = Vector3(2.5, 1.8, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_wall"]
 material = SubResource("StandardMaterial3D_wall")
-size = Vector3(6, 4.2, 0.1)
+size = Vector3(10, 4.8, 0.2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
-size = Vector3(6, 4.2, 0.1)
+size = Vector3(10, 4.8, 0.2)
 
 [sub_resource type="BoxMesh" id="BoxMesh_wall_side"]
 material = SubResource("StandardMaterial3D_wall")
-size = Vector3(0.2, 4.2, 4.45)
+size = Vector3(0.2, 4.8, 9.2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall_side"]
-size = Vector3(0.2, 4.2, 4.45)
+size = Vector3(0.2, 4.8, 9.2)
 
 [sub_resource type="BoxMesh" id="BoxMesh_ceiling"]
 material = SubResource("StandardMaterial3D_wall")
-size = Vector3(6.2, 0.2, 4.45)
+size = Vector3(10.2, 0.2, 9.2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ceiling"]
-size = Vector3(6.2, 0.2, 4.45)
+size = Vector3(10.2, 0.2, 9.2)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lamp"]
 albedo_color = Color(0.8, 0.85, 0.9, 1)
@@ -80,7 +80,7 @@ roughness = 0.38
 material = SubResource("StandardMaterial3D_pipe")
 top_radius = 0.045
 bottom_radius = 0.045
-height = 4.2
+height = 4.8
 radial_segments = 16
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
@@ -101,7 +101,7 @@ script = ExtResource("1_script")
 environment = SubResource("Environment_menu")
 
 [node name="MenuSpotLight" type="SpotLight3D" parent="." unique_id=1738064566]
-transform = Transform3D(1, 0, 0, 0, 0.9781476, 0.2079117, 0, -0.2079117, 0.9781476, 0, 2.2, 0.3)
+transform = Transform3D(1, 0, 0, 0, 0.9702957, 0.2419219, 0, -0.2419219, 0.9702957, 0, 3.2, -0.8)
 light_color = Color(0.88, 0.93, 1, 1)
 light_energy = 2.6
 spot_range = 6.0
@@ -109,7 +109,7 @@ spot_angle = 45.0
 spot_attenuation = 1.1
 
 [node name="MenuAmbientLight" type="OmniLight3D" parent="." unique_id=184910293]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, -1.2)
 light_color = Color(0.25, 0.55, 0.95, 1)
 light_energy = 0.4
 omni_range = 4.5
@@ -125,7 +125,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 mesh = SubResource("PlaneMesh_floor")
 
 [node name="IndustrialWall" type="StaticBody3D" parent="." unique_id=992817263]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -1.85)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -2.8)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="IndustrialWall"]
 mesh = SubResource("BoxMesh_wall")
@@ -134,22 +134,22 @@ mesh = SubResource("BoxMesh_wall")
 shape = SubResource("BoxShape3D_wall")
 
 [node name="Pipes" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -1.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -2.75)
 
 [node name="PipeLeft" type="MeshInstance3D" parent="Pipes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.9, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.2, 0, 0)
 mesh = SubResource("CylinderMesh_pipe")
 
 [node name="PipeRight" type="MeshInstance3D" parent="Pipes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.9, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, 0)
 mesh = SubResource("CylinderMesh_pipe")
 
 [node name="PipeTop" type="MeshInstance3D" parent="Pipes"]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 1.8, 0.02)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 2.1, 0.02)
 mesh = SubResource("CylinderMesh_pipe")
 
 [node name="BackWall" type="StaticBody3D" parent="." unique_id=194827101]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 2.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 6.2)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="BackWall"]
 mesh = SubResource("BoxMesh_wall")
@@ -158,7 +158,7 @@ mesh = SubResource("BoxMesh_wall")
 shape = SubResource("BoxShape3D_wall")
 
 [node name="LeftWall" type="StaticBody3D" parent="." unique_id=194827102]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1.6, 0.275)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.0, 2.2, 1.7)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="LeftWall"]
 mesh = SubResource("BoxMesh_wall_side")
@@ -167,7 +167,7 @@ mesh = SubResource("BoxMesh_wall_side")
 shape = SubResource("BoxShape3D_wall_side")
 
 [node name="RightWall" type="StaticBody3D" parent="." unique_id=194827103]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.6, 0.275)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.0, 2.2, 1.7)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RightWall"]
 mesh = SubResource("BoxMesh_wall_side")
@@ -176,7 +176,7 @@ mesh = SubResource("BoxMesh_wall_side")
 shape = SubResource("BoxShape3D_wall_side")
 
 [node name="Ceiling" type="StaticBody3D" parent="." unique_id=194827104]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.7, 0.275)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 1.7)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ceiling"]
 mesh = SubResource("BoxMesh_ceiling")
@@ -196,7 +196,7 @@ omni_range = 5.5
 omni_attenuation = 1.2
 
 [node name="Viewport2Din3D" parent="." unique_id=1130208441 instance=ExtResource("2_bqqt6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -1.78)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, -2.68)
 screen_size = Vector2(2.4, 1.45)
 scene = ExtResource("3_ui")
 viewport_size = Vector2(1280, 720)
@@ -214,5 +214,6 @@ autoplay = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Fade" parent="." unique_id=1653293877 instance=ExtResource("7_fade")]
+
 
 

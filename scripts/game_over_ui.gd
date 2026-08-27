@@ -4,10 +4,10 @@ extends Control
 signal restart_pressed
 signal menu_pressed
 
-@onready var time_label: Label = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TimeBadge/TimeSurvivedValue
-@onready var steps_label: Label = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/StatsGrid/StepsValue
-@onready var marionettes_label: Label = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/StatsGrid/MarionetteValue
-@onready var foxy_label: Label = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/StatsGrid/FoxyValue
+@onready var time_label: Label = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/TimeBadge/VBox/TimeSurvivedValue
+@onready var steps_label: Label = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/StatsGrid/StepsCard/VBox/StepsValue
+@onready var marionettes_label: Label = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/StatsGrid/MarionetteCard/VBox/MarionetteValue
+@onready var foxy_label: Label = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/StatsGrid/FoxyCard/VBox/FoxyValue
 @onready var reason_label: Label = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ReasonBadge/DeathReasonValue
 
 @onready var restart_button: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsContainer/RestartButton
@@ -36,7 +36,7 @@ func _update_stats() -> void:
 	var seconds: int = total_seconds % 60
 	
 	if time_label:
-		time_label.text = "%02d:%02d" % [minutes, seconds]
+		time_label.text = "%02d:%02ds" % [minutes, seconds]
 	if steps_label:
 		steps_label.text = "%d" % SceneLoader.steps_taken
 	if marionettes_label:
@@ -44,11 +44,13 @@ func _update_stats() -> void:
 	if foxy_label:
 		foxy_label.text = "%d" % SceneLoader.foxy_charges_blocked
 	if reason_label:
-		reason_label.text = SceneLoader.last_death_reason
+		reason_label.text = "CRITICAL FAILURE // " + SceneLoader.last_death_reason.to_upper()
 
 func _on_restart_button_pressed() -> void:
 	restart_pressed.emit()
 
 func _on_menu_button_pressed() -> void:
 	menu_pressed.emit()
+
+
 

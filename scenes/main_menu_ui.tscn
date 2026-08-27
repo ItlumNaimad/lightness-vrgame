@@ -42,37 +42,40 @@ expand_margin_right = 12.0
 expand_margin_bottom = 4.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
-bg_color = Color(0.12, 0.25, 0.45, 0.25)
+bg_color = Color(0, 1, 0.64, 0.14)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
 border_width_bottom = 2
-border_color = Color(0.4, 0.7, 1, 0.7)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-expand_margin_left = 12.0
-expand_margin_top = 4.0
-expand_margin_right = 12.0
-expand_margin_bottom = 4.0
+border_color = Color(0, 1, 0.64, 0.85)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+expand_margin_left = 6.0
+expand_margin_top = 2.0
+expand_margin_right = 6.0
+expand_margin_bottom = 2.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel_dark"]
-bg_color = Color(0.03, 0.04, 0.06, 0.9)
+bg_color = Color(0.04, 0.05, 0.08, 0.88)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.2, 0.35, 0.55, 0.5)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
+border_color = Color(0, 1, 0.64, 0.38)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_step_btn"]
-bg_color = Color(0.08, 0.12, 0.18, 0.8)
+bg_color = Color(0.06, 0.08, 0.11, 0.85)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.3, 0.5, 0.75, 0.5)
+border_color = Color(0, 1, 0.64, 0.28)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
@@ -138,6 +141,7 @@ alignment = 1
 [node name="TitleContainer" type="Control" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel" unique_id=537587066]
 custom_minimum_size = Vector2(0, 110)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="TitleLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/TitleContainer" unique_id=845370396]
 modulate = Color(0.95, 0.97, 1, 1)
@@ -285,7 +289,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.75, 1, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
 theme_override_font_sizes/font_size = 24
-text = "AUDIO & ACCESSIBILITY SETTINGS"
+text = "SETTINGS"
 horizontal_alignment = 1
 
 [node name="HSeparator" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content" unique_id=2029517554]
@@ -392,7 +396,7 @@ theme_override_fonts/font = ExtResource("5_font_cinzel")
 theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-text = "⮌ Back to Menu"
+text = "⮌ BACK TO MENU"
 script = ExtResource("2_hold_btn")
 
 [node name="GuidePanel" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer" unique_id=2007537610]
@@ -472,7 +476,7 @@ theme_override_fonts/font = ExtResource("5_font_cinzel")
 theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-text = "⮌ Back to Menu"
+text = "⮌ BACK TO MENU"
 script = ExtResource("2_hold_btn")
 
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/StartButton" to="." method="_on_start_button_pressed"]
@@ -487,4 +491,5 @@ script = ExtResource("2_hold_btn")
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/TTSToggleBtn" to="." method="_on_tts_toggle_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/BackFromSettingsButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/BackFromGuideButton" to="." method="_on_back_pressed"]
+
 
