@@ -218,6 +218,67 @@ func _exit_tree():
 	super._exit_tree()
 
 # Called on each frame to update the pickup
+# Direct hardware polling for trigger / click on any controller
+func _check_trigger_pressed() -> bool:
+	if not enabled:
+		return false
+		
+	# 1. Controller attached to this pointer
+	if _controller and _controller.get_is_active():
+		if _controller.is_button_pressed(active_button_action) \
+				or _controller.is_button_pressed("trigger_click") \
+				or _controller.is_button_pressed("trigger") \
+				or _controller.is_button_pressed("primary_click") \
+				or _controller.is_button_pressed("ax_button") \
+				or _controller.is_button_pressed("by_button") \
+				or _controller.get_float("trigger") >= 0.4 \
+				or _controller.get_float("trigger_click") >= 0.4:
+			return true
+
+	# 2. Right controller node
+	var r_ctrl := _controller_right_node if _controller_right_node else XRHelpers.get_right_controller(self)
+	if r_ctrl and r_ctrl.get_is_active():
+		if r_ctrl.is_button_pressed(active_button_action) \
+				or r_ctrl.is_button_pressed("trigger_click") \
+				or r_ctrl.is_button_pressed("trigger") \
+				or r_ctrl.is_button_pressed("primary_click") \
+				or r_ctrl.is_button_pressed("ax_button") \
+				or r_ctrl.is_button_pressed("by_button") \
+				or r_ctrl.get_float("trigger") >= 0.4 \
+				or r_ctrl.get_float("trigger_click") >= 0.4:
+			return true
+
+	# 3. Left controller node
+	var l_ctrl := _controller_left_node if _controller_left_node else XRHelpers.get_left_controller(self)
+	if l_ctrl and l_ctrl.get_is_active():
+		if l_ctrl.is_button_pressed(active_button_action) \
+				or l_ctrl.is_button_pressed("trigger_click") \
+				or l_ctrl.is_button_pressed("trigger") \
+				or l_ctrl.is_button_pressed("primary_click") \
+				or l_ctrl.is_button_pressed("ax_button") \
+				or l_ctrl.is_button_pressed("by_button") \
+				or l_ctrl.get_float("trigger") >= 0.4 \
+				or l_ctrl.get_float("trigger_click") >= 0.4:
+			return true
+
+	# 4. Direct XRServer tracker inspection
+	for tracker_name in [&"right_hand", &"left_hand"]:
+		var tracker = XRServer.get_tracker(tracker_name)
+		if tracker:
+			var trig_val = tracker.get_input(&"trigger")
+			if trig_val is float and trig_val >= 0.4:
+				return true
+			var trig_click = tracker.get_input(&"trigger_click")
+			if trig_click is bool and trig_click:
+				return true
+			elif trig_click is float and trig_click >= 0.4:
+				return true
+			var prim_click = tracker.get_input(&"primary_click")
+			if prim_click is bool and prim_click:
+				return true
+
+	return false
+
 func _process(delta):
 	super._process(delta)
 
@@ -293,6 +354,15 @@ func _process(delta):
 	# Update last values
 	last_target = new_target
 	last_collided_at = new_at
+
+	# Poll hardware trigger state every frame
+	var trigger_is_down := _check_trigger_pressed()
+	if trigger_is_down and not _is_trigger_down:
+		_is_trigger_down = true
+		_button_pressed()
+	elif not trigger_is_down and _is_trigger_down:
+		_is_trigger_down = false
+		_button_released()
 
 
 # Set pointer enabled property
@@ -569,4 +639,5 @@ func _visible_miss() -> void:
 	# Restore laser length if set to collide-length
 	$Laser.mesh.size.z = distance
 	$Laser.position.z = distance * -0.5
+
 

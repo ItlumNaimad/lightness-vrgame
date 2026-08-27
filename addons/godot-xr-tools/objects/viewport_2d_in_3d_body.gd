@@ -145,7 +145,7 @@ func _report_touch_down(index : int, at : Vector2) -> void:
 	event.index = index
 	event.position = at
 	event.pressed = true
-	_viewport.push_input(event)
+	_viewport.push_input(event, true)
 
 
 # Report touch-up event
@@ -154,7 +154,7 @@ func _report_touch_up(index : int, at : Vector2) -> void:
 	event.index = index
 	event.position = at
 	event.pressed = false
-	_viewport.push_input(event)
+	_viewport.push_input(event, true)
 
 
 # Report touch-move event
@@ -164,7 +164,7 @@ func _report_touch_move(index : int, pressed : bool, from : Vector2, to : Vector
 	event.position = to
 	event.pressure = 1.0 if pressed else 0.0
 	event.relative = to - from
-	_viewport.push_input(event)
+	_viewport.push_input(event, true)
 
 
 # Report mouse-down event
@@ -173,7 +173,7 @@ func _report_mouse_down(at : Vector2) -> void:
 	move_event.position = at
 	move_event.global_position = at
 	move_event.button_mask = 1
-	_viewport.push_input(move_event)
+	_viewport.push_input(move_event, true)
 
 	var event := InputEventMouseButton.new()
 	event.button_index = MOUSE_BUTTON_LEFT
@@ -181,7 +181,7 @@ func _report_mouse_down(at : Vector2) -> void:
 	event.position = at
 	event.global_position = at
 	event.button_mask = 1
-	_viewport.push_input(event)
+	_viewport.push_input(event, true)
 
 
 # Report mouse-up event
@@ -192,7 +192,7 @@ func _report_mouse_up(at : Vector2) -> void:
 	event.position = at
 	event.global_position = at
 	event.button_mask = 0
-	_viewport.push_input(event)
+	_viewport.push_input(event, true)
 
 
 # Report mouse-move event
@@ -203,7 +203,7 @@ func _report_mouse_move(pressed : bool, from : Vector2, to : Vector2) -> void:
 	event.relative = to - from
 	event.button_mask = 1 if pressed else 0
 	event.pressure = 1.0 if pressed else 0.0
-	_viewport.push_input(event)
+	_viewport.push_input(event, true)
 
 
 # Find the next free touch index
@@ -219,4 +219,5 @@ func _next_touch_index() -> int:
 
 	# No hole so add to end
 	return current.size()
+
 
