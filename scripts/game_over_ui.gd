@@ -1,4 +1,4 @@
-@tool
+﻿@tool
 extends Control
 
 signal restart_pressed
@@ -19,15 +19,15 @@ func _ready() -> void:
 
 func _setup_accessibility() -> void:
 	if not Engine.is_editor_hint() and TTSManager:
-		TTSManager.setup_button(restart_button, "Zagraj Ponownie")
-		TTSManager.setup_button(menu_button, "Menu Główne")
+		TTSManager.setup_button(restart_button, "Play Again")
+		TTSManager.setup_button(menu_button, "Main Menu")
 		
-		# Odczytanie komunikatu o końcu gry po ułamku sekundy
+		# Read game over summary after brief delay
 		await get_tree().create_timer(0.3).timeout
 		var total_seconds: int = int(SceneLoader.last_survival_time)
 		var minutes: int = int(total_seconds / 60.0)
 		var seconds: int = total_seconds % 60
-		var summary_text = "Koniec gry. Przeżyłeś %d minut i %d sekund. Przyczyna: %s." % [minutes, seconds, SceneLoader.last_death_reason]
+		var summary_text = "Game over. You survived %d minutes and %d seconds. Cause of death: %s." % [minutes, seconds, SceneLoader.last_death_reason]
 		TTSManager.speak(summary_text, false)
 
 func _update_stats() -> void:
@@ -51,3 +51,4 @@ func _on_restart_button_pressed() -> void:
 
 func _on_menu_button_pressed() -> void:
 	menu_pressed.emit()
+

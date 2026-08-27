@@ -1,4 +1,4 @@
-extends Node
+﻿extends Node
 
 ## TTSManager — Globalny menedżer lektora (Text-to-Speech) i dostępności UI
 ## Wykorzystuje natywne API DisplayServer w Godot 4.x z buforowaniem i odrzucaniem spamu (Dwell Debounce).
@@ -35,9 +35,11 @@ func _init_voices() -> void:
 		var voices = DisplayServer.tts_get_voices()
 		if voices.size() > 0:
 			current_voice_id = voices[0]["id"]
+			# Prefer English TTS voice (en, eng, english)
 			for v in voices:
 				var lang = v.get("language", "").to_lower()
-				if "pl" in lang or "pol" in lang:
+				var v_name = v.get("name", "").to_lower()
+				if "en" in lang or "eng" in lang or "english" in v_name:
 					current_voice_id = v["id"]
 					break
 
@@ -149,3 +151,4 @@ func _trigger_ui_haptic(frequency: float, amplitude: float, duration: float) -> 
 			left_hand.trigger_haptic_pulse("haptic", frequency, amplitude, duration, 0.0)
 		if right_hand and right_hand is XRController3D:
 			right_hand.trigger_haptic_pulse("haptic", frequency, amplitude, duration, 0.0)
+

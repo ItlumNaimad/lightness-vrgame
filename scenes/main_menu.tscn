@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://cobrdt2tet5ga"]
+﻿[gd_scene load_steps=18 format=3 uid="uid://cobrdt2tet5ga"]
 
 [ext_resource type="Script" path="res://scripts/main_menu.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="2_bqqt6"]
@@ -7,9 +7,9 @@
 [ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="5_player"]
 [ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="6_startxr"]
 [ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="7_fade"]
-[ext_resource type="Texture2D" uid="uid://cypy2uylu8c5u" path="res://assets/textures/Plaster006_2K-PNG/Plaster006_2K-PNG_Color.png" id="8_wall_color"]
-[ext_resource type="Texture2D" uid="uid://cv3xwb671v8vi" path="res://assets/textures/Plaster006_2K-PNG/Plaster006_2K-PNG_NormalGL.png" id="9_wall_normal"]
-[ext_resource type="Texture2D" uid="uid://bgm0p8p52u1x4" path="res://assets/textures/Plaster006_2K-PNG/Plaster006_2K-PNG_Roughness.png" id="10_wall_rough"]
+[ext_resource type="Texture2D" uid="uid://bsc3ql0fq5x8b" path="res://assets/textures/Plaster006_2K-PNG/Plaster006_2K-PNG_Color.png" id="8_wall_color"]
+[ext_resource type="Texture2D" uid="uid://cpahkw3dcl28d" path="res://assets/textures/Plaster006_2K-PNG/Plaster006_2K-PNG_NormalGL.png" id="9_wall_normal"]
+[ext_resource type="Texture2D" uid="uid://dnum5txu5gvmk" path="res://assets/textures/Plaster006_2K-PNG/Plaster006_2K-PNG_Roughness.png" id="10_wall_rough"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_menu"]
 sky_top_color = Color(0.02, 0.03, 0.05, 1)
@@ -43,6 +43,33 @@ size = Vector3(6, 4.2, 0.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
 size = Vector3(6, 4.2, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_side"]
+material = SubResource("StandardMaterial3D_wall")
+size = Vector3(0.2, 4.2, 4.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_side"]
+size = Vector3(0.2, 4.2, 4.45)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ceiling"]
+material = SubResource("StandardMaterial3D_wall")
+size = Vector3(6.2, 0.2, 4.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ceiling"]
+size = Vector3(6.2, 0.2, 4.45)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lamp"]
+albedo_color = Color(0.8, 0.85, 0.9, 1)
+emission_enabled = true
+emission = Color(0.7, 0.85, 1, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_lamp"]
+material = SubResource("StandardMaterial3D_lamp")
+top_radius = 0.2
+bottom_radius = 0.25
+height = 0.1
+radial_segments = 16
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pipe"]
 albedo_color = Color(0.18, 0.17, 0.16, 1)
@@ -121,6 +148,53 @@ mesh = SubResource("CylinderMesh_pipe")
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 1.8, 0.02)
 mesh = SubResource("CylinderMesh_pipe")
 
+[node name="BackWall" type="StaticBody3D" parent="." unique_id=194827101]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 2.4)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="BackWall"]
+mesh = SubResource("BoxMesh_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BackWall"]
+shape = SubResource("BoxShape3D_wall")
+
+[node name="LeftWall" type="StaticBody3D" parent="." unique_id=194827102]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1.6, 0.275)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LeftWall"]
+mesh = SubResource("BoxMesh_wall_side")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LeftWall"]
+shape = SubResource("BoxShape3D_wall_side")
+
+[node name="RightWall" type="StaticBody3D" parent="." unique_id=194827103]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.6, 0.275)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RightWall"]
+mesh = SubResource("BoxMesh_wall_side")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RightWall"]
+shape = SubResource("BoxShape3D_wall_side")
+
+[node name="Ceiling" type="StaticBody3D" parent="." unique_id=194827104]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.7, 0.275)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ceiling"]
+mesh = SubResource("BoxMesh_ceiling")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling"]
+shape = SubResource("BoxShape3D_ceiling")
+
+[node name="CeilingLampFixture" type="MeshInstance3D" parent="Ceiling"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+mesh = SubResource("CylinderMesh_lamp")
+
+[node name="CeilingLight" type="OmniLight3D" parent="Ceiling"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0)
+light_color = Color(0.65, 0.8, 1, 1)
+light_energy = 0.8
+omni_range = 5.5
+omni_attenuation = 1.2
+
 [node name="Viewport2Din3D" parent="." unique_id=1130208441 instance=ExtResource("2_bqqt6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -1.78)
 screen_size = Vector2(2.4, 1.45)
@@ -140,3 +214,5 @@ autoplay = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Fade" parent="." unique_id=1653293877 instance=ExtResource("7_fade")]
+
+
