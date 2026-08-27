@@ -1,4 +1,4 @@
-# Nowy system zarządzania scenami (SceneLoader.gd)
+﻿# Nowy system zarządzania scenami (SceneLoader.gd)
 
 Zrezygnowaliśmy z podejścia "Staging" (z persistentnym graczem w `main.tscn`) na rzecz **pełnej podmiany scen** (`change_scene_to_packed`). Rozwiązuje to krytyczne problemy z fizyką XR oraz błędami kolizji przy teleportacji na dynamicznie ładowane mapy.
 
@@ -142,6 +142,37 @@ Przeprowadzono pełną analizę projektu (szczegóły w pliku `gameDoc/Inżynier
    - Zmodyfikowano [`addons/godot-xr-tools/materials/pointer.tres`](file:///c:/Users/naimad/Documents/lightness-vrgame/addons/godot-xr-tools/materials/pointer.tres) i [`function_pointer.tscn`](file:///c:/Users/naimad/Documents/lightness-vrgame/addons/godot-xr-tools/functions/function_pointer.tscn).
    - Zastąpiono gruby czerwony promień i wielką kulę cienką wiązką (1.2mm) w chłodnym błękitnym kolorze (`Color(0.15, 0.55, 1, 0.6)`) oraz miniaturową świecącą kropką celownika.
 
+23. **Rozbudowa pokoju Menu Głównego i poprawa ergonomii przestrzennej (v0.5.2):**
+   - **Pełnowymiarowe pomieszczenie 3D**: Dotychczasowe menu składało się jedynie z pojedynczej płaskiej ściany zawieszonej w próżni, co wywoływało poczucie klaustrofobii i nienaturalnego lewitowania w pustce. Zbudowano pełny pokój industrialny o wymiarach 10.0m x 9.2m i wysokości 4.8m (podłoga, sufit, ściany boczne, ściana tylna oraz frontowa ściana interaktywna z rurami przemysłowymi i lampą sufitową).
+   - **Korekta ergonomii i wysokości**: Podniesiono `Viewport2Din3D` na ścianie (`transform.origin.y = 2.15m`, screen_size `2.4m x 1.45m`). Wcześniej interfejs wisiał zbyt nisko, zmuszając gracza do nienaturalnego pochylania głowy i schylania się w goglach.
+   - **Ukierunkowane oświetlenie strefowe**: Wyeliminowano ogólne jasne rozświetlenie otoczenia. Źródło światła punktowego `SpotLight3D` (`MenuSpotLight`) skierowano selektywnie wyłącznie na ścianę interfejsu (GUI), podczas gdy reszta pomieszczenia i sufit zostały przyciemnione (`WorldEnvironment` z chłodnym ambientem `Color(0.08, 0.1, 0.14)`). Nadaje to surowy, skupiony klimat bez oślepiania gracza.
+   - **Korekta ekranu Game Over**: W scenie `scenes/game_over.tscn` usunięto jaskrawe, zalewające całą przestrzeń czerwone światło, skupiając delikatniejsze oświetlenie punktowe jedynie na ścianie z wynikami telemetrii sesji.
+
+24. **Cyfrowy Glitch napisu tytułowego i estetyka ścian (v0.5.2):**
+   - **Czcionka i shader**: Napis tytułowy "LIGHTLESS" wyśrodkowano i zmieniono czcionkę na cyfrową `RubikGlitch-Regular.ttf` współpracującą z shaderem `glitch_text.gdshader`.
+   - **Balans czasu trwania**: Wcześniejszy mikro-offset był ledwo dostrzegalny. Zwiększono częstotliwość występowania zakłóceń oraz wydłużono czas trwania silniejszego glitcha do ok. 1.0 sekundy, dzięki czemu gracz wyraźnie widzi dynamiczną zmianę glifów i artefakty cyfrowe.
+   - **Styl Google Stitch**: Ekrany Settings i Game Over zintegrowano ze stylistyką wyrytych w ścianie inskrypcji. Interaktywne przyciski rozświetlają się neonowym blaskiem i płynnie powiększają po najechaniu laserem VR, bez konieczności stosowania odcinających się prostokątnych paneli tła.
+
+25. **Przełączenie syntezatora mowy TTS na język angielski (v0.5.2):**
+   - Poprzednio syntezator mowy w systemie Windows SAPI wymuszał głos polski, co brzmiało nienaturalnie przy anglojęzycznym interfejsie ("Start Game", "Settings", "Controls and Survival Guide", "Exit Game").
+   - W `scripts/tts_manager.gd` przestawiono domyślny język syntezy na angielski (lokalizacja `en`), dzięki czemu lektor poprawnie i płynnie wymawia nazwy kontrolek i opcji.
+
+26. **Batalia z niedziałającymi przyciskami – studium błędu (v0.5.2):**
+   - **Objaw**: Po najechaniu na przycisk (np. Start Game lub Settings) i przytrzymaniu triggera pasek napełniał się do 100%, lecz po załadowaniu nie następowała jakakolwiek reakcja — brak przejścia do mapy gry, brak otwarcia ustawień, brak możliwości wyjścia. Gracz był uwięziony w menu.
+   - **Diagnoza etap 1 (Pętla wielokrotnego ładowania)**: W logach debugera ujawniono, że `[HoldButton] ACTIVATED: SettingsButton` odpalało się 4 razy z rzędu w ułamku sekundy. Wynikało to z faktu, że gracz po osiągnięciu 100% napełnienia nadal fizycznie trzymał trigger, przez co po 0.4s cooldownu przycisk natychmiast ładował się od nowa. Naprawiono to wprowadzając flagę `_wait_for_release = true`, która zamraża ładowanie aż do fizycznego puszczenia spustu.
+   - **Diagnoza etap 2 (Brak reakcji mimo pojedynczego wyzwolenia)**: Mimo wyeliminowania pętli, przycisk nadal nic nie robił. Wprowadzono diagnostyczne printy w łańcuchu: `HoldButton` -> `pressed` -> `main_menu_ui.gd` -> `start_pressed` -> `main_menu.gd`.
+   - **Przełom diagnostyczny ("The Missing Script Bug")**: W logu konsoli pojawił się krytyczny wpis:
+     `[MainMenu] Found UI instance: MainMenuUI`
+     `[MainMenu] ERROR: UI does not have start_pressed signal!`
+     `[MainMenu] ERROR: UI does not have exit_pressed signal!`
+     W pliku `scenes/main_menu_ui.tscn` korzeń sceny `[node name="MainMenuUI" type="Control"]` z niewyjaśnionych przyczyn utracił linijkę `script = ExtResource("1_ui_script")`. W efekcie Godot traktował całe UI jako goły węzeł `Control`. Sygnały `start_pressed` i `exit_pressed` w ogóle nie istniały na obiekcie, a wywołania sygnałów wewnętrznych (np. `_on_settings_button_pressed`) trafiały w próżnię (Control nie posiada takich metod).
+   - **Rozwiązanie**: Przywrócono powiązanie skryptu `main_menu_ui.gd` do korzenia sceny w pliku `.tscn`. W efekcie cała komunikacja i nawigacja między panelami oraz startem mapy natychmiast zaczęła działać.
+
+27. **Zidentyfikowane błędy, dług techniczny i wnioski:**
+   - **Błąd podwójnego Jumpscare'a**: Zauważono, że po wystąpieniu sekwencji jumpscare gracz nadal może wykonać minimalny ruch kontrolerem. Może to spowodować wejście w strefę kolizji kolejnego przeciwnika i wywołanie drugiego jumpscare'a nakładającego się na pierwszy. Konieczne jest natychmiastowe zablokowanie fizyki gracza i wejść ruchu (`movement_providers`) w momencie zainicjowania ataku w `JumpscareHelper`.
+   - **Błąd wyłącznika TTS**: Przycisk toggle w panelu Settings wizualnie zmienia stan ("Sound Compass: ON/OFF", "TTS Voice: ON/OFF"), lecz wyłączenie TTS w żaden sposób nie blokuje odtwarzania mowy w `TTSManager` — syntezator nadal odczytuje teksty. Należy dodać ścisłą weryfikację flagi `tts_enabled` przed każdym wywołaniem `DisplayServer.tts_speak()`.
+   - **Mechanika aktywacji przycisków (Kliknięcie vs Hold)**: W toku testów ustalono, że przyciski reagują zarówno na pojedyncze kliknięcie triggera (z racji podpięcia wskaźnika laserowego VR), jak i na pełne przytrzymanie paska `HoldButton`. Skoro wystarczy samo kliknięcie triggera, animacja ładowania paska jest zbędna i wprowadza niepotrzebną zwłokę. W kolejnej iteracji planowane jest usunięcie animacji paska na rzecz natychmiastowego kliknięcia.
+
 ### Zadania do wykonania
 
 | Priorytet | Zadanie                                                                                       | Status       |
@@ -149,13 +180,18 @@ Przeprowadzono pełną analizę projektu (szczegóły w pliku `gameDoc/Inżynier
 | 🟢 WYSOKI | Ekran Game Over (dedykowana scena / UI / telemetria)                                         | Zrobione     |
 | 🟢 WYSOKI | System TTS / lektora w menu (Accessibility z Dwell Debounce) + HoldButton                      | Zrobione     |
 | 🟢 WYSOKI | Przebudowa Menu Głównego (industrialna ściana 3D + glitch "LIGHTLESS")                       | Zrobione     |
+| 🟢 WYSOKI | Rozbudowa pokoju Menu Głównego do pełnego 3D (v0.5.2)                                         | Zrobione     |
+| 🟢 WYSOKI | Naprawa łańcucha sygnałów UI i odblokowanie nawigacji menu (v0.5.2)                            | Zrobione     |
+| 🟢 WYSOKI | Lektor TTS w języku angielskim (v0.5.2)                                                       | Zrobione     |
 | 🟢 WYSOKI | Fizyczne blokowanie rąk gracza (`CollisionHand`)                                             | Zrobione     |
 | 🟢 WYSOKI | Zaawansowane dźwięki kroków gracza (zależne od powierzchni podłogi + triggery dla Foxy)       | Zrobione     |
 | 🟢 WYSOKI | Dźwiękowa informacja zwrotna przy obracaniu się joystickiem (Whoosh + Kompas Dźwiękowy)       | Zrobione     |
 | 🟢 WYSOKI | Subtelne wskaźniki VR w chłodnym błękicie (`FunctionPointer`)                                | Zrobione     |
 | 🟢 NISKI  | Nazwa projektu → "Lightless" w `project.godot` i dokumentacji                                 | Zrobione     |
 | 🟢 NISKI  | Nazwy warstw kolizji w `project.godot`                                                        | Zrobione     |
+| 🔴 PILNE  | Blokada ruchu po Jumpscare (eliminacja szczątkowego ruchu i podwójnego jumpscare'a)           | Do zrobienia |
+| 🔴 PILNE  | Naprawa wyłącznika TTS w panelu Settings (pełna blokada mowy lektora)                         | Do zrobienia |
+| 🟡 WYSOKI | Uproszczenie przycisków VR (usunięcie animacji paska HoldButton na rzecz kliknięcia)         | Do zrobienia |
 | 🟡 WYSOKI | Threat Director (pacing wrogów: Balora 0:20, Marionette 0:50, Foxy 1:30)                      | Do zrobienia |
 | 🟡 WYSOKI | Nowy przeciwnik Phantom Grasp (macki / chwyt kontrolera i wyszarpywanie)                      | Do zrobienia |
 | 🟡 ŚREDNI | Menu Pauzy w grze (`scenes/pause_menu.tscn`)                                                  | Do zrobienia |
-
