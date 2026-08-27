@@ -3,7 +3,7 @@ class_name HoldButton
 
 ## HoldButton — Interaktywny przycisk VR stylizowany na wyryty w betonowej ścianie.
 ## Po najechaniu wskaźnikiem napis delikatnie wysuwa się w stronę gracza (scale-up) i rozbłyska.
-## Samo najechanie NIE aktywuje opcji. Aby zatwierdzić, gracz musi PRZYTRZYMAĆ spust (trigger)
+## Samo najechanie NIE ładuje opcji. Aby zatwierdzić, gracz musi PRZYTRZYMAĆ spust (trigger)
 ## lub przycisk "A" na kontrolerze tak długo, aż pasek energii napełni się w 100%.
 
 @export var charge_time_hold: float = 0.55   # Czas przytrzymania spustu (trigger) do zatwierdzenia
@@ -11,6 +11,7 @@ class_name HoldButton
 var _is_hovered: bool = false
 var _is_input_holding: bool = false
 var _charge: float = 0.0
+var _cooldown: float = 0.0
 var _current_scale: float = 1.0
 var _target_scale: float = 1.0
 var _tween: Tween
@@ -58,6 +59,14 @@ func _apply_engraved_style() -> void:
 	add_theme_constant_override("outline_size", 2)
 
 func _process(delta: float) -> void:
+	# Cooldown po zatwierdzeniu — blokuje natychmiastowe kliknięcie na kolejnym ekranie
+	if _cooldown > 0.0:
+		_cooldown -= delta
+		_charge = 0.0
+		_is_input_holding = false
+		queue_redraw()
+		return
+
 	# Płynne skalowanie wyrytego napisu (wysuwanie w stronę gracza)
 	_current_scale = lerp(_current_scale, _target_scale, delta * 12.0)
 	scale = Vector2(_current_scale, _current_scale)
@@ -71,7 +80,7 @@ func _process(delta: float) -> void:
 		return
 
 	# Gracz najeżdża na napis — sprawdzamy CZY TRZYMA SPUST / PRZYCISK:
-	var holding := _is_input_holding or _is_xr_trigger_held()
+	var holding := _is_input_holding or _is_trigger_down_on_controller() or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
 	
 	if holding:
 		# Ładowanie postępuje TYLKO wtedy, gdy trigger/przycisk jest aktywnie trzymany!
@@ -85,12 +94,13 @@ func _process(delta: float) -> void:
 		# Gracz tylko najeżdża laserem LUB puścił trigger przed dojściem do 100%:
 		# Pasek energii cofa się do zera. Samo najechanie NIE ładuje opcji!
 		if _charge > 0.0:
-			_charge = max(0.0, _charge - delta * 3.5)
+			_charge = max(0.0, _charge - delta * 4.0)
 			queue_redraw()
 
 func _trigger_activation() -> void:
 	_charge = 0.0
 	_is_input_holding = false
+	_cooldown = 0.5  # 0.5s przerwy, aby nie kliknąć przycisku na nowym panelu
 	queue_redraw()
 	
 	# Efekt rozbłysku potwierdzenia
@@ -103,59 +113,30 @@ func _trigger_activation() -> void:
 	# Wywołanie akcji
 	emit_signal("pressed")
 
-func _is_xr_trigger_held() -> bool:
-	# 1. Sprawdzenie serwera OpenXR dla prawej i lewej ręki
-	for tracker_name in [&"right_hand", &"left_hand"]:
-		var tracker = XRServer.get_tracker(tracker_name)
-		if tracker:
-			# Spust analogowy (trigger)
-			var trig = tracker.get_input(&"trigger")
-			if trig is float and trig >= 0.25:
-				return true
-			# Trigger click
-			var trig_click = tracker.get_input(&"trigger_click")
-			if (trig_click is bool and trig_click) or (trig_click is float and trig_click >= 0.25):
-				return true
-			# Przycisk "A" (primary_click)
-			var prim = tracker.get_input(&"primary_click")
-			if (prim is bool and prim) or (prim is float and prim >= 0.25):
-				return true
-			# Przycisk "B" (secondary_click)
-			var sec = tracker.get_input(&"secondary_click")
-			if (sec is bool and sec) or (sec is float and sec >= 0.25):
-				return true
-			# Grip
-			var grip = tracker.get_input(&"grip_click")
-			if (grip is bool and grip) or (grip is float and grip >= 0.25):
-				return true
-
-	# 2. Sprawdzenie węzłów kontrolera gracza w drzewie
+func _is_trigger_down_on_controller() -> bool:
 	var player = get_tree().get_first_node_in_group("player")
 	if player:
 		for hand_name in ["XROrigin3D/right_hand", "XROrigin3D/left_hand"]:
 			var ctrl = player.get_node_or_null(hand_name) as XRController3D
 			if ctrl and ctrl.get_is_active():
-				if ctrl.get_float("trigger") >= 0.25 \
-						or ctrl.is_button_pressed("trigger_click") \
-						or ctrl.is_button_pressed("trigger") \
-						or ctrl.is_button_pressed("primary_click") \
-						or ctrl.is_button_pressed("ax_button") \
-						or ctrl.is_button_pressed("by_button"):
+				# Spust analogowy wciśnięty powyżej 50%
+				if ctrl.get_float("trigger") > 0.5:
 					return true
-
-	# 3. Wejście z klawiatury / myszy (desktop)
-	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		return true
-	if Input.is_action_pressed("ui_accept"):
-		return true
-
+				# Przycisk "A" na Quest (ax_button)
+				if ctrl.is_button_pressed("ax_button"):
+					return true
+				# Spust binarny
+				if ctrl.is_button_pressed("trigger_click"):
+					return true
 	return false
 
 func _trigger_haptic_feedback() -> void:
-	for tracker_name in [&"right_hand", &"left_hand"]:
-		var tracker = XRServer.get_tracker(tracker_name)
-		if tracker and tracker.has_method("trigger_haptic_pulse"):
-			tracker.trigger_haptic_pulse("haptic", 100.0, 0.7, 0.12, 0.0)
+	var player = get_tree().get_first_node_in_group("player")
+	if player:
+		for hand_name in ["XROrigin3D/right_hand", "XROrigin3D/left_hand"]:
+			var ctrl = player.get_node_or_null(hand_name) as XRController3D
+			if ctrl and ctrl.get_is_active():
+				ctrl.trigger_haptic_pulse("haptic", 100.0, 0.7, 0.12, 0.0)
 
 func _on_hover_started() -> void:
 	_is_hovered = true
