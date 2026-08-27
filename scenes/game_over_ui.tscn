@@ -14,7 +14,7 @@ shader_parameter/scanline_density = 140.0
 shader_parameter/block_size = 0.04
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glass"]
-bg_color = Color(0.04, 0.05, 0.08, 0.88)
+bg_color = Color(0.02, 0.03, 0.05, 0.3)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -31,7 +31,7 @@ border_width_bottom = 1
 border_color = Color(0, 1, 0.64, 0.25)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
-bg_color = Color(0.06, 0.08, 0.12, 0.75)
+bg_color = Color(0.03, 0.05, 0.08, 0.45)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -118,7 +118,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.015, 0.02, 0.03, 0.75)
+mouse_filter = 2
+color = Color(0, 0, 0, 0)
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
 layout_mode = 1
@@ -304,3 +305,4 @@ script = ExtResource("2_hold_btn")
 
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsContainer/RestartButton" to="." method="_on_restart_button_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsContainer/MenuButton" to="." method="_on_menu_button_pressed"]
+

@@ -1,4 +1,4 @@
-@tool
+﻿@tool
 @icon("res://addons/godot-xr-tools/editor/icons/function.svg")
 class_name XRToolsFunctionPointer
 extends XRToolsHandAimOffset
@@ -118,6 +118,7 @@ var _controller_right_node : XRController3D
 
 # The currently active controller
 var _active_controller : XRController3D
+var _is_trigger_down : bool = false
 
 
 ## Add support for is_xr_class on XRTools classes
@@ -144,6 +145,7 @@ func _enter_tree():
 		# Get button press feedback from our parent controller
 		_controller.button_pressed.connect(_on_button_pressed.bind(_controller))
 		_controller.button_released.connect(_on_button_released.bind(_controller))
+		_controller.input_float_changed.connect(_on_input_float_changed.bind(_controller))
 	else:
 		# Disable this if we don't have a controller
 		hand_offset_mode = 4
@@ -160,10 +162,14 @@ func _enter_tree():
 				_on_button_pressed.bind(_controller_left_node))
 		_controller_left_node.button_released.connect(
 				_on_button_released.bind(_controller_left_node))
+		_controller_left_node.input_float_changed.connect(
+				_on_input_float_changed.bind(_controller_left_node))
 		_controller_right_node.button_pressed.connect(
 				_on_button_pressed.bind(_controller_right_node))
 		_controller_right_node.button_released.connect(
 				_on_button_released.bind(_controller_right_node))
+		_controller_right_node.input_float_changed.connect(
+				_on_input_float_changed.bind(_controller_right_node))
 
 	# init our state
 	_update_y_offset()
@@ -183,6 +189,7 @@ func _exit_tree():
 	if _controller and not Engine.is_editor_hint():
 		_controller.button_pressed.disconnect(_on_button_pressed.bind(_controller))
 		_controller.button_released.disconnect(_on_button_released.bind(_controller))
+		_controller.input_float_changed.disconnect(_on_input_float_changed.bind(_controller))
 
 		# This will be unset in our superclass method
 
@@ -192,6 +199,8 @@ func _exit_tree():
 					_on_button_pressed.bind(_controller_left_node))
 			_controller_left_node.button_released.disconnect(
 					_on_button_released.bind(_controller_left_node))
+			_controller_left_node.input_float_changed.disconnect(
+					_on_input_float_changed.bind(_controller_left_node))
 
 		_controller_left_node = null
 
@@ -201,6 +210,8 @@ func _exit_tree():
 					_on_button_pressed.bind(_controller_right_node))
 			_controller_right_node.button_released.disconnect(
 					_on_button_released.bind(_controller_right_node))
+			_controller_right_node.input_float_changed.disconnect(
+					_on_input_float_changed.bind(_controller_right_node))
 
 		_controller_right_node = null
 
@@ -464,17 +475,35 @@ func _button_released() -> void:
 
 # Button pressed handler
 func _on_button_pressed(p_button : String, controller : XRController3D) -> void:
-	if p_button == active_button_action and enabled:
-		if controller == _active_controller:
+	if not enabled:
+		return
+	if p_button == active_button_action or p_button == "trigger" or p_button == "trigger_click" or p_button == "primary_click" or p_button == "ax_button" or p_button == "by_button":
+		_active_controller = controller
+		if not _is_trigger_down:
+			_is_trigger_down = true
 			_button_pressed()
-		else:
-			_active_controller = controller
 
 
 # Button released handler
 func _on_button_released(p_button : String, _controller : XRController3D) -> void:
-	if p_button == active_button_action and target:
-		_button_released()
+	if p_button == active_button_action or p_button == "trigger" or p_button == "trigger_click" or p_button == "primary_click" or p_button == "ax_button" or p_button == "by_button":
+		if _is_trigger_down or target:
+			_is_trigger_down = false
+			_button_released()
+
+
+# Float input handler (e.g. analog trigger on Quest/Oculus Touch)
+func _on_input_float_changed(p_action : String, p_value : float, controller : XRController3D) -> void:
+	if not enabled:
+		return
+	if p_action == "trigger" or p_action == "trigger_value" or p_action == active_button_action:
+		if p_value >= 0.5 and not _is_trigger_down:
+			_is_trigger_down = true
+			_active_controller = controller
+			_button_pressed()
+		elif p_value < 0.25 and _is_trigger_down:
+			_is_trigger_down = false
+			_button_released()
 
 
 # Update the laser active material
@@ -540,3 +569,4 @@ func _visible_miss() -> void:
 	# Restore laser length if set to collide-length
 	$Laser.mesh.size.z = distance
 	$Laser.position.z = distance * -0.5
+
