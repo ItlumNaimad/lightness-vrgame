@@ -101,6 +101,8 @@ func _show_panel(panel_name: String) -> void:
 
 func _on_start_button_pressed() -> void:
 	start_pressed.emit()
+	if start_pressed.get_connections().is_empty():
+		SceneLoader.load_scene("res://scenes/game_map.tscn")
 
 func _on_settings_button_pressed() -> void:
 	_show_panel("settings")
@@ -114,6 +116,8 @@ func _on_guide_button_pressed() -> void:
 
 func _on_exit_button_pressed() -> void:
 	exit_pressed.emit()
+	if exit_pressed.get_connections().is_empty():
+		get_tree().quit()
 
 func _on_back_pressed() -> void:
 	_show_panel("main")
@@ -170,3 +174,4 @@ func _on_tts_toggle_pressed() -> void:
 		_update_settings_ui()
 		if TTSManager.tts_enabled:
 			TTSManager.speak("TTS voice enabled", true)
+

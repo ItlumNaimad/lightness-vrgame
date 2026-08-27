@@ -100,18 +100,18 @@ func _process(delta: float) -> void:
 func _trigger_activation() -> void:
 	_charge = 0.0
 	_is_input_holding = false
-	_cooldown = 0.5  # 0.5s przerwy, aby nie kliknąć przycisku na nowym panelu
+	_cooldown = 0.4  # 0.4s przerwy
 	queue_redraw()
 	
 	# Efekt rozbłysku potwierdzenia
 	_current_scale = 1.14
 	scale = Vector2(_current_scale, _current_scale)
 	
-	# Wibracja w kontrolerze (haptics)
-	_trigger_haptic_feedback()
-	
-	# Wywołanie akcji
+	# 1. BEZWZGLĘDNIE NAJPIERW: Wywołanie akcji przycisku
 	emit_signal("pressed")
+	
+	# 2. Bezpieczna haptyka przez XRServer
+	_trigger_haptic_feedback()
 
 func _is_trigger_down_on_controller() -> bool:
 	var player = get_tree().get_first_node_in_group("player")
@@ -119,8 +119,8 @@ func _is_trigger_down_on_controller() -> bool:
 		for hand_name in ["XROrigin3D/right_hand", "XROrigin3D/left_hand"]:
 			var ctrl = player.get_node_or_null(hand_name) as XRController3D
 			if ctrl and ctrl.get_is_active():
-				# Spust analogowy wciśnięty powyżej 50%
-				if ctrl.get_float("trigger") > 0.5:
+				# Spust analogowy wciśnięty powyżej 40%
+				if ctrl.get_float("trigger") > 0.4:
 					return true
 				# Przycisk "A" na Quest (ax_button)
 				if ctrl.is_button_pressed("ax_button"):
@@ -131,12 +131,9 @@ func _is_trigger_down_on_controller() -> bool:
 	return false
 
 func _trigger_haptic_feedback() -> void:
-	var player = get_tree().get_first_node_in_group("player")
-	if player:
-		for hand_name in ["XROrigin3D/right_hand", "XROrigin3D/left_hand"]:
-			var ctrl = player.get_node_or_null(hand_name) as XRController3D
-			if ctrl and ctrl.get_is_active():
-				ctrl.trigger_haptic_pulse("haptic", 100.0, 0.7, 0.12, 0.0)
+	if XRServer.primary_interface:
+		for tracker in ["right_hand", "left_hand"]:
+			XRServer.primary_interface.trigger_haptic_pulse("haptic", tracker, 100.0, 0.7, 0.1, 0.0)
 
 func _on_hover_started() -> void:
 	_is_hovered = true
