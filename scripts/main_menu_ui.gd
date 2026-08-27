@@ -92,6 +92,7 @@ func _setup_accessibility() -> void:
 	TTSManager.setup_button(back_from_guide_btn, "Back to Main Menu")
 
 func _show_panel(panel_name: String) -> void:
+	print("[MainMenuUI] Switching to panel: ", panel_name)
 	if main_panel:
 		main_panel.visible = (panel_name == "main")
 	if settings_panel:
@@ -100,11 +101,13 @@ func _show_panel(panel_name: String) -> void:
 		guide_panel.visible = (panel_name == "guide")
 
 func _on_start_button_pressed() -> void:
+	print("[MainMenuUI] Start button pressed! Emitting start_pressed...")
 	start_pressed.emit()
 	if start_pressed.get_connections().is_empty():
 		SceneLoader.load_scene("res://scenes/game_map.tscn")
 
 func _on_settings_button_pressed() -> void:
+	print("[MainMenuUI] Settings button pressed! Calling _show_panel('settings')")
 	_show_panel("settings")
 	if TTSManager:
 		TTSManager.announce_panel("Settings screen. Use plus and minus buttons to adjust volume.")
