@@ -35,7 +35,7 @@ controller = 1
 [node name="MovementFootstep" parent="XROrigin3D" unique_id=118507568 instance=ExtResource("14_footstep")]
 default_surface_audio_type = ExtResource("15_surface")
 
-[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D" unique_id=639605948]
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D" unique_id=639605948 groups=["player_head"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06774485, 0.47796416, -0.18833774)
 
 [node name="VRCommonShaderCache" parent="XROrigin3D/XRCamera3D" unique_id=1303836383 instance=ExtResource("2_qhqgy")]

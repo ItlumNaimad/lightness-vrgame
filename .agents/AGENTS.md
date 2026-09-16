@@ -4,7 +4,7 @@
 ## Kontekst projektu
 - **Gatunek:** Gra survival horror w VR tworzona w silniku Godot 4.x.
 - **Dostępność:** Pełna dostępność dla osób niewidomych – rozgrywka oparta w 100% na dźwięku przestrzennym (3D Audio) i haptyce, bez jakiejkolwiek przewagi z bodźców wizualnych. 
-- **Nawigacja:** Interfejsy obsługiwane przez VR-Pointer lub joystick kontrolera, w połączeniu z systemem odczytywania zaznaczeń (TTS / nagrania lektorskie).
+- **Nawigacja (KRYTYCZNE DLA DOSTĘPNOŚCI):** Interfejsy (Menu Główne, Ustawienia, Pauza, Game Over) **muszą oferować pełną obsługę nawigacji joystickiem kontrolera**, aby gracze niewidomi nie musieli celować w przestrzeni 3D wskaźnikiem laserowym. Wychylenie gałki kontrolera (góra/dół) przesuwa focus po elementach interfejsu (wyzwalając natychmiastowy odczyt lektorski TTS i impuls haptyczny), a przycisk A / trigger zatwierdza wybór. VR-Pointer pozostaje opcjonalnym rozwiązaniem pomocniczym.
 - **Zderzenia:** Uderzenia w ściany i hałasliwe poruszanie (sprint) generują dźwięki ostrzegające wrogów.
 
 ## Architektura i Zarządzanie Scenami
@@ -21,6 +21,15 @@
 2. **Foxy (Hałas i Szarża):** Reaguje na **kumulatywny hałas gracza** (sprint, kolizje, gwałtowne ruchy). Gdy hałas przekroczy próg, Foxy nagle całkowicie milknie (sygnał dla gracza), a po ~2 sekundach szarżuje w linii prostej na pozycję, w której gracz hałasował. Kontra: gracz musi zrobić odskok w bok ALBO obronić się, wyciągając i machając kontrolerem w stronę szarży (blok).
 3. **Marionette (Szepty i Odpędzanie):** Pojawia się blisko gracza i emituje jeden główny szept, który z czasem przybliża się do ucha. Należy ustalić kierunek i zdecydowanie machnąć ręką (kontrolerem) w stronę źródła dźwięku, by ją odpędzić. *Uwaga eskalacyjna:* Wraz z upływem czasu gry (sygnalizowanym gongiem co 10s), mechanika staje się trudniejsza i Marionette może atakować sekwencyjnie (np. 2-3 szepty z rzędu z różnych stron).
 4. **Phantom Grasp (Macki/Chwyt):** Sygnalizowany cichym pełzaniem w kierunku rąk gracza. Nagle "chwyta" jeden z kontrolerów, wywołując silną wibrację i agresywny dźwięk. Gracz musi bardzo szybko i intensywnie potrząsać zaatakowanym kontrolerem, by wyrwać się z uścisku, zanim dojdzie do Jumpscare'a.
+
+## Struktura Rozgrywki — Poziomy / Noce (FNaF Style)
+Gra podzielona jest na poziomy (noce) z rosnącym poziomem trudności i stopniowym wprowadzaniem wrogów:
+- **Poziom 1 (Noc 0 - Test Room / Tutorial):** Brak przeciwników. Trening poruszania, uderzeń w ściany (odgłos kolizji, haptyka) oraz wskazywania przestrzennych sygnałów dźwiękowych 3D.
+- **Poziom 2 (Noc 1 - 30 sekund):** Tylko Balora na niskiej prędkości, przyspieszająca w ostatnich sekundach nocy.
+- **Poziom 3 (Noc 2 - 60 sekund):** Balora przyspieszająca co 10s + Marionette atakująca co ok. 20s (pod koniec podwójny szept).
+- **Poziom 4 (Noc 3):** Dołącza Foxy — bardzo cierpliwy na hałas (wysoki próg wyzwolenia szarży).
+- **Poziom 5 (Noc 4):** Aktywniejszy Foxy (niższy próg hałasu), częstsza Marionette i ataki Phantom Grasp.
+- **Poziom 6 (Noc 5 - Finał):** Maksymalna prędkość Balory + **2x Foxy** (dwóch łowców hałasu szarżujących z różnych kierunków) + Marionette + Phantom Grasp.
 
 ## Zalecenia Designowe (Audio i Feedback)
 AI podczas implementacji musi uwzględnić wielokanałowe informowanie gracza o zagrożeniach:
@@ -41,3 +50,14 @@ Każdy nowy, większy postęp, odkryte założenia logiki lub checklisty funkcjo
 - `[/]` zadania w trakcie realizacji
 - `[x]` zadania ukończone
 Dzięki temu po ponownym otwarciu projektu będzie możliwe odtworzenie pełnego kontekstu postępów implementacyjnych z pliku tekstowego.
+
+## Flow Pracy (notatki i dokumentacje)
+- gameDoc\Inżynierka\Notatka.md - Notatki o użytych mechanizmach w programowaniu, zapiski co się zmieniało z wersji na wersję, ostateczne decyzje techniczne
+- gameDoc\Inżynierka\README.md - Ogólna dokumentacja o postępach, co zostało dodawane w jakich wersjach, którego dnia wchodziły dane aktualizacje, opis ogólny projektu, aktualne zadania/problemy
+- README.md - dokumentcja ogólna z aktualnymi najważniejsyzmi informacjami, która jest pokazana na GitHub
+
+## Agentic AI rules
+- Jeżeli na drodze pracy zauważysz ważny patern GDScript/Godot, który jest efektywniejszy i prostszy od tego używanego w aktualnym kodzie - zaproponuj jego implementacje i opisz w dokumentacji dlaczego jest lepszy
+- Jeżeli zauważysz, że jakaś funkcjonalność jest zbędna, niepotrzebnie skomplikowana lub sprawia problemy - zaproponuj zmianę i opisz w dokumentacji dlaczego jest to uzasadnione
+- W przypadku zmian, które mogą wpłynąć na stabilność projektu (np. zmiana architektury, dodawanie nowych, złożonych mechanizmów) - konieczne jest opisanie i uzasadnienie tej zmiany w dokumentacji
+- Rzeczy, które warto praktykować w przyszłych implementacjach/to czego można się nauczyć na bazie konwersacji/internetu możesz zaproponować do zrobienia własnego SKILL.md

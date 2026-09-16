@@ -22,7 +22,6 @@ config/icon="res://icon.svg"
 [autoload]
 
 XRToolsUserSettings="*uid://bqgb8i74tm0t"
-XRToolsRumbleManager="*uid://by853dk86g1qw"
 SceneLoader="*res://scripts/scene_loader.gd"
 EventBus="*res://scripts/event_bus.gd"
 TTSManager="*res://scripts/tts_manager.gd"

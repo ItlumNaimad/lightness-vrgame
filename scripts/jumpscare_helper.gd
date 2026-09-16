@@ -49,22 +49,14 @@ static func execute(
 	target_transform.origin = Vector3(0, -0.3, -0.5)
 	
 	if jumpscare_sound and jumpscare_sound.get_parent():
-		var audio_trans = jumpscare_sound.global_transform
-		jumpscare_sound.get_parent().remove_child(jumpscare_sound)
-		camera.add_child(jumpscare_sound)
-		jumpscare_sound.global_transform = audio_trans
-		
+		jumpscare_sound.reparent(camera, true)
 		var tween = caller.get_tree().create_tween()
 		tween.tween_property(jumpscare_sound, "transform", target_transform, 0.2).set_trans(Tween.TRANS_SINE)
 
 	# 4. Reparenting dodatkowych węzłów (np. MeshInstance3D Balory)
 	for node in extra_nodes_to_reparent:
 		if node and node.get_parent():
-			var node_trans = node.global_transform
-			node.get_parent().remove_child(node)
-			camera.add_child(node)
-			node.global_transform = node_trans
-			
+			node.reparent(camera, true)
 			var tween2 = caller.get_tree().create_tween()
 			tween2.tween_property(node, "transform", target_transform, 0.2).set_trans(Tween.TRANS_SINE)
 	

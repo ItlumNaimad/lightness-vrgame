@@ -1,4 +1,4 @@
-﻿extends Node
+extends Node
 
 ## TTSManager — Globalny menedżer lektora (Text-to-Speech) i dostępności UI
 ## Wykorzystuje natywne API DisplayServer w Godot 4.x z buforowaniem i odrzucaniem spamu (Dwell Debounce).
@@ -62,6 +62,9 @@ func speak(text: String, interrupt: bool = true) -> void:
 	_execute_speak(text, interrupt)
 
 func _execute_speak(text: String, interrupt: bool = true) -> void:
+	if not tts_enabled or text.is_empty():
+		return
+		
 	var now = Time.get_ticks_msec() / 1000.0
 	if text == _last_spoken_text and (now - _last_spoken_time) < 0.35:
 		return

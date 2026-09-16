@@ -1,4 +1,4 @@
-﻿# Nowy system zarządzania scenami (SceneLoader.gd)
+# Nowy system zarządzania scenami (SceneLoader.gd)
 
 Zrezygnowaliśmy z podejścia "Staging" (z persistentnym graczem w `main.tscn`) na rzecz **pełnej podmiany scen** (`change_scene_to_packed`). Rozwiązuje to krytyczne problemy z fizyką XR oraz błędami kolizji przy teleportacji na dynamicznie ładowane mapy.
 
@@ -173,6 +173,37 @@ Przeprowadzono pełną analizę projektu (szczegóły w pliku `gameDoc/Inżynier
    - **Błąd wyłącznika TTS**: Przycisk toggle w panelu Settings wizualnie zmienia stan ("Sound Compass: ON/OFF", "TTS Voice: ON/OFF"), lecz wyłączenie TTS w żaden sposób nie blokuje odtwarzania mowy w `TTSManager` — syntezator nadal odczytuje teksty. Należy dodać ścisłą weryfikację flagi `tts_enabled` przed każdym wywołaniem `DisplayServer.tts_speak()`.
    - **Mechanika aktywacji przycisków (Kliknięcie vs Hold)**: W toku testów ustalono, że przyciski reagują zarówno na pojedyncze kliknięcie triggera (z racji podpięcia wskaźnika laserowego VR), jak i na pełne przytrzymanie paska `HoldButton`. Skoro wystarczy samo kliknięcie triggera, animacja ładowania paska jest zbędna i wprowadza niepotrzebną zwłokę. W kolejnej iteracji planowane jest usunięcie animacji paska na rzecz natychmiastowego kliknięcia.
 
+28. **Wdrożenie zaleceń audytu technicznego i nowe mechaniki (v0.6.0):**
+   - **Naprawa systemu Fade i likwidacja race condition w SceneLoader**:
+     - Usunięto wadliwy warunek `ClassDB.class_exists("XRToolsFade")` (klasa GDScript niewidoczna w ClassDB), przywracając działanie ściemniania i rozjaśniania widoku w goglach VR.
+     - Wprowadzono podwójne oczekiwanie na klatkę (`await get_tree().process_frame`) po podmianie sceny, co zagwarantowało obecność węzła Fade w grupie `fade_mesh` przed wywołaniem rozjaśnienia.
+     - Zaimplementowano reset flagi `is_loading = false` w przypadku nieudanego ładowania zasobu, eliminując ryzyko trwałego uwięzienia gracza w czarnym ekranie.
+   - **Precyzyjny tracking pozycji gracza w VR**:
+     - Do węzła `XRCamera3D` w `scenes/player.tscn` dodano grupę `player_head`.
+     - W `scripts/game_map.gd` (efekt Distortion) oraz `scripts/foxy.gd` (nasłuchiwanie i szarża) zastąpiono statyczną pozycję roota `Player` pozycją głowy gracza (`camera.global_position`), likwidując błąd fałszywego odległościomierza i błędnego namierzania Foxy'ego.
+     - Kosmetyczny `TimerLabel` uczyniono opcjonalnym, co zapobiega zablokowaniu bake'owania NavMesha i timera przetrwania.
+     - Scena `scenes/marionette.tscn` została zarejestrowana w grupie `enemy` i oczyszczona ze zbędnego stałego mesha debugowego.
+   - **Semantyka audio i rozdzielenie próbek dźwiękowych**:
+     - Wyeliminowano wieloznaczność próbki `nice-sfx.mp3`.
+     - Ostrzeżenie przed szarżą Foxy'ego przypisano do złowrogiego sygnału `danger.wav` (pitch 0.8).
+     - Sukces zablokowania szarży Foxy'ego zachowano na satysfakcjonującym `nice-sfx.mp3`.
+     - Odpędzenie Marionetki zyskało dedykowany świst rozproszenia `whoosh2.mp3`.
+     - Kompas dźwiękowy otrzymał unikalny, subtelny dzwon `Broken bell.ogg` z debouncingiem i zmiennym pitchem azymutu.
+   - **Akustyka i haptyka kolizji ze ścianami**:
+     - W `player_audio_manager.gd` zaimplementowano detekcję uderzenia gracza w ścianę (`player_body.is_on_wall()`).
+     - Uderzenie generuje głuchy odgłos kontaktu, fizyczny impuls haptyczny w kontrolerach oraz emituje hałas `EventBus.noise_emitted(3.5)`, alarmując Foxy'ego i domykając immersyjną pętlę percepcji otoczenia dla niewidomego gracza.
+   - **Dostosowanie AI Balory i Marionette do specyfikacji AGENTS.md**:
+     - **Balora**: Wdrożono maszynę stanów `PATROL → ALERT → CHASE → COOLDOWN`. Balora patroluje węzły trasy na NavMeshu (promień agenta 0.85m). Wejście w strefę Alertu przyspiesza pozytywkę (`pitch_scale` 1.35), strefa Krytyczna wyzwala szybki pościg (`pitch_scale` 1.7), a ucieczka sprintem na odległość >9.5m pozwala zgubić pościg i wprowadza Balorę w stan odpoczynku (Cooldown).
+     - **Marionette**: Zastąpiono pasywne wpatrywanie się aktywną obroną — gracz musi ustalić kierunek szeptu i zdecydowanie machnąć kontrolerem VR w stronę źródła dźwięku. Dodano wibrację ostrzegawczą kontrolerów, gdy szept zbliża się krytycznie do ucha, oraz eskalację trudności z sygnału `EventBus.milestone_reached`.
+   - **Threat Director (Pacing)**:
+     - W `game_map.gd` wprowadzono stopniowe wprowadzanie przeciwników na osi czasu: Balora (15s), Marionette (40s), Foxy (75s), Phantom Grasp (110s).
+   - **Nowy przeciwnik — Phantom Grasp**:
+     - Stworzono `scenes/phantom_grasp.tscn` i `scripts/phantom_grasp.gd`. Wróg pełznie od dołu ku dłoni gracza, nagle chwyta kontroler wywołując ciągłą, intensywną wibrację i agresywny dźwięk. Gracz musi dynamicznie potrząsać pochwyconym kontrolerem, by wyrwać się z uścisku przed jumpscarem.
+   - **Echolokacja (Puls dźwiękowy)**:
+     - Pod przyciskiem `ax_button` wdrożono sondujący impuls dźwiękowo-haptyczny. Raycast w 8 kierunkach generuje przestrzenne, opóźnione echa 3D odbite od ścian pomieszczenia, kosztem wygenerowania hałasu ściągającego Foxy'ego.
+   - **Menu Pauzy VR**:
+     - Utworzono scenę `scenes/pause_menu.tscn` i `scenes/pause_menu_ui.tscn`. Przycisk `menu_button` wyświetla trójwymiarowy panel pauzy 1.6m przed graczem na wysokości oczu, zamraża pętlę gry (`paused = true`) i oferuje opcje Resume, Restart Map oraz Main Menu z pełnym odczytem TTS.
+
 ### Zadania do wykonania
 
 | Priorytet | Zadanie                                                                                       | Status       |
@@ -180,18 +211,104 @@ Przeprowadzono pełną analizę projektu (szczegóły w pliku `gameDoc/Inżynier
 | 🟢 WYSOKI | Ekran Game Over (dedykowana scena / UI / telemetria)                                         | Zrobione     |
 | 🟢 WYSOKI | System TTS / lektora w menu (Accessibility z Dwell Debounce) + HoldButton                      | Zrobione     |
 | 🟢 WYSOKI | Przebudowa Menu Głównego (industrialna ściana 3D + glitch "LIGHTLESS")                       | Zrobione     |
-| 🟢 WYSOKI | Rozbudowa pokoju Menu Głównego do pełnego 3D (v0.5.2)                                         | Zrobione     |
-| 🟢 WYSOKI | Naprawa łańcucha sygnałów UI i odblokowanie nawigacji menu (v0.5.2)                            | Zrobione     |
-| 🟢 WYSOKI | Lektor TTS w języku angielskim (v0.5.2)                                                       | Zrobione     |
-| 🟢 WYSOKI | Fizyczne blokowanie rąk gracza (`CollisionHand`)                                             | Zrobione     |
-| 🟢 WYSOKI | Zaawansowane dźwięki kroków gracza (zależne od powierzchni podłogi + triggery dla Foxy)       | Zrobione     |
-| 🟢 WYSOKI | Dźwiękowa informacja zwrotna przy obracaniu się joystickiem (Whoosh + Kompas Dźwiękowy)       | Zrobione     |
-| 🟢 WYSOKI | Subtelne wskaźniki VR w chłodnym błękicie (`FunctionPointer`)                                | Zrobione     |
-| 🟢 NISKI  | Nazwa projektu → "Lightless" w `project.godot` i dokumentacji                                 | Zrobione     |
-| 🟢 NISKI  | Nazwy warstw kolizji w `project.godot`                                                        | Zrobione     |
-| 🔴 PILNE  | Blokada ruchu po Jumpscare (eliminacja szczątkowego ruchu i podwójnego jumpscare'a)           | Do zrobienia |
-| 🔴 PILNE  | Naprawa wyłącznika TTS w panelu Settings (pełna blokada mowy lektora)                         | Do zrobienia |
-| 🟡 WYSOKI | Uproszczenie przycisków VR (usunięcie animacji paska HoldButton na rzecz kliknięcia)         | Do zrobienia |
-| 🟡 WYSOKI | Threat Director (pacing wrogów: Balora 0:20, Marionette 0:50, Foxy 1:30)                      | Do zrobienia |
-| 🟡 WYSOKI | Nowy przeciwnik Phantom Grasp (macki / chwyt kontrolera i wyszarpywanie)                      | Do zrobienia |
-| 🟡 ŚREDNI | Menu Pauzy w grze (`scenes/pause_menu.tscn`)                                                  | Do zrobienia |
+| 🟢 WYSOKI | Rozbudowa pokoju Menu Głównego do pełnego 3D                                                 | Zrobione     |
+| 🟢 WYSOKI | Naprawa systemu Fade w SceneLoader i likwidacja martwego kodu ClassDB                        | Zrobione     |
+| 🟢 WYSOKI | Poprawne odczytywanie pozycji głowy gracza (Distortion & Foxy)                               | Zrobione     |
+| 🟢 WYSOKI | Rozdzielenie próbek audio (unikalne dźwięki ostrzeżeń, sukcesów i kompasu)                    | Zrobione     |
+| 🟢 WYSOKI | Detekcja kolizji ze ścianami (dźwięk, hałas dla Foxy'ego, haptyka)                           | Zrobione     |
+| 🟢 WYSOKI | AI Balory wg AGENTS.md (FSM: Patrol, Alert z przyspieszającą pozytywką, Pościg, Ucieczka)    | Zrobione     |
+| 🟢 WYSOKI | AI Marionetki wg AGENTS.md (aktywne machnięcie dłonią w stronę szeptu, haptyka bliskości)     | Zrobione     |
+| 🟢 WYSOKI | Threat Director (pacing pojawiania się wrogów w czasie gry)                                  | Zrobione     |
+| 🟢 WYSOKI | Przeciwnik Phantom Grasp (chwyt za kontroler, wibracja, mechanika wyszarpywania)              | Zrobione     |
+| 🟢 WYSOKI | Echolokacja (puls dźwiękowy sondujący geometrię pomieszczenia kosztem hałasu)                | Zrobione     |
+| 🟢 WYSOKI | Menu Pauzy w grze (`scenes/pause_menu.tscn`, wywołanie `menu_button`, pełny TTS)              | Zrobione     |
+| 🟢 WYSOKI | Optymalizacje w pętli klatek (cache referencji grup, `node.reparent()`)                      | Zrobione     |
+| 🟢 NISKI  | Czyszczenie kodu i usunięcie osieroconych plików (`main.gd.uid`, komentarze `![ASK]`)         | Zrobione     |
+| 🟢 WYSOKI | Poprawka wyłącznika TTS w ustawieniach (`_execute_speak` guard) — wersja v0.5.2              | Zrobione     |
+| 🟢 WYSOKI | Zabezpieczenie coroutines audio po `await create_timer` (`is_inside_tree()`)                 | Zrobione     |
+| 🟢 WYSOKI | Failsafe resetu pauzy `get_tree().paused = false` w `SceneLoader.load_scene()`                | Zrobione     |
+| 🟢 NISKI  | Usunięcie zbędnego autoloadu `XRToolsRumbleManager` na rzecz natywnego OpenXR                | Zrobione     |
+
+---
+
+## Wersja v0.5.2 — Podsumowanie Poprawek Audytowych (Priorytet A)
+W ramach weryfikacji po-audytowej wdrożono 4 kluczowe usprawnienia:
+1. **TTSManager**: Dopisano guard `if not tts_enabled: return` wewnątrz `_execute_speak()`, dzięki czemu przełączenie opcji *TTS Voice: OFF* w menu ustawień natychmiast wycisza mowę lektora również przy najechaniu wskaźnikiem (Dwell Debounce).
+2. **PlayerAudioManager**: W funkcjach `_spawn_delayed_echo` i `_trigger_compass_ping` wprowadzono sprawdzenie `if not is_inside_tree(): return` bezpośrednio po `await get_tree().create_timer(...).timeout`. Zapobiega to błędom w konsoli w sytuacji, gdy scena zostanie przeładowana lub nastąpi jumpscare w trakcie trwania opóźnienia echa.
+3. **SceneLoader**: W `load_scene()` dodano prewencyjne `get_tree().paused = false` oraz `process_mode = Node.PROCESS_MODE_ALWAYS` w `_ready()`, eliminując ryzyko zablokowania ładowania, gdyby zmiana sceny została zainicjowana w trakcie aktywnej pauzy.
+4. **project.godot**: Usunięto nieużywany wpis `XRToolsRumbleManager` z listy `[autoload]`. Całość haptyki w grze operuje teraz w 100% na bezpośrednim, wysokowydajnym wywołaniu OpenXR `controller.trigger_haptic_pulse()`.
+
+---
+
+## Nowe Ustalenie Projektowe: Struktura Poziomów (System Nocy / FNaF Style)
+
+Zdecydowano o odejściu od pojedynczego, nieskończonego trybu przetrwania na rzecz **strukturyzowanej kampanii poziomów (nocy)**, analogicznie do progresji znanej z serii *Five Nights at Freddy's*. Każdy poziom ma z góry zdefiniowany cel czasowy przetrwania, specyficzną konfigurację przeciwników, rosnące tempo i parametry agresji, a także pełni rolę stopniowego wprowadzenia (onboardingu) niewidomego gracza w mechaniki sensoryczne VR.
+
+### Szczegółowa specyfikacja poziomów:
+
+#### 1. Poziom 1: Pokój Testowy / Tutorial (Noc 0)
+- **Cel:** Bezpieczne zapoznanie się z akustyką pomieszczenia, fizyką poruszania się i orientacją 3D.
+- **Przeciwnicy:** Brak zagrożeń (0 wrogów).
+- **Mechaniki i zadania:**
+  - Gracz uczy się poruszania (chód, sprint pod gałką, obrót snap-turn z dźwiękiem whoosh).
+  - Test uderzeń w ściany pokoju (gracz słyszy głuchy odgłos kolizji i odczuwa haptykę kontrolerów, uświadamiając sobie geometrię 4 ścian).
+  - **Sygnały treningowe:** W przestrzeni 3D pojawiają się sekwencyjne dźwięki (pingi/dzwoneczki) w różnych azymutach i odległościach, aby gracz nauczył się precyzyjnie obracać głowę i wskazywać źródło dźwięku przed wejściem w starcie z wrogami.
+  - Możliwość przetestowania sonaru echolokacji (`ax_button`).
+
+#### 2. Poziom 2: Pierwszy Kontakt — Balora (Noc 1)
+- **Czas trwania:** **30 sekund** (krótka, wstępna noc wprowadzająca).
+- **Przeciwnicy:** Wyłącznie **Balora**.
+- **Parametry:**
+  - Balora porusza się z niską prędkością bazową (`patrol_speed` ~0.7 m/s).
+  - W ostatnich 5–8 sekundach nocy Balora zauważalnie przyspiesza tempo pozytywki i ruch, dając przedsmak zagrożenia tuż przed wybiciem dzwonu końcowego.
+- **Nauka gracza:** Identyfikacja pozytywki 3D, nauka oceny odległości na słuch, reakcja na przyspieszające tempo muzyki.
+
+#### 3. Poziom 3: Podwójne Zagrożenie — Marionette (Noc 2)
+- **Czas trwania:** **60 sekund (1 minuta)**.
+- **Przeciwnicy:** **Balora** + **Marionette**.
+- **Parametry:**
+  - **Balora:** Startuje powoli, przyspiesza stopniowo co 10 sekund (skalowanie parametrów przez milestone).
+  - **Marionette:** Debiutuje na tej nocy. Atakuje w odstępach ok. 20 sekund. Przez większość nocy pojawia się w pojedynczych szeptach (`_rounds_remaining = 1`). Pod koniec nocy (ostatnie 15s) wchodzi w serię **2 szeptów z rzędu** z różnych stron.
+- **Nauka gracza:** Dzielenie uwagi między krążącą po mapie Balorę a nagłe szepty przy uchu; nauka obrony gestem zamachu kontrolerem w stronę dźwięku.
+
+#### 4. Poziom 4: Cisza i Hałas — Foxy (Noc 3)
+- **Przeciwnicy:** **Balora** + **Marionette** + **Foxy**.
+- **Parametry:**
+  - Debiutuje **Foxy**.
+  - W tej nocy Foxy jest **bardzo cierpliwy** na hałasy (wysoki próg irytacji `noise_threshold` np. 16.0–20.0, wolny przyrost wskaźnika hałasu).
+  - Do ataku Foxy'ego dochodzi tylko przy ewidentnym, ciągłym bieganiu lub wielokrotnym wpadaniu w ściany.
+- **Nauka gracza:** Zrozumienie mechaniki hałasu kroków i kolizji; nauka rozpoznawania sygnału ostrzegawczego `danger.wav`, ciszy przed szarżą i wykonywania bloku dłonią / uniku w bok.
+
+#### 5. Poziom 5: Eskalacja — Noc Zagrożenia (Noc 4)
+- **Przeciwnicy:** **Balora** + **Marionette** + **Foxy** + **Phantom Grasp**.
+- **Parametry:**
+  - **Foxy:** Znacznie aktywniejszy – niższy próg hałasu (`noise_threshold` ~9.0), szybsza reakcja na uderzenia w ściany i echolokację.
+  - **Marionette:** Atakuje częściej (interwały 12–15s), standardowo w seriach po 2–3 szepty.
+  - **Balora:** Wyższe prędkości patrolowe i agresywniejsza strefa pościgu.
+  - **Phantom Grasp:** Sporadyczne pełzanie i chwyt dłoni, wymuszający intensywne potrząsanie kontrolerem pod presją innych dźwięków.
+
+#### 6. Poziom 6: Finał / Koszmar (Noc 5)
+- **Przeciwnicy:** **Balora** (maksymalna prędkość) + **2x Foxy** (dwaj niezależni łowcy hałasu!) + **Marionette** + **Phantom Grasp**.
+- **Parametry:**
+  - **Podwójny Foxy:** Na mapie operują dwie instancje Foxy'ego o różnych punktach startowych. Hałas gracza może sprowokować szarżę z dwóch różnych stron, zmuszając do błyskawicznej identyfikacji kierunku biegu i kierunkowego bloku.
+  - **Balora:** Bardzo szybki patrol (`patrol_speed` ~1.4 m/s, `chase_speed` ~2.8 m/s), wymagający natychmiastowej reakcji sprintem przy wejściu w strefę Alertu.
+  - Ekstremalny test percepcji wielokanałowej 3D Audio i odporności na presję sensoryczną.
+
+---
+
+## Nowe Ustalenie Projektowe: Pełna Obsługa Nawigacji Joystickiem w Menu (Accessibility)
+
+### Problem i Uzasadnienie:
+Ręczne celowanie wskaźnikiem laserowym VR (`FunctionPointer`) w trójwymiarową ścianę interfejsu jest dla osoby niewidomej barierą krytyczną. Bez bodźców wzrokowych trafienie promieniem w przycisk o wymiarach kilkudziesięciu centymetrów w przestrzeni wirtualnej wymaga żmudnego „przemiatania” powietrza.
+
+### Rozwiązanie i Standard Dostępności:
+1. **D-Pad / Joystick Navigation jako Główny Kanał Sterowania UI:**
+   - Gracz w menu (Main Menu, Settings, Pause Menu, Game Over) może swobodnie poruszać się po pozycjach za pomocą **gałki analogowej (joysticka)** kontrolera VR (wychylenie w górę / w dół, akcje `ui_up` / `ui_down`).
+2. **Sprzężenie z Focusem i TTS:**
+   - Zmiana focusu (`grab_focus()` na kolejnym `Button`) natychmiast aktywuje podpięty sygnał `focus_entered`, co wywołuje:
+     - Dedykowany odczyt lektora: `TTSManager.speak(button_label)`.
+     - Krótki, czytelny impuls haptyczny w dłoni (`trigger_haptic_pulse` 35Hz, 0.04s).
+3. **Zatwierdzanie Wyboru:**
+   - Wciśnięcie przycisku **A** (lub spustu kontrolera / `ui_accept`) natychmiast wykonuje akcję przycisku (`pressed`), bez konieczności celowania ręką.
+4. **Pointer jako Opcja Pomocnicza:**
+   - Wskaźnik laserowy pozostaje dostępny dla osób widzących lub słabowidzących, jednak pętla sterowania joystickiem jest w pełni samowystarczalna.

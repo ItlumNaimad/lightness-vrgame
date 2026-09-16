@@ -33,17 +33,29 @@ var target_position: Vector3 = Vector3.ZERO
 var state_timer: float = 4.0
 var is_jumpscaring: bool = false
 
+var player_head: Node3D
+
 func _ready():
 	if jumpscare_trigger:
 		jumpscare_trigger.body_entered.connect(_on_body_entered)
 	if block_trigger:
 		block_trigger.body_entered.connect(_on_block_entered)
 	
-	if ClassDB.class_exists("EventBus") or true:
-		# Odwołanie do autoload EventBus
-		var event_bus = get_node_or_null("/root/EventBus")
-		if event_bus:
-			event_bus.noise_emitted.connect(_on_noise_emitted)
+	if EventBus:
+		EventBus.noise_emitted.connect(_on_noise_emitted)
+		
+	_find_player()
+
+func _find_player():
+	var head = get_tree().get_first_node_in_group("player_head")
+	if head:
+		player_head = head
+	else:
+		var player_root = get_tree().get_first_node_in_group("player")
+		if player_root:
+			player_head = player_root.get_node_or_null("XROrigin3D/XRCamera3D")
+			if player_head == null:
+				player_head = player_root
 
 func _on_noise_emitted(pos: Vector3, noise_level: float):
 	if current_state == State.LISTENING:
@@ -65,8 +77,10 @@ func _enter_preparing_charge():
 		walk_sound.stop()
 		
 	var warning_player = AudioStreamPlayer3D.new()
-	warning_player.stream = preload("res://assets/sounds/nice-sfx.mp3")
-	warning_player.volume_db = 10.0
+	# Dedykowana próbka ostrzeżenia - niski, złowrogi sygnał zagrożenia
+	warning_player.stream = preload("res://assets/sounds/danger.wav")
+	warning_player.volume_db = 6.0
+	warning_player.pitch_scale = 0.8
 	add_child(warning_player)
 	warning_player.play()
 	warning_player.finished.connect(warning_player.queue_free)
@@ -77,14 +91,10 @@ func _enter_charging():
 	current_state = State.CHARGING
 	state_timer = charge_max_duration
 	
-	# Pobranie AKTUALNEJ pozycji gracza tuż przed szarżą
-	var player_root = get_tree().get_first_node_in_group("player")
-	if player_root:
-		var camera = player_root.get_node_or_null("XROrigin3D/XRCamera3D")
-		if camera:
-			target_position = camera.global_position
-		else:
-			target_position = player_root.global_position
+	if player_head == null:
+		_find_player()
+	if player_head:
+		target_position = player_head.global_position
 	
 	# Obrót w stronę targetu
 	var direction = (target_position - global_position)
@@ -123,10 +133,11 @@ func _physics_process(delta: float):
 				current_noise -= noise_decay_rate * delta
 				current_noise = max(current_noise, 0)
 			
-			# Powolne podążanie w stronę gracza podczas nasłuchu
-			var player_root = get_tree().get_first_node_in_group("player")
-			if player_root:
-				var p_pos = player_root.global_position
+			if player_head == null:
+				_find_player()
+				
+			if player_head:
+				var p_pos = player_head.global_position
 				var dir = (p_pos - global_position)
 				dir.y = 0
 				if dir.length() > 2.0:
@@ -211,6 +222,15 @@ func _on_block_entered(body: Node3D):
 	if current_state == State.CHARGING:
 		print("Foxy: Zablokowany przez rękę (", body.name, ")!")
 		SceneLoader.foxy_charges_blocked += 1
+		
+		# Haptyka obronna na kontrolerze dłoni
+		var controller = body as XRController3D
+		if controller == null and body.get_parent() is XRController3D:
+			controller = body.get_parent() as XRController3D
+		elif controller == null and body.get_parent() and body.get_parent().get_parent() is XRController3D:
+			controller = body.get_parent().get_parent() as XRController3D
+		if controller:
+			controller.trigger_haptic_pulse("haptic", 120.0, 1.0, 0.35, 0.0)
 		
 		var success_player = AudioStreamPlayer.new()
 		success_player.stream = preload("res://assets/sounds/nice-sfx.mp3")
