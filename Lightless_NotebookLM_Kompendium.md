@@ -92,6 +92,7 @@ scripts/
   jumpscare_helper.gd
   jumpscare_helper.gd.uid
   level_manager.gd
+  level_manager.gd.uid
   main_menu_ui.gd
   main_menu_ui.gd.uid
   main_menu.gd
@@ -111,6 +112,7 @@ scripts/
   tts_manager.gd
   tts_manager.gd.uid
   vr_ui_navigator.gd
+  vr_ui_navigator.gd.uid
 project.godot
 README.md
 ````
@@ -1202,6 +1204,86 @@ Wdrożono kluczowe poprawki na podstawie testów VR z dnia 16.09.2026:
 *Ostatnia aktualizacja:* v0.5.2 (16.09.2026) — Wdrożenie szyn audio, spowolnienie i blokada sprintu Phantom Grasp, naprawa wyszarpywania, poprawa donośności Ballory, powiększenie i 100% ochrona przycisków VR przed luźnym kliknięciem (Hold Button).
 ````
 
+## File: scripts/ballora.gd.uid
+````
+uid://40tyohs7i6dm
+````
+
+## File: scripts/event_bus.gd.uid
+````
+uid://bupsx8u5arpwo
+````
+
+## File: scripts/foxy.gd.uid
+````
+uid://bebk6fhspwj0v
+````
+
+## File: scripts/game_map.gd.uid
+````
+uid://cbilw02reekmp
+````
+
+## File: scripts/game_over_ui.gd.uid
+````
+uid://c3335djg2m52k
+````
+
+## File: scripts/game_over.gd
+````
+@tool
+extends XRToolsSceneBase
+
+const GAME_MAP_PATH = "res://scenes/game_map.tscn"
+const MAIN_MENU_PATH = "res://scenes/main_menu.tscn"
+
+func _ready() -> void:
+	if Engine.is_editor_hint():
+		return
+		
+	# Zablokowanie ruchu kontrolerem dla sceny Game Over
+	var providers = get_tree().get_nodes_in_group("movement_providers")
+	for p in providers:
+		if "enabled" in p:
+			p.enabled = false
+			
+	# Podpinamy sygnały z UI wewnątrz Viewport2Din3D
+	var viewport_2d = $Viewport2Din3D
+	if viewport_2d:
+		if not viewport_2d.is_node_ready():
+			await viewport_2d.ready
+		var ui = viewport_2d.get_scene_instance()
+		if ui:
+			ui.restart_pressed.connect(_on_restart_pressed)
+			ui.menu_pressed.connect(_on_menu_pressed)
+
+func _on_restart_pressed() -> void:
+	SceneLoader.load_scene(GAME_MAP_PATH)
+
+func _on_menu_pressed() -> void:
+	SceneLoader.load_scene(MAIN_MENU_PATH)
+````
+
+## File: scripts/game_over.gd.uid
+````
+uid://ckr1jiigqdojl
+````
+
+## File: scripts/glitch_title.gd.uid
+````
+uid://be1qqnukbv3uc
+````
+
+## File: scripts/hold_button.gd.uid
+````
+uid://csj733r2xrc37
+````
+
+## File: scripts/jumpscare_helper.gd.uid
+````
+uid://cgrlq66342glr
+````
+
 ## File: scripts/level_manager.gd
 ````
 extends Node
@@ -1400,6 +1482,56 @@ func _apply_bus_volume(bus_name: String, volume_percent: int) -> void:
 			AudioServer.set_bus_volume_db(bus_idx, db)
 ````
 
+## File: scripts/level_manager.gd.uid
+````
+uid://cb68butgxiya
+````
+
+## File: scripts/main_menu_ui.gd.uid
+````
+uid://cnirmw4v8ixlt
+````
+
+## File: scripts/main_menu.gd.uid
+````
+uid://c1n8p7fin4eiq
+````
+
+## File: scripts/marionette.gd.uid
+````
+uid://b7ny004tb164f
+````
+
+## File: scripts/pause_menu_ui.gd.uid
+````
+uid://dnxve3m5i3n4j
+````
+
+## File: scripts/pause_menu.gd.uid
+````
+uid://bcr15wxo5bwsm
+````
+
+## File: scripts/phantom_grasp.gd.uid
+````
+uid://ck2hvdc2sbygk
+````
+
+## File: scripts/player_audio_manager.gd.uid
+````
+uid://ddgofpxlmq1d3
+````
+
+## File: scripts/scene_loader.gd.uid
+````
+uid://b0l72c2rig2ql
+````
+
+## File: scripts/tts_manager.gd.uid
+````
+uid://bin4f34eliqc8
+````
+
 ## File: scripts/vr_ui_navigator.gd
 ````
 extends Node
@@ -1552,171 +1684,9 @@ func _apply_focus_to_current(ctrl: XRController3D) -> void:
 			TTSManager.speak(txt, true)
 ````
 
-## File: scripts/ballora.gd.uid
+## File: scripts/vr_ui_navigator.gd.uid
 ````
-uid://40tyohs7i6dm
-````
-
-## File: scripts/event_bus.gd.uid
-````
-uid://bupsx8u5arpwo
-````
-
-## File: scripts/foxy.gd.uid
-````
-uid://bebk6fhspwj0v
-````
-
-## File: scripts/game_map.gd.uid
-````
-uid://cbilw02reekmp
-````
-
-## File: scripts/game_over_ui.gd.uid
-````
-uid://c3335djg2m52k
-````
-
-## File: scripts/game_over.gd
-````
-@tool
-extends XRToolsSceneBase
-
-const GAME_MAP_PATH = "res://scenes/game_map.tscn"
-const MAIN_MENU_PATH = "res://scenes/main_menu.tscn"
-
-func _ready() -> void:
-	if Engine.is_editor_hint():
-		return
-		
-	# Zablokowanie ruchu kontrolerem dla sceny Game Over
-	var providers = get_tree().get_nodes_in_group("movement_providers")
-	for p in providers:
-		if "enabled" in p:
-			p.enabled = false
-			
-	# Podpinamy sygnały z UI wewnątrz Viewport2Din3D
-	var viewport_2d = $Viewport2Din3D
-	if viewport_2d:
-		if not viewport_2d.is_node_ready():
-			await viewport_2d.ready
-		var ui = viewport_2d.get_scene_instance()
-		if ui:
-			ui.restart_pressed.connect(_on_restart_pressed)
-			ui.menu_pressed.connect(_on_menu_pressed)
-
-func _on_restart_pressed() -> void:
-	SceneLoader.load_scene(GAME_MAP_PATH)
-
-func _on_menu_pressed() -> void:
-	SceneLoader.load_scene(MAIN_MENU_PATH)
-````
-
-## File: scripts/game_over.gd.uid
-````
-uid://ckr1jiigqdojl
-````
-
-## File: scripts/glitch_title.gd.uid
-````
-uid://be1qqnukbv3uc
-````
-
-## File: scripts/hold_button.gd.uid
-````
-uid://csj733r2xrc37
-````
-
-## File: scripts/jumpscare_helper.gd.uid
-````
-uid://cgrlq66342glr
-````
-
-## File: scripts/main_menu_ui.gd.uid
-````
-uid://cnirmw4v8ixlt
-````
-
-## File: scripts/main_menu.gd.uid
-````
-uid://c1n8p7fin4eiq
-````
-
-## File: scripts/marionette.gd.uid
-````
-uid://b7ny004tb164f
-````
-
-## File: scripts/pause_menu_ui.gd
-````
-extends Control
-
-signal resume_requested
-signal restart_requested
-signal main_menu_requested
-
-@onready var resume_btn: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ResumeBtn
-@onready var restart_btn: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/RestartBtn
-@onready var menu_btn: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/MenuBtn
-
-var _navigator: VRUINavigator
-
-func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	_setup_accessibility()
-	_navigator = VRUINavigator.new()
-	_navigator.root_control = self
-	add_child(_navigator)
-	visibility_changed.connect(_on_visibility_changed)
-
-func _on_visibility_changed() -> void:
-	if visible and _navigator:
-		_navigator.refresh_buttons()
-
-func _setup_accessibility() -> void:
-	if TTSManager:
-		TTSManager.setup_button(resume_btn, "Resume Game")
-		TTSManager.setup_button(restart_btn, "Restart Map")
-		TTSManager.setup_button(menu_btn, "Return to Main Menu")
-
-func _on_resume_pressed() -> void:
-	resume_requested.emit()
-
-func _on_restart_pressed() -> void:
-	restart_requested.emit()
-
-func _on_menu_pressed() -> void:
-	main_menu_requested.emit()
-````
-
-## File: scripts/pause_menu_ui.gd.uid
-````
-uid://dnxve3m5i3n4j
-````
-
-## File: scripts/pause_menu.gd.uid
-````
-uid://bcr15wxo5bwsm
-````
-
-## File: scripts/phantom_grasp.gd.uid
-````
-uid://ck2hvdc2sbygk
-````
-
-## File: scripts/player_audio_manager.gd.uid
-````
-uid://ddgofpxlmq1d3
-````
-
-## File: scripts/scene_loader.gd.uid
-````
-uid://b0l72c2rig2ql
-````
-
-## File: scripts/tts_manager.gd.uid
-````
-uid://bin4f34eliqc8
+uid://cioohvcyfqwpl
 ````
 
 ## File: .agents/AGENTS.md
@@ -1906,6 +1876,48 @@ scene = ExtResource("3_ui")
 viewport_size = Vector2(600, 480)
 input_gamepad = true
 unshaded = true
+````
+
+## File: scripts/pause_menu_ui.gd
+````
+extends Control
+
+signal resume_requested
+signal restart_requested
+signal main_menu_requested
+
+@onready var resume_btn: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ResumeBtn
+@onready var restart_btn: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/RestartBtn
+@onready var menu_btn: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/MenuBtn
+
+var _navigator: VRUINavigator
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	_setup_accessibility()
+	_navigator = VRUINavigator.new()
+	_navigator.root_control = self
+	add_child(_navigator)
+	visibility_changed.connect(_on_visibility_changed)
+
+func _on_visibility_changed() -> void:
+	if visible and _navigator:
+		_navigator.refresh_buttons()
+
+func _setup_accessibility() -> void:
+	if TTSManager:
+		TTSManager.setup_button(resume_btn, "Resume Game")
+		TTSManager.setup_button(restart_btn, "Restart Map")
+		TTSManager.setup_button(menu_btn, "Return to Main Menu")
+
+func _on_resume_pressed() -> void:
+	resume_requested.emit()
+
+func _on_restart_pressed() -> void:
+	restart_requested.emit()
+
+func _on_menu_pressed() -> void:
+	main_menu_requested.emit()
 ````
 
 ## File: scripts/pause_menu.gd
@@ -3633,6 +3645,85 @@ collision_mask = 524289
 shape = SubResource("SphereShape3D_jumpscare")
 ````
 
+## File: scenes/foxy.tscn
+````
+[gd_scene format=3 uid="uid://cxabcf23t8foo"]
+
+[ext_resource type="Script" uid="uid://bebk6fhspwj0v" path="res://scripts/foxy.gd" id="1_foxy"]
+[ext_resource type="AudioStream" uid="uid://buv1fya4k5bwa" path="res://assets/sounds/foxy_runing.mp3" id="2_run"]
+[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="3_jump"]
+[ext_resource type="AudioStream" uid="uid://131ewctsgefe" path="res://assets/sounds/foxy_walking.wav" id="4_walk"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_foxy_col"]
+radius = 0.5571289
+height = 2.3572266
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_foxy_mat"]
+albedo_color = Color(1, 0.2, 0, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_foxy_mesh"]
+material = SubResource("StandardMaterial3D_foxy_mat")
+radius = 0.51416016
+height = 2.3575196
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_foxy_trig"]
+height = 2.3625977
+radius = 0.8149414
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_block"]
+size = Vector3(1.8463135, 2.1749024, 0.9095459)
+
+[node name="Foxy" type="CharacterBody3D" unique_id=2065885202 groups=["enemy"]]
+collision_layer = 4
+script = ExtResource("1_foxy")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=839306087]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1786133, 0)
+shape = SubResource("CapsuleShape3D_foxy_col")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1730761299]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1787598, 0)
+mesh = SubResource("CapsuleMesh_foxy_mesh")
+
+[node name="RunSound" type="AudioStreamPlayer3D" parent="." unique_id=693784785]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+stream = ExtResource("2_run")
+volume_db = 15.24
+unit_size = 16.12
+max_distance = 25.0
+bus = &"Enemies"
+
+[node name="WalkSound" type="AudioStreamPlayer3D" parent="." unique_id=998877665]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+stream = ExtResource("4_walk")
+volume_db = 15.614
+unit_size = 17.05
+max_distance = 25.0
+bus = &"Enemies"
+
+[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=1594056728]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+stream = ExtResource("3_jump")
+volume_db = 9.019
+bus = &"Jumpscare"
+
+[node name="JumpscareTrigger" type="Area3D" parent="." unique_id=1994404484]
+collision_layer = 0
+collision_mask = 524289
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpscareTrigger" unique_id=829897168]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1812989, 0)
+shape = SubResource("CylinderShape3D_foxy_trig")
+
+[node name="BlockTrigger" type="Area3D" parent="." unique_id=1234567890]
+collision_layer = 0
+collision_mask = 131072
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BlockTrigger" unique_id=820912904]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.038757324, 1.1874512, -0.70477295)
+shape = SubResource("BoxShape3D_block")
+````
+
 ## File: scripts/game_map.gd
 ````
 @tool
@@ -4319,85 +4410,6 @@ whoosh2 Whoosh away by jriches1 -- https://freesound.org/s/817959/ -- License: C
 danger Cinematic Alarm Hit by Rizzard -- https://freesound.org/s/560157/ -- License: Creative Commons 0
 ````
 
-## File: scenes/foxy.tscn
-````
-[gd_scene format=3 uid="uid://cxabcf23t8foo"]
-
-[ext_resource type="Script" uid="uid://bebk6fhspwj0v" path="res://scripts/foxy.gd" id="1_foxy"]
-[ext_resource type="AudioStream" uid="uid://buv1fya4k5bwa" path="res://assets/sounds/foxy_runing.mp3" id="2_run"]
-[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="3_jump"]
-[ext_resource type="AudioStream" uid="uid://131ewctsgefe" path="res://assets/sounds/foxy_walking.wav" id="4_walk"]
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_foxy_col"]
-radius = 0.5571289
-height = 2.3572266
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_foxy_mat"]
-albedo_color = Color(1, 0.2, 0, 1)
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_foxy_mesh"]
-material = SubResource("StandardMaterial3D_foxy_mat")
-radius = 0.51416016
-height = 2.3575196
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_foxy_trig"]
-height = 2.3625977
-radius = 0.8149414
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_block"]
-size = Vector3(1.8463135, 2.1749024, 0.9095459)
-
-[node name="Foxy" type="CharacterBody3D" unique_id=2065885202 groups=["enemy"]]
-collision_layer = 4
-script = ExtResource("1_foxy")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=839306087]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1786133, 0)
-shape = SubResource("CapsuleShape3D_foxy_col")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1730761299]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1787598, 0)
-mesh = SubResource("CapsuleMesh_foxy_mesh")
-
-[node name="RunSound" type="AudioStreamPlayer3D" parent="." unique_id=693784785]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-stream = ExtResource("2_run")
-volume_db = 15.24
-unit_size = 16.12
-max_distance = 25.0
-bus = &"Enemies"
-
-[node name="WalkSound" type="AudioStreamPlayer3D" parent="." unique_id=998877665]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-stream = ExtResource("4_walk")
-volume_db = 15.614
-unit_size = 17.05
-max_distance = 25.0
-bus = &"Enemies"
-
-[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=1594056728]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-stream = ExtResource("3_jump")
-volume_db = 9.019
-bus = &"Jumpscare"
-
-[node name="JumpscareTrigger" type="Area3D" parent="." unique_id=1994404484]
-collision_layer = 0
-collision_mask = 524289
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpscareTrigger" unique_id=829897168]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1812989, 0)
-shape = SubResource("CylinderShape3D_foxy_trig")
-
-[node name="BlockTrigger" type="Area3D" parent="." unique_id=1234567890]
-collision_layer = 0
-collision_mask = 131072
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="BlockTrigger" unique_id=820912904]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.038757324, 1.1874512, -0.70477295)
-shape = SubResource("BoxShape3D_block")
-````
-
 ## File: scripts/player_audio_manager.gd
 ````
 extends Node
@@ -4592,6 +4604,10 @@ run/main_scene="res://scenes/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
+[audio]
+
+default_bus_layout="res://default_bus_layout.tres"
+
 [autoload]
 
 XRToolsUserSettings="*uid://bqgb8i74tm0t"
@@ -4621,10 +4637,6 @@ renderer/rendering_method="mobile"
 
 openxr/enabled=true
 shaders/enabled=true
-
-[audio]
-
-default_bus_layout="res://default_bus_layout.tres"
 ````
 
 ## File: scripts/ballora.gd
@@ -5346,170 +5358,6 @@ func _trigger_jumpscare(reason: String):
 	await JumpscareHelper.execute(self, jumpscare_sound, [], "Marionette — " + reason)
 ````
 
-## File: scenes/game_map.tscn
-````
-[gd_scene format=3 uid="uid://cjyxx2d4hafto"]
-
-[ext_resource type="Script" uid="uid://cbilw02reekmp" path="res://scripts/game_map.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://d3qvt0affmqvn" path="res://assets/textures/Wooden Floor Texture/wood2_COLOR.jpg" id="2_lp764"]
-[ext_resource type="Texture2D" uid="uid://ch8av1pfgrixv" path="res://assets/textures/Wooden Floor Texture/wood2_OCC.jpg" id="3_m2cng"]
-[ext_resource type="Texture2D" uid="uid://bkxkmyk7y0hl4" path="res://assets/textures/Wooden Floor Texture/wood2_NRM.jpg" id="4_oviui"]
-[ext_resource type="AudioStream" uid="uid://bv6a0kufxjmtr" path="res://assets/sounds/ambience.mp3" id="5_m2cng"]
-[ext_resource type="PackedScene" uid="uid://b4ml2o2jh5ooc" path="res://scenes/balora.tscn" id="6_oviui"]
-[ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="7_player"]
-[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="8_startxr"]
-[ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="9_fade"]
-[ext_resource type="PackedScene" uid="uid://b3t54b22cxxxx" path="res://scenes/marionette.tscn" id="10_marnin"]
-[ext_resource type="PackedScene" uid="uid://cxabcf23t8foo" path="res://scenes/foxy.tscn" id="11_foxy"]
-[ext_resource type="PackedScene" path="res://scenes/phantom_grasp.tscn" id="12_grasp"]
-[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="13_pause"]
-
-[sub_resource type="Environment" id="Environment_iau3x"]
-background_mode = 1
-background_color = Color(0, 0, 0, 1)
-ambient_light_source = 1
-ambient_light_energy = 0.0
-
-
-[sub_resource type="NavigationMesh" id="NavigationMesh_new"]
-geometry_parsed_geometry_type = 1
-agent_height = 2.75
-agent_radius = 0.75
-cell_size = 0.25
-cell_height = 0.25
-
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_test"]
-size = Vector3(40.593994, 1, 43.245117)
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_test"]
-lightmap_size_hint = Vector2i(102, 102)
-size = Vector2(40, 43)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial_test"]
-disable_specular_occlusion = true
-albedo_texture = ExtResource("2_lp764")
-normal_enabled = true
-normal_scale = 14.51
-normal_texture = ExtResource("4_oviui")
-ao_enabled = true
-ao_light_affect = 1.0
-ao_texture = ExtResource("3_m2cng")
-uv1_triplanar = true
-uv1_triplanar_sharpness = 1.6008334
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ns"]
-size = Vector3(40.58618, 4, 0.5)
-
-[sub_resource type="BoxMesh" id="BoxMesh_wall_ns"]
-size = Vector3(40, 4, 0.5)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial_wall"]
-albedo_color = Color(0.15, 0.12, 0.1, 1)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ew"]
-size = Vector3(0.5, 4, 43.78125)
-
-[sub_resource type="BoxMesh" id="BoxMesh_wall_ew"]
-size = Vector3(0.5, 4, 44)
-
-[node name="GameMap" type="Node3D" unique_id=120756022]
-script = ExtResource("1_script")
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=982597785]
-environment = SubResource("Environment_iau3x")
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1915778391]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10, 0)
-visible = false
-light_energy = 0.0
-
-
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=990958998]
-navigation_mesh = SubResource("NavigationMesh_new")
-
-[node name="Floor" type="StaticBody3D" parent="NavigationRegion3D" unique_id=309467535]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Floor" unique_id=1961788420]
-shape = SubResource("BoxShape3D_test")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Floor" unique_id=1559076285]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-mesh = SubResource("PlaneMesh_test")
-surface_material_override/0 = SubResource("StandardMaterial_test")
-
-[node name="WallNorth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=723940986]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 21.738867)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallNorth" unique_id=1396440935]
-shape = SubResource("BoxShape3D_wall_ns")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallNorth" unique_id=730965168]
-mesh = SubResource("BoxMesh_wall_ns")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="WallSouth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=118626652]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -21.617676)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallSouth" unique_id=913572083]
-shape = SubResource("BoxShape3D_wall_ns")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallSouth" unique_id=1717054843]
-mesh = SubResource("BoxMesh_wall_ns")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="WallEast" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1399451984]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.171703, 2, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallEast" unique_id=727175830]
-shape = SubResource("BoxShape3D_wall_ew")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallEast" unique_id=350134398]
-mesh = SubResource("BoxMesh_wall_ew")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="WallWest" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1916824261]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.25622, 2, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallWest" unique_id=584697121]
-shape = SubResource("BoxShape3D_wall_ew")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallWest" unique_id=1766290024]
-mesh = SubResource("BoxMesh_wall_ew")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=569793408]
-stream = ExtResource("5_m2cng")
-volume_db = -1.273
-autoplay = true
-
-[node name="Marionette" parent="." unique_id=958148592 instance=ExtResource("10_marnin")]
-
-[node name="StartXR" parent="." unique_id=1224595367 instance=ExtResource("8_startxr")]
-
-[node name="Player" parent="." unique_id=805658640 instance=ExtResource("7_player")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.8063904, -1.6275938)
-
-[node name="Fade" parent="." unique_id=1010360029 instance=ExtResource("9_fade")]
-
-[node name="Balora" parent="." unique_id=1656694762 instance=ExtResource("6_oviui")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4395071, 16.287754)
-
-[node name="Foxy" parent="." unique_id=123456789 instance=ExtResource("11_foxy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1.4, -18.799488)
-
-[node name="Foxy2" parent="." unique_id=123456790 instance=ExtResource("11_foxy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.4, 18.0)
-
-[node name="PhantomGrasp" parent="." unique_id=987654321 instance=ExtResource("12_grasp")]
-
-[node name="PauseMenu" parent="." instance=ExtResource("13_pause")]
-
-
-[editable path="Player"]
-````
-
 ## File: scenes/main_menu_ui.tscn
 ````
 [gd_scene load_steps=22 format=3 uid="uid://bvwh78d1g322u"]
@@ -5811,122 +5659,6 @@ theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
 text = "exit"
-script = ExtResource("2_hold_btn")
-
-[node name="NightsPanel" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
-visible = false
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="NightsBg" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel_glass")
-
-[node name="Margin" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg"]
-layout_mode = 2
-theme_override_constants/margin_left = 32
-theme_override_constants/margin_top = 22
-theme_override_constants/margin_right = 32
-theme_override_constants/margin_bottom = 22
-
-[node name="Content" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="NightsTitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 1, 0.64, 1)
-theme_override_fonts/font = ExtResource("5_font_cinzel")
-theme_override_font_sizes/font_size = 26
-text = "SELECT SURVIVAL NIGHT"
-horizontal_alignment = 1
-
-[node name="HSeparator1" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content"]
-layout_mode = 2
-
-[node name="ScrollContainer" type="ScrollContainer" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content"]
-custom_minimum_size = Vector2(0, 360)
-layout_mode = 2
-
-[node name="NightsList" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/ScrollContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 10
-
-[node name="Night0Btn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/ScrollContainer/NightsList"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_setting_card")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
-text = "NIGHT 0: Test Room (Safe Tutorial)"
-script = ExtResource("2_hold_btn")
-
-[node name="Night1Btn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/ScrollContainer/NightsList"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_setting_card")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
-text = "NIGHT 1: First Contact (30 seconds)"
-script = ExtResource("2_hold_btn")
-
-[node name="Night2Btn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/ScrollContainer/NightsList"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_setting_card")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
-text = "NIGHT 2: Whispering Shadows (60 seconds)"
-script = ExtResource("2_hold_btn")
-
-[node name="Night3Btn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/ScrollContainer/NightsList"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_setting_card")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
-text = "NIGHT 3: Silence and Charge (90 seconds)"
-script = ExtResource("2_hold_btn")
-
-[node name="Night4Btn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/ScrollContainer/NightsList"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_setting_card")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
-text = "NIGHT 4: The Deep Dark (120 seconds)"
-script = ExtResource("2_hold_btn")
-
-[node name="Night5Btn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/ScrollContainer/NightsList"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_setting_card")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_btn_hover")
-text = "NIGHT 5: Nightmare Finale (150 seconds)"
-script = ExtResource("2_hold_btn")
-
-[node name="HSeparator2" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content"]
-layout_mode = 2
-
-[node name="BackFromNightsButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content"]
-custom_minimum_size = Vector2(420, 52)
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
-theme_override_fonts/font = ExtResource("5_font_cinzel")
-theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_pill_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_pill_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_pill_hover")
-text = "⮌ BACK TO MENU"
 script = ExtResource("2_hold_btn")
 
 [node name="SettingsPanel" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
@@ -6705,6 +6437,163 @@ autoplay = true
 [node name="Player" parent="." unique_id=629638343 instance=ExtResource("5_player")]
 
 [node name="Fade" parent="." unique_id=1653293877 instance=ExtResource("7_fade")]
+````
+
+## File: scenes/game_map.tscn
+````
+[gd_scene format=3 uid="uid://cjyxx2d4hafto"]
+
+[ext_resource type="Script" uid="uid://cbilw02reekmp" path="res://scripts/game_map.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://d3qvt0affmqvn" path="res://assets/textures/Wooden Floor Texture/wood2_COLOR.jpg" id="2_lp764"]
+[ext_resource type="Texture2D" uid="uid://ch8av1pfgrixv" path="res://assets/textures/Wooden Floor Texture/wood2_OCC.jpg" id="3_m2cng"]
+[ext_resource type="Texture2D" uid="uid://bkxkmyk7y0hl4" path="res://assets/textures/Wooden Floor Texture/wood2_NRM.jpg" id="4_oviui"]
+[ext_resource type="AudioStream" uid="uid://bv6a0kufxjmtr" path="res://assets/sounds/ambience.mp3" id="5_m2cng"]
+[ext_resource type="PackedScene" uid="uid://b4ml2o2jh5ooc" path="res://scenes/balora.tscn" id="6_oviui"]
+[ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="7_player"]
+[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="8_startxr"]
+[ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="9_fade"]
+[ext_resource type="PackedScene" uid="uid://b3t54b22cxxxx" path="res://scenes/marionette.tscn" id="10_marnin"]
+[ext_resource type="PackedScene" uid="uid://cxabcf23t8foo" path="res://scenes/foxy.tscn" id="11_foxy"]
+[ext_resource type="PackedScene" path="res://scenes/phantom_grasp.tscn" id="12_grasp"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="13_pause"]
+
+[sub_resource type="Environment" id="Environment_iau3x"]
+background_mode = 1
+ambient_light_source = 1
+ambient_light_energy = 0.0
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_new"]
+geometry_parsed_geometry_type = 1
+agent_height = 2.75
+agent_radius = 0.75
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_test"]
+size = Vector3(40.593994, 1, 43.245117)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_test"]
+lightmap_size_hint = Vector2i(102, 102)
+size = Vector2(40, 43)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial_test"]
+disable_specular_occlusion = true
+albedo_texture = ExtResource("2_lp764")
+normal_enabled = true
+normal_scale = 14.51
+normal_texture = ExtResource("4_oviui")
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = ExtResource("3_m2cng")
+uv1_triplanar = true
+uv1_triplanar_sharpness = 1.6008334
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ns"]
+size = Vector3(40.58618, 4, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_ns"]
+size = Vector3(40, 4, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial_wall"]
+albedo_color = Color(0.15, 0.12, 0.1, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ew"]
+size = Vector3(0.5, 4, 43.78125)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_ew"]
+size = Vector3(0.5, 4, 44)
+
+[node name="GameMap" type="Node3D" unique_id=120756022]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=982597785]
+environment = SubResource("Environment_iau3x")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1915778391]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10, 0)
+visible = false
+light_energy = 0.0
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=990958998]
+navigation_mesh = SubResource("NavigationMesh_new")
+
+[node name="Floor" type="StaticBody3D" parent="NavigationRegion3D" unique_id=309467535]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Floor" unique_id=1961788420]
+shape = SubResource("BoxShape3D_test")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Floor" unique_id=1559076285]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("PlaneMesh_test")
+surface_material_override/0 = SubResource("StandardMaterial_test")
+
+[node name="WallNorth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=723940986]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 21.738867)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallNorth" unique_id=1396440935]
+shape = SubResource("BoxShape3D_wall_ns")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallNorth" unique_id=730965168]
+mesh = SubResource("BoxMesh_wall_ns")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="WallSouth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=118626652]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -21.617676)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallSouth" unique_id=913572083]
+shape = SubResource("BoxShape3D_wall_ns")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallSouth" unique_id=1717054843]
+mesh = SubResource("BoxMesh_wall_ns")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="WallEast" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1399451984]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.171703, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallEast" unique_id=727175830]
+shape = SubResource("BoxShape3D_wall_ew")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallEast" unique_id=350134398]
+mesh = SubResource("BoxMesh_wall_ew")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="WallWest" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1916824261]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.25622, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallWest" unique_id=584697121]
+shape = SubResource("BoxShape3D_wall_ew")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallWest" unique_id=1766290024]
+mesh = SubResource("BoxMesh_wall_ew")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=569793408]
+stream = ExtResource("5_m2cng")
+volume_db = -1.273
+autoplay = true
+
+[node name="Marionette" parent="." unique_id=958148592 instance=ExtResource("10_marnin")]
+
+[node name="StartXR" parent="." unique_id=1224595367 instance=ExtResource("8_startxr")]
+
+[node name="Player" parent="." unique_id=805658640 instance=ExtResource("7_player")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.8063904, -1.6275938)
+
+[node name="Fade" parent="." unique_id=1010360029 instance=ExtResource("9_fade")]
+
+[node name="Balora" parent="." unique_id=1656694762 instance=ExtResource("6_oviui")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4395071, 16.287754)
+
+[node name="Foxy" parent="." unique_id=123456789 instance=ExtResource("11_foxy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1.4, -18.799488)
+
+[node name="Foxy2" parent="." unique_id=123456790 instance=ExtResource("11_foxy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.4, 18)
+
+[node name="PhantomGrasp" parent="." unique_id=987654321 instance=ExtResource("12_grasp")]
+
+[node name="PauseMenu" parent="." unique_id=1457039507 instance=ExtResource("13_pause")]
+
+[editable path="Player"]
 ````
 
 ## File: scenes/player.tscn
