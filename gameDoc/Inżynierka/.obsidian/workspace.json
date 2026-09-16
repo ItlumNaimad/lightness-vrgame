@@ -39,12 +39,14 @@
             "id": "e29220ff57d8c398",
             "type": "leaf",
             "state": {
-              "type": "release-notes",
+              "type": "markdown",
               "state": {
-                "currentVersion": "1.13.7"
+                "file": "Notatka.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-book-up",
-              "title": "Informacje o wersji 1.13.7"
+              "icon": "lucide-file",
+              "title": "Notatka"
             }
           }
         ],
@@ -214,12 +216,12 @@
   },
   "active": "e29220ff57d8c398",
   "lastOpenFiles": [
+    "README.md",
     "DESIGN.md",
     "Audit.md",
     "Notatka.md",
     "AGENT_zalecenia.md",
     "Dokumentacja.pdf",
-    "README.md",
     "Witaj.md"
   ]
 }

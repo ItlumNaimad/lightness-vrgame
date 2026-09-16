@@ -363,3 +363,29 @@ Ręczne celowanie wskaźnikiem laserowym VR (`FunctionPointer`) w trójwymiarow�
 - Oddzielny dźwięk na kroki i na bieganie.
 - Pokonanie PhantomGrasp'a alternatywną mechaniką: "beam dźwiękowy", który natychmiast niszczy macki, ale generuje olbrzymi hałas triggerujący szarżę Foxy'ego oraz kierujący Ballorę w to miejsce.
 
+## Wdrożenie 16.09.2026 — Noce (FNaF Style), Trwały Zapis Ustawień, VR UI Navigator i Ciemność z FeetLight
+- [x] **Podział na Noce / Poziomy (FNaF Style, Noc 0 - 5):**
+  - Stworzono singleton `scripts/level_manager.gd` (Autoload `LevelManager`).
+  - Zdefiniowano noce od Nocy 0 (Test Room / bezpieczny trening) do Nocy 5 (Koszmar: maks. prędkość Balory + 2 niezależnych Foxy szarżujących z różnych stron + Marionette + Phantom Grasp).
+  - W `scenes/game_map.tscn` i `scripts/game_map.gd` wdrożono automatyczną konfigurację przeciwników na podstawie wybranej nocy, dynamiczny czas nocy (30s - 150s), dzwon 6:00 AM, lektorski komunikat zwycięstwa i automatyczne odblokowanie kolejnej nocy.
+  - Dodano instancję `Foxy2` dla podwójnego polowania w Nocy 5.
+- [x] **Trwały Zapis Ustawień i Postępu (JSON):**
+  - Postęp gry (odblokowane i wybrana noc) zapisywany jest w `user://save_data.json`.
+  - Ustawienia głośności szyn audio (`Master`, `Enemies`, `Footsteps`, `Jumpscare`) oraz stan lektora TTS (`tts_enabled`) zapisywane są trwale do `user://settings.json` przez `LevelManager.save_settings()` i ładowane automatycznie przy każdym starcie gry, eliminując problem resetowania ustawień.
+- [x] **Nawigacja Joystickiem w Menu Głównym i Menu Pauzy (Krytyczne dla Dostępności):**
+  - Stworzono moduł `scripts/vr_ui_navigator.gd` (`VRUINavigator`), który nasłuchuje osi pionowej gałki na kontrolerach VR (`left_hand` / `right_hand`).
+  - Wychylenie gałki w górę/dół sekwencyjnie przenosi focus między przyciskami w menu, wyzwalając natychmiastowy odczyt lektorski TTS oraz impuls haptyczny w kontrolerze.
+  - Wciśnięcie przycisku A (`ax_button`) lub pociągnięcie za spust (`trigger_click`) natychmiast zatwierdza wybór.
+  - Wdrożono w `scenes/main_menu_ui.tscn` i `scenes/pause_menu_ui.tscn`.
+- [x] **Usunięcie Sztucznego Obrotu (MovementTurn) i Efektu Whoosh:**
+  - Zgodnie z decyzją projektową usunięto snap turn joystickiem – gracz w VR obraca się naturalnie własnym ciałem w 360°, co eliminuje dezorientację i chorobę lokomocyjną.
+  - Usunięto węzeł `MovementTurn` oraz `TurnAudioPlayer` z `scenes/player.tscn`.
+  - Usunięto szynę `Whoosh` z `default_bus_layout.tres` oraz zbędną kartę i suwaki z menu ustawień.
+- [x] **Ciemność na Mapie i Subtelne Oświetlenie Stóp (FeetLight):**
+  - Globalne oświetlenie na mapie (`DirectionalLight3D`) zostało wyłączone (`visible = false`, `energy = 0.0`), a `Environment` ustawiono na 100% czarne tło i zerowy ambient.
+  - Do `scenes/player.tscn` dodano źródło światła `FeetLight` (`OmniLight3D`, zasięg 1.6m pod stopami), które rzuca delikatne, nastrojowe światło pod nogi gracza, dając poczucie stania na podłożu i orientację w przestrzeni, podczas gdy korytarze toną w absolutnym mroku.
+- [x] **HoldButton — Całkowite Wyzerowanie `button_mask = 0`:**
+  - Aby zapobiec samowolnemu emitowaniu zdarzenia `pressed` przez silnik C++ przy krótkim kliknięciu triggera, wyzerowano maskę przycisków myszy `button_mask = 0` w `scripts/hold_button.gd`.
+  - Sygnał `pressed` emitowany jest wyłącznie po przytrzymaniu triggera przez 0.65s i naładowaniu paska.
+
+

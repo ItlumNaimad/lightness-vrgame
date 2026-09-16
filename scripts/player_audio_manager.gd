@@ -1,7 +1,6 @@
 extends Node
 class_name PlayerAudioManager
 
-@export var rotation_threshold_degrees: float = 8.0
 @export var walk_noise_level: float = 1.0
 @export var sprint_noise_level: float = 2.8
 @export var wall_noise_level: float = 3.5
@@ -10,7 +9,6 @@ class_name PlayerAudioManager
 @export var echolocation_cooldown: float = 2.0
 
 @onready var origin: XROrigin3D = get_node_or_null("../XROrigin3D")
-@onready var turn_audio_player: AudioStreamPlayer = $TurnAudioPlayer
 @onready var footstep_provider = get_node_or_null("../XROrigin3D/MovementFootstep")
 @onready var sprint_provider = get_node_or_null("../XROrigin3D/MovementSprint")
 @onready var player_body: CharacterBody3D = get_node_or_null("../XROrigin3D/PlayerBody")
@@ -18,8 +16,6 @@ class_name PlayerAudioManager
 var left_ctrl: XRController3D
 var right_ctrl: XRController3D
 
-var _last_rotation_y: float = 0.0
-var _accumulated_turn: float = 0.0
 var _wall_hit_timer: float = 0.0
 var _echolocation_timer: float = 0.0
 
@@ -36,7 +32,6 @@ func _ready():
 			player_body = origin.get_node_or_null("PlayerBody")
 		left_ctrl = origin.get_node_or_null("left_hand") as XRController3D
 		right_ctrl = origin.get_node_or_null("right_hand") as XRController3D
-		_last_rotation_y = origin.global_transform.basis.get_euler().y
 		
 	if footstep_provider and not footstep_provider.footstep.is_connected(_on_footstep):
 		footstep_provider.footstep.connect(_on_footstep)
@@ -72,31 +67,6 @@ func _physics_process(delta: float):
 		_echolocation_timer = echolocation_cooldown
 		_trigger_echolocation()
 
-	# 2. Wykrywanie obrotu i dźwięk Whoosh / Kompas
-	if origin:
-		var current_rotation_y = origin.global_transform.basis.get_euler().y
-		var angle_diff = angle_difference(_last_rotation_y, current_rotation_y)
-		var diff = abs(rad_to_deg(angle_diff))
-		
-		_accumulated_turn += diff
-		
-		# Wykrywanie obrotu skokowego (duży skok w 1 klatce) lub płynnego (nagromadzony obrót)
-		if diff >= rotation_threshold_degrees or _accumulated_turn >= 20.0:
-			_accumulated_turn = 0.0
-			if turn_audio_player:
-				if TTSManager:
-					turn_audio_player.volume_db = TTSManager.whoosh_volume_db
-				else:
-					turn_audio_player.volume_db = 3.0
-					
-				if angle_diff > 0:
-					turn_audio_player.pitch_scale = 0.85 # Obrót w lewo (niższy ton)
-				else:
-					turn_audio_player.pitch_scale = 1.15 # Obrót w prawo (wyższy ton)
-				
-				turn_audio_player.play()
-				
-		_last_rotation_y = current_rotation_y
 
 func _trigger_wall_collision():
 	# Dźwięk głuchego uderzenia w ścianę

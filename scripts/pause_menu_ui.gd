@@ -8,9 +8,19 @@ signal main_menu_requested
 @onready var restart_btn: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/RestartBtn
 @onready var menu_btn: Button = $CenterContainer/PanelContainer/MarginContainer/VBoxContainer/MenuBtn
 
+var _navigator: VRUINavigator
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_setup_accessibility()
+	_navigator = VRUINavigator.new()
+	_navigator.root_control = self
+	add_child(_navigator)
+	visibility_changed.connect(_on_visibility_changed)
+
+func _on_visibility_changed() -> void:
+	if visible and _navigator:
+		_navigator.refresh_buttons()
 
 func _setup_accessibility() -> void:
 	if TTSManager:

@@ -3,7 +3,6 @@
 [ext_resource type="PackedScene" uid="uid://diyu06cw06syv" path="res://addons/godot-xr-tools/player/player_body.tscn" id="1_g2els"]
 [ext_resource type="PackedScene" uid="uid://btknduttnmoxf" path="res://addons/godot-xr-tools/misc/vr_common_shader_cache.tscn" id="2_qhqgy"]
 [ext_resource type="PackedScene" uid="uid://bdwmserhqai5h" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_physics_hand_low.tscn" id="3_dqkch"]
-[ext_resource type="PackedScene" uid="uid://b6bk2pj8vbj28" path="res://addons/godot-xr-tools/functions/movement_turn.tscn" id="4_fjrip"]
 [ext_resource type="PackedScene" uid="uid://btf05hjpw6k05" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_physics_hand_low.tscn" id="4_qlg0r"]
 [ext_resource type="PackedScene" uid="uid://bkv43ec6chcf3" path="res://addons/godot-xr-tools/hands/scenes/collision/collision_hand_left.tscn" id="5_col_l"]
 [ext_resource type="PackedScene" uid="uid://c3uoohvnshach" path="res://addons/godot-xr-tools/hands/scenes/collision/collision_hand_right.tscn" id="6_col_r"]
@@ -11,7 +10,6 @@
 [ext_resource type="PackedScene" uid="uid://cqhw276realc" path="res://addons/godot-xr-tools/functions/function_pointer.tscn" id="10_pointer"]
 [ext_resource type="PackedScene" uid="uid://drs4eeq721ojn" path="res://addons/godot-xr-tools/functions/movement_sprint.tscn" id="11_sprint"]
 [ext_resource type="Script" uid="uid://ddgofpxlmq1d3" path="res://scripts/player_audio_manager.gd" id="12_audio_mgr"]
-[ext_resource type="AudioStream" uid="uid://nxwcy3rpkag7" path="res://assets/sounds/whoosh.mp3" id="13_whoosh"]
 [ext_resource type="PackedScene" uid="uid://0xlsitpu17r1" path="res://addons/godot-xr-tools/functions/movement_footstep.tscn" id="14_footstep"]
 [ext_resource type="Resource" uid="uid://dbsq5a4220b3" path="res://assets/sounds/default_surface.tres" id="15_surface"]
 [ext_resource type="AudioStream" uid="uid://c7yasims5j5dg" path="res://assets/sounds/danger.wav" id="16_danger"]
@@ -61,8 +59,6 @@ tracker = &"left_hand"
 
 [node name="LeftHand" parent="XROrigin3D/left_hand/CollisionHandLeft" unique_id=922969339 instance=ExtResource("3_dqkch")]
 
-[node name="MovementTurn" parent="XROrigin3D/left_hand" unique_id=186636919 instance=ExtResource("4_fjrip")]
-
 [node name="FunctionPointer" parent="XROrigin3D/left_hand" unique_id=1737039443 instance=ExtResource("10_pointer")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.02, 0.05, -0.1)
 distance = 6.0
@@ -87,10 +83,13 @@ show_laser = 2
 laser_length = 1
 show_target = true
 
+[node name="FeetLight" type="OmniLight3D" parent="XROrigin3D" unique_id=193847291]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+light_color = Color(0.35, 0.42, 0.52, 1)
+light_energy = 0.55
+omni_range = 1.6
+omni_attenuation = 2.4
+
 [node name="PlayerAudioManager" type="Node" parent="." unique_id=863448654]
 script = ExtResource("12_audio_mgr")
 
-[node name="TurnAudioPlayer" type="AudioStreamPlayer" parent="PlayerAudioManager" unique_id=745962780]
-stream = ExtResource("13_whoosh")
-volume_db = 5.0
-bus = &"Whoosh"

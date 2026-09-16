@@ -30,6 +30,8 @@ const COLOR_GLOW_AURA := Color(0.0, 1.0, 0.64, 0.6)
 func _ready() -> void:
 	disabled = false
 	toggle_mode = false
+	button_mask = 0  # Blokuje domyślną natywną emisję pressed z BaseButton silnika C++
+	action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
 	
 	var empty_style := StyleBoxEmpty.new()
 	add_theme_stylebox_override("normal", empty_style)

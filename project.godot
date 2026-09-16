@@ -25,6 +25,7 @@ XRToolsUserSettings="*uid://bqgb8i74tm0t"
 SceneLoader="*res://scripts/scene_loader.gd"
 EventBus="*res://scripts/event_bus.gd"
 TTSManager="*res://scripts/tts_manager.gd"
+LevelManager="*res://scripts/level_manager.gd"
 XRToolsRumbleManager="*uid://by853dk86g1qw"
 
 [editor_plugins]
