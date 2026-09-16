@@ -73,3 +73,22 @@ W 0:00:40:064   load: res://scenes/pause_menu_ui.tscn:4 - ext_resource, invalid 
 E 0:00:40:224   @implicit_ready: Trying to assign value of type 'Node' to a variable of type 'Node3D'.
   <Źródło GDScript>pause_menu.gd:3 @ @implicit_ready()
   <Ślad stosu>  pause_menu.gd:3 @ @implicit_ready()
+
+---
+
+## Rozwiązanie (Status: Naprawione 2026-09-16)
+
+1. **Crash OpenXR (`XR_ERROR_CALL_ORDER_INVALID`) & `Trying to assign value of type 'Node' to 'Node3D'`:**
+   - **Przyczyna:** W pliku `scenes/pause_menu.tscn` zasób `Viewport2Din3D` miał przypisany błędny UID `uid://clc5dre31iskm`, który faktycznie należał do sceny `res://addons/godot-xr-tools/xr/start_xr.tscn`. W efekcie zamiast trójwymiarowego panelu UI (`Node3D`) zainstancjonował się węzeł `StartXR` (typ `Node`), co wywołało błąd rzutowania na `Node3D` oraz podwójną, równoległą konfigurację OpenXR (`OpenXR: Configuring interface` x 2), łamiąc pętlę renderowania klatek VR.
+   - **Rozwiązanie:** W `scenes/pause_menu.tscn` wstawiono poprawny UID `uid://clujaf3u776a3` dla `viewport_2d_in_3d.tscn` oraz właściwy UID dla `scripts/pause_menu.gd` (`uid://bcr15wxo5bwsm`).
+
+2. **Błąd parsowania `Identifier "delta" not declared in current scope` w `game_map.gd`:**
+   - **Przyczyna:** W `game_map.gd:94` funkcja `_update_threat_pacing()` była wywoływana i zdefiniowana bez parametru `delta`, podczas gdy wewnątrz używano zmiennej `delta`. Uniemożliwiło to załadowanie skryptu mapy.
+   - **Rozwiązanie:** Dodano parametr `delta: float` do deklaracji `_update_threat_pacing(delta: float)` oraz przekazano `delta` z pętli `_process(delta)`.
+
+3. **Ostrzeżenie `SHADOWED_VARIABLE` w `player_audio_manager.gd`:**
+   - **Przyczyna:** W funkcji `_trigger_collision_rumble()` zadeklarowano lokalne zmienne `var left_ctrl` i `var right_ctrl`, które przesłaniały istniejące pola klasy.
+   - **Rozwiązanie:** Usunięto lokalną redeklarację `var` i wykorzystano istniejące zmienne instancyjne klasy.
+
+4. **Nieprawidłowe UID-y (`invalid UID: uid://..._01`):**
+   - **Rozwiązanie:** Podmieniono fikcyjne identyfikatory UID w `scenes/pause_menu.tscn`, `scenes/pause_menu_ui.tscn`, `scenes/phantom_grasp.tscn` i `scenes/game_map.tscn` na rzeczywiste UID skryptów.

@@ -11,8 +11,8 @@
 [ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="9_fade"]
 [ext_resource type="PackedScene" uid="uid://b3t54b22cxxxx" path="res://scenes/marionette.tscn" id="10_marnin"]
 [ext_resource type="PackedScene" uid="uid://cxabcf23t8foo" path="res://scenes/foxy.tscn" id="11_foxy"]
-[ext_resource type="PackedScene" uid="uid://phantom_grasp_scene_01" path="res://scenes/phantom_grasp.tscn" id="12_grasp"]
-[ext_resource type="PackedScene" uid="uid://pause_menu_scene_01" path="res://scenes/pause_menu.tscn" id="13_pause"]
+[ext_resource type="PackedScene" path="res://scenes/phantom_grasp.tscn" id="12_grasp"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="13_pause"]
 
 [sub_resource type="Environment" id="Environment_iau3x"]
 background_mode = 1

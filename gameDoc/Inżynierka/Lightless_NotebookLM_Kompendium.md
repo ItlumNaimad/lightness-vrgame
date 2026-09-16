@@ -98,8 +98,11 @@ scripts/
   marionette.gd
   marionette.gd.uid
   pause_menu_ui.gd
+  pause_menu_ui.gd.uid
   pause_menu.gd
+  pause_menu.gd.uid
   phantom_grasp.gd
+  phantom_grasp.gd.uid
   player_audio_manager.gd
   player_audio_manager.gd.uid
   scene_loader.gd
@@ -1111,10 +1114,10 @@ Gra zorganizowana jest w 6 zróżnicowanych nocy, wprowadzających gracza krok p
 
 ## File: scenes/pause_menu_ui.tscn
 ````
-[gd_scene load_steps=5 format=3 uid="uid://pause_menu_ui_01"]
+[gd_scene load_steps=5 format=3]
 
-[ext_resource type="Script" uid="uid://pause_menu_ui_script_01" path="res://scripts/pause_menu_ui.gd" id="1_script"]
-[ext_resource type="Script" uid="uid://hold_button_script_01" path="res://scripts/hold_button.gd" id="2_hold"]
+[ext_resource type="Script" uid="uid://dnxve3m5i3n4j" path="res://scripts/pause_menu_ui.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://csj733r2xrc37" path="res://scripts/hold_button.gd" id="2_hold"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0.06, 0.07, 0.08, 0.95)
@@ -1214,11 +1217,11 @@ script = ExtResource("2_hold")
 
 ## File: scenes/pause_menu.tscn
 ````
-[gd_scene load_steps=4 format=3 uid="uid://pause_menu_scene_01"]
+[gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" uid="uid://pause_menu_controller_script_01" path="res://scripts/pause_menu.gd" id="1_pause"]
-[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="2_vp"]
-[ext_resource type="PackedScene" uid="uid://pause_menu_ui_01" path="res://scenes/pause_menu_ui.tscn" id="3_ui"]
+[ext_resource type="Script" uid="uid://bcr15wxo5bwsm" path="res://scripts/pause_menu.gd" id="1_pause"]
+[ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="2_vp"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu_ui.tscn" id="3_ui"]
 
 [node name="PauseMenu" type="Node3D"]
 process_mode = 3
@@ -1234,9 +1237,9 @@ unshaded = true
 
 ## File: scenes/phantom_grasp.tscn
 ````
-[gd_scene format=3 uid="uid://phantom_grasp_scene_01"]
+[gd_scene format=3]
 
-[ext_resource type="Script" uid="uid://phantom_grasp_script_01" path="res://scripts/phantom_grasp.gd" id="1_grasp"]
+[ext_resource type="Script" uid="uid://ck2hvdc2sbygk" path="res://scripts/phantom_grasp.gd" id="1_grasp"]
 [ext_resource type="AudioStream" uid="uid://dn1d2v8onqbl" path="res://assets/sounds/marionette/257784__xtrgamr__ominous-whispers.wav" id="2_crawl"]
 [ext_resource type="AudioStream" uid="uid://c7yasims5j5dg" path="res://assets/sounds/danger.wav" id="3_grab"]
 [ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="4_jump"]
@@ -1261,6 +1264,101 @@ pitch_scale = 1.3
 [node name="JumpscareSound" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("4_jump")
 volume_db = 10.0
+````
+
+## File: scripts/ballora.gd.uid
+````
+uid://40tyohs7i6dm
+````
+
+## File: scripts/event_bus.gd.uid
+````
+uid://bupsx8u5arpwo
+````
+
+## File: scripts/foxy.gd.uid
+````
+uid://bebk6fhspwj0v
+````
+
+## File: scripts/game_map.gd.uid
+````
+uid://cbilw02reekmp
+````
+
+## File: scripts/game_over_ui.gd.uid
+````
+uid://c3335djg2m52k
+````
+
+## File: scripts/game_over.gd
+````
+@tool
+extends XRToolsSceneBase
+
+const GAME_MAP_PATH = "res://scenes/game_map.tscn"
+const MAIN_MENU_PATH = "res://scenes/main_menu.tscn"
+
+func _ready() -> void:
+	if Engine.is_editor_hint():
+		return
+		
+	# Zablokowanie ruchu kontrolerem dla sceny Game Over
+	var providers = get_tree().get_nodes_in_group("movement_providers")
+	for p in providers:
+		if "enabled" in p:
+			p.enabled = false
+			
+	# Podpinamy sygnały z UI wewnątrz Viewport2Din3D
+	var viewport_2d = $Viewport2Din3D
+	if viewport_2d:
+		if not viewport_2d.is_node_ready():
+			await viewport_2d.ready
+		var ui = viewport_2d.get_scene_instance()
+		if ui:
+			ui.restart_pressed.connect(_on_restart_pressed)
+			ui.menu_pressed.connect(_on_menu_pressed)
+
+func _on_restart_pressed() -> void:
+	SceneLoader.load_scene(GAME_MAP_PATH)
+
+func _on_menu_pressed() -> void:
+	SceneLoader.load_scene(MAIN_MENU_PATH)
+````
+
+## File: scripts/game_over.gd.uid
+````
+uid://ckr1jiigqdojl
+````
+
+## File: scripts/glitch_title.gd.uid
+````
+uid://be1qqnukbv3uc
+````
+
+## File: scripts/hold_button.gd.uid
+````
+uid://csj733r2xrc37
+````
+
+## File: scripts/jumpscare_helper.gd.uid
+````
+uid://cgrlq66342glr
+````
+
+## File: scripts/main_menu_ui.gd.uid
+````
+uid://cnirmw4v8ixlt
+````
+
+## File: scripts/main_menu.gd.uid
+````
+uid://c1n8p7fin4eiq
+````
+
+## File: scripts/marionette.gd.uid
+````
+uid://b7ny004tb164f
 ````
 
 ## File: scripts/pause_menu_ui.gd
@@ -1293,6 +1391,11 @@ func _on_restart_pressed() -> void:
 
 func _on_menu_pressed() -> void:
 	main_menu_requested.emit()
+````
+
+## File: scripts/pause_menu_ui.gd.uid
+````
+uid://dnxve3m5i3n4j
 ````
 
 ## File: scripts/pause_menu.gd
@@ -1405,6 +1508,11 @@ func _on_main_menu() -> void:
 	get_tree().paused = false
 	visible = false
 	SceneLoader.load_scene("res://scenes/main_menu.tscn")
+````
+
+## File: scripts/pause_menu.gd.uid
+````
+uid://bcr15wxo5bwsm
 ````
 
 ## File: scripts/phantom_grasp.gd
@@ -1570,6 +1678,26 @@ func _trigger_jumpscare():
 	await JumpscareHelper.execute(self, jumpscare_sound, [], "Phantom Grasp — Zmiażdżenie uściskiem macek")
 ````
 
+## File: scripts/phantom_grasp.gd.uid
+````
+uid://ck2hvdc2sbygk
+````
+
+## File: scripts/player_audio_manager.gd.uid
+````
+uid://ddgofpxlmq1d3
+````
+
+## File: scripts/scene_loader.gd.uid
+````
+uid://b0l72c2rig2ql
+````
+
+## File: scripts/tts_manager.gd.uid
+````
+uid://bin4f34eliqc8
+````
+
 ## File: .agents/AGENTS.md
 ````markdown
 # Wymogi projektowe dla agentów AI - Lightless VR
@@ -1636,116 +1764,6 @@ Dzięki temu po ponownym otwarciu projektu będzie możliwe odtworzenie pełnego
 - Rzeczy, które warto praktykować w przyszłych implementacjach/to czego można się nauczyć na bazie konwersacji/internetu możesz zaproponować do zrobienia własnego SKILL.md
 ````
 
-## File: scripts/ballora.gd.uid
-````
-uid://40tyohs7i6dm
-````
-
-## File: scripts/event_bus.gd.uid
-````
-uid://bupsx8u5arpwo
-````
-
-## File: scripts/foxy.gd.uid
-````
-uid://bebk6fhspwj0v
-````
-
-## File: scripts/game_map.gd.uid
-````
-uid://cbilw02reekmp
-````
-
-## File: scripts/game_over_ui.gd.uid
-````
-uid://c3335djg2m52k
-````
-
-## File: scripts/game_over.gd
-````
-@tool
-extends XRToolsSceneBase
-
-const GAME_MAP_PATH = "res://scenes/game_map.tscn"
-const MAIN_MENU_PATH = "res://scenes/main_menu.tscn"
-
-func _ready() -> void:
-	if Engine.is_editor_hint():
-		return
-		
-	# Zablokowanie ruchu kontrolerem dla sceny Game Over
-	var providers = get_tree().get_nodes_in_group("movement_providers")
-	for p in providers:
-		if "enabled" in p:
-			p.enabled = false
-			
-	# Podpinamy sygnały z UI wewnątrz Viewport2Din3D
-	var viewport_2d = $Viewport2Din3D
-	if viewport_2d:
-		if not viewport_2d.is_node_ready():
-			await viewport_2d.ready
-		var ui = viewport_2d.get_scene_instance()
-		if ui:
-			ui.restart_pressed.connect(_on_restart_pressed)
-			ui.menu_pressed.connect(_on_menu_pressed)
-
-func _on_restart_pressed() -> void:
-	SceneLoader.load_scene(GAME_MAP_PATH)
-
-func _on_menu_pressed() -> void:
-	SceneLoader.load_scene(MAIN_MENU_PATH)
-````
-
-## File: scripts/game_over.gd.uid
-````
-uid://ckr1jiigqdojl
-````
-
-## File: scripts/glitch_title.gd.uid
-````
-uid://be1qqnukbv3uc
-````
-
-## File: scripts/hold_button.gd.uid
-````
-uid://csj733r2xrc37
-````
-
-## File: scripts/jumpscare_helper.gd.uid
-````
-uid://cgrlq66342glr
-````
-
-## File: scripts/main_menu_ui.gd.uid
-````
-uid://cnirmw4v8ixlt
-````
-
-## File: scripts/main_menu.gd.uid
-````
-uid://c1n8p7fin4eiq
-````
-
-## File: scripts/marionette.gd.uid
-````
-uid://b7ny004tb164f
-````
-
-## File: scripts/player_audio_manager.gd.uid
-````
-uid://ddgofpxlmq1d3
-````
-
-## File: scripts/scene_loader.gd.uid
-````
-uid://b0l72c2rig2ql
-````
-
-## File: scripts/tts_manager.gd.uid
-````
-uid://bin4f34eliqc8
-````
-
 ## File: scripts/event_bus.gd
 ````
 extends Node
@@ -1757,27 +1775,6 @@ signal noise_emitted(global_pos: Vector3, noise_level: float)
 ## Sygnał wywoływany co próg przetrwania (np. co 10s) dla eskalacji trudności
 @warning_ignore("unused_signal")
 signal milestone_reached(milestone: int)
-````
-
-## File: scenes/marionette.tscn
-````
-[gd_scene format=3 uid="uid://b3t54b22cxxxx"]
-
-[ext_resource type="Script" uid="uid://b7ny004tb164f" path="res://scripts/marionette.gd" id="1_marnin"]
-[ext_resource type="AudioStream" uid="uid://dn1d2v8onqbl" path="res://assets/sounds/marionette/257784__xtrgamr__ominous-whispers.wav" id="2_y05hy"]
-[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="3_jump"]
-
-[node name="Marionette" type="Node3D" unique_id=1428825871 groups=["enemy"]]
-script = ExtResource("1_marnin")
-
-[node name="WhisperSound" type="AudioStreamPlayer3D" parent="." unique_id=279718808]
-stream = ExtResource("2_y05hy")
-volume_db = 8.0
-unit_size = 15.0
-max_distance = 25.0
-
-[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=1378429979]
-stream = ExtResource("3_jump")
 ````
 
 ## File: scenes/game_over.tscn
@@ -1935,6 +1932,27 @@ scene_properties_keys = PackedStringArray("game_over_ui.gd")
 [node name="Player" parent="." unique_id=845576995 instance=ExtResource("4_player")]
 
 [node name="Fade" parent="." unique_id=584986121 instance=ExtResource("6_fade")]
+````
+
+## File: scenes/marionette.tscn
+````
+[gd_scene format=3 uid="uid://b3t54b22cxxxx"]
+
+[ext_resource type="Script" uid="uid://b7ny004tb164f" path="res://scripts/marionette.gd" id="1_marnin"]
+[ext_resource type="AudioStream" uid="uid://dn1d2v8onqbl" path="res://assets/sounds/marionette/257784__xtrgamr__ominous-whispers.wav" id="2_y05hy"]
+[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="3_jump"]
+
+[node name="Marionette" type="Node3D" unique_id=1428825871 groups=["enemy"]]
+script = ExtResource("1_marnin")
+
+[node name="WhisperSound" type="AudioStreamPlayer3D" parent="." unique_id=279718808]
+stream = ExtResource("2_y05hy")
+volume_db = 8.0
+unit_size = 15.0
+max_distance = 25.0
+
+[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=1378429979]
+stream = ExtResource("3_jump")
 ````
 
 ## File: scripts/game_over_ui.gd
@@ -2101,166 +2119,6 @@ func _start_major_glitch() -> void:
 	_is_major_glitching = true
 	_major_glitch_time_left = major_glitch_duration + randf_range(-0.15, 0.2)
 	_char_shuffle_timer = 0.0
-````
-
-## File: scripts/tts_manager.gd
-````
-extends Node
-
-## TTSManager — Globalny menedżer lektora (Text-to-Speech) i dostępności UI
-## Wykorzystuje natywne API DisplayServer w Godot 4.x z buforowaniem i odrzucaniem spamu (Dwell Debounce).
-
-var tts_enabled: bool = true
-var sound_compass_enabled: bool = true
-var whoosh_volume_db: float = 3.0
-var voice_rate: float = 1.0
-var voice_volume: int = 80
-var current_voice_id: String = ""
-
-var _last_spoken_text: String = ""
-var _last_spoken_time: float = 0.0
-var _currently_hovered_control: Control = null
-
-# Dwell Debounce — zapobiega zacinaniu wątku SAPI Windows przy szybkim przesuwaniu lasera
-var _pending_speech_text: String = ""
-var _pending_dwell_time: float = 0.0
-const DWELL_THRESHOLD: float = 0.08 # 80ms pauzy na przycisku zanim lektor zacznie mówić
-
-func _ready() -> void:
-	_init_voices()
-	call_deferred("_warmup_tts")
-
-func _process(delta: float) -> void:
-	if _pending_dwell_time > 0.0:
-		_pending_dwell_time -= delta
-		if _pending_dwell_time <= 0.0 and not _pending_speech_text.is_empty():
-			_execute_speak(_pending_speech_text)
-			_pending_speech_text = ""
-
-func _init_voices() -> void:
-	if DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH):
-		var voices = DisplayServer.tts_get_voices()
-		if voices.size() > 0:
-			current_voice_id = voices[0]["id"]
-			# Prefer English TTS voice (en, eng, english)
-			for v in voices:
-				var lang = v.get("language", "").to_lower()
-				var v_name = v.get("name", "").to_lower()
-				if "en" in lang or "eng" in lang or "english" in v_name:
-					current_voice_id = v["id"]
-					break
-
-func _warmup_tts() -> void:
-	if DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH) and not current_voice_id.is_empty():
-		DisplayServer.tts_speak(" ", current_voice_id, 0, 1.0, 1.0)
-		DisplayServer.tts_stop()
-
-## Wypowiada dany tekst natychmiast lub z opóźnieniem dwell
-func speak(text: String, interrupt: bool = true) -> void:
-	if not tts_enabled or text.is_empty():
-		return
-		
-	if not DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH):
-		return
-		
-	# Bezpośrednie wywołanie dla kliknięć / akcji
-	_pending_speech_text = ""
-	_pending_dwell_time = 0.0
-	_execute_speak(text, interrupt)
-
-func _execute_speak(text: String, interrupt: bool = true) -> void:
-	if not tts_enabled or text.is_empty():
-		return
-		
-	var now = Time.get_ticks_msec() / 1000.0
-	if text == _last_spoken_text and (now - _last_spoken_time) < 0.35:
-		return
-		
-	_last_spoken_text = text
-	_last_spoken_time = now
-	
-	if interrupt and DisplayServer.tts_is_speaking():
-		DisplayServer.tts_stop()
-		
-	if not current_voice_id.is_empty():
-		DisplayServer.tts_speak(text, current_voice_id, voice_volume, 1.0, voice_rate)
-	else:
-		var voices = DisplayServer.tts_get_voices()
-		if voices.size() > 0:
-			current_voice_id = voices[0]["id"]
-			DisplayServer.tts_speak(text, current_voice_id, voice_volume, 1.0, voice_rate)
-
-## Zatrzymuje aktualną mowę
-func stop() -> void:
-	_pending_speech_text = ""
-	_pending_dwell_time = 0.0
-	if DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH) and DisplayServer.tts_is_speaking():
-		DisplayServer.tts_stop()
-
-## Zapowiedź otwartego panelu
-func announce_panel(panel_text: String) -> void:
-	_currently_hovered_control = null
-	speak(panel_text, true)
-
-## Konfiguruje dostępność przycisku
-func setup_button(button: Button, text_or_callable = "") -> void:
-	if button == null:
-		return
-		
-	if not button.focus_entered.is_connected(_on_control_hovered.bind(button, text_or_callable)):
-		button.focus_entered.connect(_on_control_hovered.bind(button, text_or_callable))
-	if not button.mouse_entered.is_connected(_on_control_hovered.bind(button, text_or_callable)):
-		button.mouse_entered.connect(_on_control_hovered.bind(button, text_or_callable))
-	if not button.mouse_exited.is_connected(_on_control_unhovered.bind(button)):
-		button.mouse_exited.connect(_on_control_unhovered.bind(button))
-	if not button.focus_exited.is_connected(_on_control_unhovered.bind(button)):
-		button.focus_exited.connect(_on_control_unhovered.bind(button))
-	if not button.pressed.is_connected(_on_button_pressed):
-		button.pressed.connect(_on_button_pressed)
-
-func _on_control_hovered(control: Control, text_or_callable) -> void:
-	if _currently_hovered_control == control:
-		return
-	_currently_hovered_control = control
-	
-	var speech_text = ""
-	if text_or_callable is Callable:
-		speech_text = str(text_or_callable.call())
-	elif text_or_callable is String and not text_or_callable.is_empty():
-		speech_text = text_or_callable
-	elif control is Button:
-		speech_text = control.text
-		
-	speech_text = _clean_symbols(speech_text)
-	
-	# Kolejkujemy z dwell threshold, by nie blokować wątku SAPI przy przesuwaniu lasera
-	_pending_speech_text = speech_text
-	_pending_dwell_time = DWELL_THRESHOLD
-	_trigger_ui_haptic(35.0, 0.25, 0.04)
-
-func _on_control_unhovered(control: Control) -> void:
-	if _currently_hovered_control == control:
-		_currently_hovered_control = null
-		_pending_speech_text = ""
-		_pending_dwell_time = 0.0
-
-func _on_button_pressed() -> void:
-	_pending_speech_text = ""
-	_pending_dwell_time = 0.0
-	_trigger_ui_haptic(100.0, 0.8, 0.1)
-
-func _clean_symbols(text: String) -> String:
-	return text.replace("⟳", "").replace("⌂", "").replace("▶", "").replace("⚙", "").replace("✕", "").replace("🎮", "").replace("⮌", "").replace("•", "").replace("—", "-").strip_edges()
-
-func _trigger_ui_haptic(frequency: float, amplitude: float, duration: float) -> void:
-	var player_root = get_tree().get_first_node_in_group("player")
-	if player_root:
-		var left_hand = player_root.get_node_or_null("XROrigin3D/left_hand")
-		var right_hand = player_root.get_node_or_null("XROrigin3D/right_hand")
-		if left_hand and left_hand is XRController3D:
-			left_hand.trigger_haptic_pulse("haptic", frequency, amplitude, duration, 0.0)
-		if right_hand and right_hand is XRController3D:
-			right_hand.trigger_haptic_pulse("haptic", frequency, amplitude, duration, 0.0)
 ````
 
 ## File: scenes/game_over_ui.tscn
@@ -2574,6 +2432,227 @@ script = ExtResource("2_hold_btn")
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsContainer/MenuButton" to="." method="_on_menu_button_pressed"]
 ````
 
+## File: scripts/main_menu.gd
+````
+@tool
+extends XRToolsSceneBase
+
+func _ready() -> void:
+	if Engine.is_editor_hint():
+		return
+		
+	# Zablokowanie ruchu kontrolerem specjalnie i tylko dla sceny menu
+	var providers = get_tree().get_nodes_in_group("movement_providers")
+	for p in providers:
+		if "enabled" in p:
+			p.enabled = false
+			
+	print("[MainMenu] Scene loaded. Connecting UI signals...")
+	_connect_ui_signals()
+
+func _connect_ui_signals() -> void:
+	var viewport_2d = $Viewport2Din3D
+	if not viewport_2d:
+		print("[MainMenu] ERROR: Viewport2Din3D not found!")
+		return
+		
+	if not viewport_2d.is_node_ready():
+		print("[MainMenu] Waiting for Viewport2Din3D to be ready...")
+		await viewport_2d.ready
+		
+	await get_tree().process_frame
+	
+	var ui = viewport_2d.get_scene_instance()
+	if not ui and $Viewport2Din3D/Viewport.get_child_count() > 0:
+		ui = $Viewport2Din3D/Viewport.get_child(0)
+		
+	if ui:
+		print("[MainMenu] Found UI instance: ", ui.name)
+		if ui.has_signal("start_pressed"):
+			if not ui.start_pressed.is_connected(_on_start_pressed):
+				ui.start_pressed.connect(_on_start_pressed)
+				print("[MainMenu] start_pressed CONNECTED!")
+		else:
+			print("[MainMenu] ERROR: UI does not have start_pressed signal!")
+			
+		if ui.has_signal("exit_pressed"):
+			if not ui.exit_pressed.is_connected(_on_exit_pressed):
+				ui.exit_pressed.connect(_on_exit_pressed)
+				print("[MainMenu] exit_pressed CONNECTED!")
+		else:
+			print("[MainMenu] ERROR: UI does not have exit_pressed signal!")
+	else:
+		print("[MainMenu] ERROR: Could not find UI instance inside Viewport2Din3D!")
+
+func _on_start_pressed():
+	print("[MainMenu] _on_start_pressed called! Loading game map...")
+	SceneLoader.load_scene("res://scenes/game_map.tscn")
+
+func _on_exit_pressed():
+	print("[MainMenu] _on_exit_pressed called! Quitting game...")
+	get_tree().quit()
+````
+
+## File: scripts/tts_manager.gd
+````
+extends Node
+
+## TTSManager — Globalny menedżer lektora (Text-to-Speech) i dostępności UI
+## Wykorzystuje natywne API DisplayServer w Godot 4.x z buforowaniem i odrzucaniem spamu (Dwell Debounce).
+
+var tts_enabled: bool = true
+var sound_compass_enabled: bool = true
+var whoosh_volume_db: float = 3.0
+var voice_rate: float = 1.0
+var voice_volume: int = 80
+var current_voice_id: String = ""
+
+var _last_spoken_text: String = ""
+var _last_spoken_time: float = 0.0
+var _currently_hovered_control: Control = null
+
+# Dwell Debounce — zapobiega zacinaniu wątku SAPI Windows przy szybkim przesuwaniu lasera
+var _pending_speech_text: String = ""
+var _pending_dwell_time: float = 0.0
+const DWELL_THRESHOLD: float = 0.08 # 80ms pauzy na przycisku zanim lektor zacznie mówić
+
+func _ready() -> void:
+	_init_voices()
+	call_deferred("_warmup_tts")
+
+func _process(delta: float) -> void:
+	if _pending_dwell_time > 0.0:
+		_pending_dwell_time -= delta
+		if _pending_dwell_time <= 0.0 and not _pending_speech_text.is_empty():
+			_execute_speak(_pending_speech_text)
+			_pending_speech_text = ""
+
+func _init_voices() -> void:
+	if DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH):
+		var voices = DisplayServer.tts_get_voices()
+		if voices.size() > 0:
+			current_voice_id = voices[0]["id"]
+			# Prefer English TTS voice (en, eng, english)
+			for v in voices:
+				var lang = v.get("language", "").to_lower()
+				var v_name = v.get("name", "").to_lower()
+				if "en" in lang or "eng" in lang or "english" in v_name:
+					current_voice_id = v["id"]
+					break
+
+func _warmup_tts() -> void:
+	if DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH) and not current_voice_id.is_empty():
+		DisplayServer.tts_speak(" ", current_voice_id, 0, 1.0, 1.0)
+		DisplayServer.tts_stop()
+
+## Wypowiada dany tekst natychmiast lub z opóźnieniem dwell
+func speak(text: String, interrupt: bool = true) -> void:
+	if not tts_enabled or text.is_empty():
+		return
+		
+	if not DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH):
+		return
+		
+	# Bezpośrednie wywołanie dla kliknięć / akcji
+	_pending_speech_text = ""
+	_pending_dwell_time = 0.0
+	_execute_speak(text, interrupt)
+
+func _execute_speak(text: String, interrupt: bool = true) -> void:
+	if not tts_enabled or text.is_empty():
+		return
+		
+	var now = Time.get_ticks_msec() / 1000.0
+	if text == _last_spoken_text and (now - _last_spoken_time) < 0.35:
+		return
+		
+	_last_spoken_text = text
+	_last_spoken_time = now
+	
+	if interrupt and DisplayServer.tts_is_speaking():
+		DisplayServer.tts_stop()
+		
+	if not current_voice_id.is_empty():
+		DisplayServer.tts_speak(text, current_voice_id, voice_volume, 1.0, voice_rate)
+	else:
+		var voices = DisplayServer.tts_get_voices()
+		if voices.size() > 0:
+			current_voice_id = voices[0]["id"]
+			DisplayServer.tts_speak(text, current_voice_id, voice_volume, 1.0, voice_rate)
+
+## Zatrzymuje aktualną mowę
+func stop() -> void:
+	_pending_speech_text = ""
+	_pending_dwell_time = 0.0
+	if DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH) and DisplayServer.tts_is_speaking():
+		DisplayServer.tts_stop()
+
+## Zapowiedź otwartego panelu
+func announce_panel(panel_text: String) -> void:
+	_currently_hovered_control = null
+	speak(panel_text, true)
+
+## Konfiguruje dostępność przycisku
+func setup_button(button: Button, text_or_callable = "") -> void:
+	if button == null:
+		return
+		
+	if not button.focus_entered.is_connected(_on_control_hovered.bind(button, text_or_callable)):
+		button.focus_entered.connect(_on_control_hovered.bind(button, text_or_callable))
+	if not button.mouse_entered.is_connected(_on_control_hovered.bind(button, text_or_callable)):
+		button.mouse_entered.connect(_on_control_hovered.bind(button, text_or_callable))
+	if not button.mouse_exited.is_connected(_on_control_unhovered.bind(button)):
+		button.mouse_exited.connect(_on_control_unhovered.bind(button))
+	if not button.focus_exited.is_connected(_on_control_unhovered.bind(button)):
+		button.focus_exited.connect(_on_control_unhovered.bind(button))
+	if not button.pressed.is_connected(_on_button_pressed):
+		button.pressed.connect(_on_button_pressed)
+
+func _on_control_hovered(control: Control, text_or_callable) -> void:
+	if _currently_hovered_control == control:
+		return
+	_currently_hovered_control = control
+	
+	var speech_text = ""
+	if text_or_callable is Callable:
+		speech_text = str(text_or_callable.call())
+	elif text_or_callable is String and not text_or_callable.is_empty():
+		speech_text = text_or_callable
+	elif control is Button:
+		speech_text = control.text
+		
+	speech_text = _clean_symbols(speech_text)
+	
+	# Kolejkujemy z dwell threshold, by nie blokować wątku SAPI przy przesuwaniu lasera
+	_pending_speech_text = speech_text
+	_pending_dwell_time = DWELL_THRESHOLD
+	_trigger_ui_haptic(35.0, 0.25, 0.04)
+
+func _on_control_unhovered(control: Control) -> void:
+	if _currently_hovered_control == control:
+		_currently_hovered_control = null
+		_pending_speech_text = ""
+		_pending_dwell_time = 0.0
+
+func _on_button_pressed() -> void:
+	_pending_speech_text = ""
+	_pending_dwell_time = 0.0
+	_trigger_ui_haptic(100.0, 0.8, 0.1)
+
+func _clean_symbols(text: String) -> String:
+	return text.replace("⟳", "").replace("⌂", "").replace("▶", "").replace("⚙", "").replace("✕", "").replace("🎮", "").replace("⮌", "").replace("•", "").replace("—", "-").strip_edges()
+
+func _trigger_ui_haptic(frequency: float, amplitude: float, duration: float) -> void:
+	var player_root = get_tree().get_first_node_in_group("player")
+	if player_root:
+		var left_hand = player_root.get_node_or_null("XROrigin3D/left_hand")
+		var right_hand = player_root.get_node_or_null("XROrigin3D/right_hand")
+		if left_hand and left_hand is XRController3D:
+			left_hand.trigger_haptic_pulse("haptic", frequency, amplitude, duration, 0.0)
+		if right_hand and right_hand is XRController3D:
+			right_hand.trigger_haptic_pulse("haptic", frequency, amplitude, duration, 0.0)
+````
+
 ## File: scripts/jumpscare_helper.gd
 ````
 ## Wspólne narzędzia dla przeciwników w Lightness VR
@@ -2663,67 +2742,6 @@ static func _trigger_rumble(caller: Node) -> void:
 		left_hand.trigger_haptic_pulse("haptic", 100.0, 1.0, 0.5, 0.0)
 	if right_hand and right_hand is XRController3D:
 		right_hand.trigger_haptic_pulse("haptic", 100.0, 1.0, 0.5, 0.0)
-````
-
-## File: scripts/main_menu.gd
-````
-@tool
-extends XRToolsSceneBase
-
-func _ready() -> void:
-	if Engine.is_editor_hint():
-		return
-		
-	# Zablokowanie ruchu kontrolerem specjalnie i tylko dla sceny menu
-	var providers = get_tree().get_nodes_in_group("movement_providers")
-	for p in providers:
-		if "enabled" in p:
-			p.enabled = false
-			
-	print("[MainMenu] Scene loaded. Connecting UI signals...")
-	_connect_ui_signals()
-
-func _connect_ui_signals() -> void:
-	var viewport_2d = $Viewport2Din3D
-	if not viewport_2d:
-		print("[MainMenu] ERROR: Viewport2Din3D not found!")
-		return
-		
-	if not viewport_2d.is_node_ready():
-		print("[MainMenu] Waiting for Viewport2Din3D to be ready...")
-		await viewport_2d.ready
-		
-	await get_tree().process_frame
-	
-	var ui = viewport_2d.get_scene_instance()
-	if not ui and $Viewport2Din3D/Viewport.get_child_count() > 0:
-		ui = $Viewport2Din3D/Viewport.get_child(0)
-		
-	if ui:
-		print("[MainMenu] Found UI instance: ", ui.name)
-		if ui.has_signal("start_pressed"):
-			if not ui.start_pressed.is_connected(_on_start_pressed):
-				ui.start_pressed.connect(_on_start_pressed)
-				print("[MainMenu] start_pressed CONNECTED!")
-		else:
-			print("[MainMenu] ERROR: UI does not have start_pressed signal!")
-			
-		if ui.has_signal("exit_pressed"):
-			if not ui.exit_pressed.is_connected(_on_exit_pressed):
-				ui.exit_pressed.connect(_on_exit_pressed)
-				print("[MainMenu] exit_pressed CONNECTED!")
-		else:
-			print("[MainMenu] ERROR: UI does not have exit_pressed signal!")
-	else:
-		print("[MainMenu] ERROR: Could not find UI instance inside Viewport2Din3D!")
-
-func _on_start_pressed():
-	print("[MainMenu] _on_start_pressed called! Loading game map...")
-	SceneLoader.load_scene("res://scenes/game_map.tscn")
-
-func _on_exit_pressed():
-	print("[MainMenu] _on_exit_pressed called! Quitting game...")
-	get_tree().quit()
 ````
 
 ## File: scripts/scene_loader.gd
@@ -3150,13 +3168,13 @@ func _process(delta: float):
 		timer_label.text = "%02d:%02d" % [minutes, seconds]
 
 	# 3. Pacing zagrożeń (Threat Director)
-	_update_threat_pacing()
+	_update_threat_pacing(delta)
 
 	# 4. Sprawdzanie progów 10 sekundowych
 	if time_survived >= next_milestone:
 		_trigger_milestone_event()
 
-func _update_threat_pacing():
+func _update_threat_pacing(delta: float):
 	if not _balora_active and time_survived >= balora_start_time:
 		_balora_active = true
 		if balora:
@@ -3368,8 +3386,10 @@ func _trigger_wall_collision():
 
 func _trigger_collision_rumble():
 	if origin:
-		var left_ctrl = origin.get_node_or_null("left_hand") as XRController3D
-		var right_ctrl = origin.get_node_or_null("right_hand") as XRController3D
+		if left_ctrl == null:
+			left_ctrl = origin.get_node_or_null("left_hand") as XRController3D
+		if right_ctrl == null:
+			right_ctrl = origin.get_node_or_null("right_hand") as XRController3D
 		if left_ctrl:
 			left_ctrl.trigger_haptic_pulse("haptic", 120.0, 0.7, 0.2, 0.0)
 		if right_ctrl:
@@ -3694,6 +3714,82 @@ func _on_tts_toggle_pressed() -> void:
 			TTSManager.speak("TTS voice enabled", true)
 ````
 
+## File: scenes/foxy.tscn
+````
+[gd_scene format=3 uid="uid://cxabcf23t8foo"]
+
+[ext_resource type="Script" uid="uid://bebk6fhspwj0v" path="res://scripts/foxy.gd" id="1_foxy"]
+[ext_resource type="AudioStream" uid="uid://buv1fya4k5bwa" path="res://assets/sounds/foxy_runing.mp3" id="2_run"]
+[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="3_jump"]
+[ext_resource type="AudioStream" uid="uid://131ewctsgefe" path="res://assets/sounds/foxy_walking.wav" id="4_walk"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_foxy_col"]
+radius = 0.5571289
+height = 2.3572266
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_foxy_mat"]
+albedo_color = Color(1, 0.2, 0, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_foxy_mesh"]
+material = SubResource("StandardMaterial3D_foxy_mat")
+radius = 0.51416016
+height = 2.3575196
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_foxy_trig"]
+height = 2.3625977
+radius = 0.8149414
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_block"]
+size = Vector3(1.8463135, 2.1749024, 0.9095459)
+
+[node name="Foxy" type="CharacterBody3D" unique_id=2065885202 groups=["enemy"]]
+collision_layer = 4
+script = ExtResource("1_foxy")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=839306087]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1786133, 0)
+shape = SubResource("CapsuleShape3D_foxy_col")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1730761299]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1787598, 0)
+mesh = SubResource("CapsuleMesh_foxy_mesh")
+
+[node name="RunSound" type="AudioStreamPlayer3D" parent="." unique_id=693784785]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+stream = ExtResource("2_run")
+volume_db = 15.24
+unit_size = 16.12
+max_distance = 25.0
+
+[node name="WalkSound" type="AudioStreamPlayer3D" parent="." unique_id=998877665]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+stream = ExtResource("4_walk")
+volume_db = 15.614
+unit_size = 17.05
+max_distance = 25.0
+
+[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=1594056728]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+stream = ExtResource("3_jump")
+volume_db = 9.019
+
+[node name="JumpscareTrigger" type="Area3D" parent="." unique_id=1994404484]
+collision_layer = 0
+collision_mask = 524289
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpscareTrigger" unique_id=829897168]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1812989, 0)
+shape = SubResource("CylinderShape3D_foxy_trig")
+
+[node name="BlockTrigger" type="Area3D" parent="." unique_id=1234567890]
+collision_layer = 0
+collision_mask = 131072
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BlockTrigger" unique_id=820912904]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.038757324, 1.1874512, -0.70477295)
+shape = SubResource("BoxShape3D_block")
+````
+
 ## File: project.godot
 ````
 ; Engine configuration file.
@@ -3723,6 +3819,7 @@ XRToolsUserSettings="*uid://bqgb8i74tm0t"
 SceneLoader="*res://scripts/scene_loader.gd"
 EventBus="*res://scripts/event_bus.gd"
 TTSManager="*res://scripts/tts_manager.gd"
+XRToolsRumbleManager="*uid://by853dk86g1qw"
 
 [editor_plugins]
 
@@ -3803,80 +3900,203 @@ whoosh2 Whoosh away by jriches1 -- https://freesound.org/s/817959/ -- License: C
 danger Cinematic Alarm Hit by Rizzard -- https://freesound.org/s/560157/ -- License: Creative Commons 0
 ````
 
-## File: scenes/foxy.tscn
+## File: scripts/hold_button.gd
 ````
-[gd_scene format=3 uid="uid://cxabcf23t8foo"]
+extends Button
+class_name HoldButton
 
-[ext_resource type="Script" uid="uid://bebk6fhspwj0v" path="res://scripts/foxy.gd" id="1_foxy"]
-[ext_resource type="AudioStream" uid="uid://buv1fya4k5bwa" path="res://assets/sounds/foxy_runing.mp3" id="2_run"]
-[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="3_jump"]
-[ext_resource type="AudioStream" uid="uid://131ewctsgefe" path="res://assets/sounds/foxy_walking.wav" id="4_walk"]
+## HoldButton — Interaktywny przycisk VR stylizowany na wyryty w betonowej ścianie.
+## Samo najechanie NIE ładuje opcji. Aby zatwierdzić, gracz musi PRZYTRZYMAĆ spust (trigger).
+## Po aktywacji przycisk jest zablokowany do momentu, gdy gracz PUŚCI trigger.
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_foxy_col"]
-radius = 0.5571289
-height = 2.3572266
+@export var charge_time_hold: float = 0.55
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_foxy_mat"]
-albedo_color = Color(1, 0.2, 0, 1)
+var _is_hovered: bool = false
+var _is_input_holding: bool = false
+var _charge: float = 0.0
+var _cooldown: float = 0.0
+var _current_scale: float = 1.0
+var _target_scale: float = 1.0
+var _tween: Tween
+var _wait_for_release: bool = false  # Blokada aż gracz puści trigger
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_foxy_mesh"]
-material = SubResource("StandardMaterial3D_foxy_mat")
-radius = 0.51416016
-height = 2.3575196
+# Kolory kamiennego wyrycia (Normal)
+const COLOR_ENGRAVED_TEXT := Color(0.60, 0.66, 0.74, 0.8)
+const COLOR_ENGRAVED_SHADOW := Color(0.01, 0.015, 0.02, 0.95)
+const COLOR_ENGRAVED_OUTLINE := Color(0.03, 0.05, 0.07, 0.95)
 
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_foxy_trig"]
-height = 2.3625977
-radius = 0.8149414
+# Kolory rozżarzonego neonu w ścianie (Hover)
+const COLOR_GLOW_TEXT := Color(1.0, 1.0, 1.0, 1.0)
+const COLOR_GLOW_NEON := Color(0.0, 1.0, 0.64, 1.0)
+const COLOR_GLOW_AURA := Color(0.0, 1.0, 0.64, 0.6)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_block"]
-size = Vector3(1.8463135, 2.1749024, 0.9095459)
+func _ready() -> void:
+	disabled = false
+	toggle_mode = false
+	action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
+	
+	var empty_style := StyleBoxEmpty.new()
+	add_theme_stylebox_override("normal", empty_style)
+	add_theme_stylebox_override("hover", empty_style)
+	add_theme_stylebox_override("pressed", empty_style)
+	add_theme_stylebox_override("focus", empty_style)
+	add_theme_stylebox_override("disabled", empty_style)
+	
+	_apply_engraved_style()
+	
+	mouse_entered.connect(_on_hover_started)
+	focus_entered.connect(_on_hover_started)
+	mouse_exited.connect(_on_hover_ended)
+	focus_exited.connect(_on_hover_ended)
+	resized.connect(_update_pivot)
+	_update_pivot()
 
-[node name="Foxy" type="CharacterBody3D" unique_id=2065885202 groups=["enemy"]]
-collision_layer = 4
-script = ExtResource("1_foxy")
+func _update_pivot() -> void:
+	pivot_offset = size / 2.0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=839306087]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1786133, 0)
-shape = SubResource("CapsuleShape3D_foxy_col")
+func _apply_engraved_style() -> void:
+	add_theme_color_override("font_color", COLOR_ENGRAVED_TEXT)
+	add_theme_color_override("font_hover_color", COLOR_GLOW_TEXT)
+	add_theme_color_override("font_focus_color", COLOR_GLOW_TEXT)
+	add_theme_color_override("font_shadow_color", COLOR_ENGRAVED_SHADOW)
+	add_theme_color_override("font_outline_color", COLOR_ENGRAVED_OUTLINE)
+	add_theme_constant_override("shadow_offset_x", 2)
+	add_theme_constant_override("shadow_offset_y", 3)
+	add_theme_constant_override("outline_size", 2)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1730761299]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1787598, 0)
-mesh = SubResource("CapsuleMesh_foxy_mesh")
+func _input(event: InputEvent) -> void:
+	if not _is_hovered:
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		_is_input_holding = event.pressed
+		get_viewport().set_input_as_handled()
 
-[node name="RunSound" type="AudioStreamPlayer3D" parent="." unique_id=693784785]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-stream = ExtResource("2_run")
-volume_db = 15.24
-unit_size = 16.12
-max_distance = 25.0
+func _process(delta: float) -> void:
+	# Cooldown po zatwierdzeniu
+	if _cooldown > 0.0:
+		_cooldown -= delta
+		_charge = 0.0
+		_is_input_holding = false
+		queue_redraw()
+		return
 
-[node name="WalkSound" type="AudioStreamPlayer3D" parent="." unique_id=998877665]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-stream = ExtResource("4_walk")
-volume_db = 15.614
-unit_size = 17.05
-max_distance = 25.0
+	_current_scale = lerp(_current_scale, _target_scale, delta * 12.0)
+	scale = Vector2(_current_scale, _current_scale)
+	
+	if not _is_hovered:
+		_is_input_holding = false
+		_wait_for_release = false
+		if _charge > 0.0:
+			_charge = max(0.0, _charge - delta * 4.0)
+			queue_redraw()
+		return
 
-[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=1594056728]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-stream = ExtResource("3_jump")
-volume_db = 9.019
+	var trigger_held := _is_input_holding or _is_trigger_down_on_controller()
+	
+	# Po aktywacji: czekamy aż gracz PUŚCI trigger zanim pozwolimy na kolejne ładowanie
+	if _wait_for_release:
+		if not trigger_held:
+			_wait_for_release = false
+		# Nie ładujemy — gracz wciąż trzyma trigger po poprzedniej aktywacji
+		return
+	
+	if trigger_held:
+		_charge += delta / max(0.05, charge_time_hold)
+		queue_redraw()
+		if _charge >= 1.0:
+			_trigger_activation()
+	else:
+		if _charge > 0.0:
+			_charge = max(0.0, _charge - delta * 4.0)
+			queue_redraw()
 
-[node name="JumpscareTrigger" type="Area3D" parent="." unique_id=1994404484]
-collision_layer = 0
-collision_mask = 524289
+func _trigger_activation() -> void:
+	_charge = 0.0
+	_is_input_holding = false
+	_cooldown = 0.3
+	_wait_for_release = true  # Blokada do puszczenia triggera!
+	queue_redraw()
+	
+	_current_scale = 1.14
+	scale = Vector2(_current_scale, _current_scale)
+	
+	print("[HoldButton] ACTIVATED: ", name, " | text: ", text)
+	
+	# Wywołanie akcji
+	pressed.emit()
+	
+	# Haptyka
+	_trigger_haptic_feedback()
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpscareTrigger" unique_id=829897168]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1812989, 0)
-shape = SubResource("CylinderShape3D_foxy_trig")
+func _is_trigger_down_on_controller() -> bool:
+	var player = get_tree().get_first_node_in_group("player")
+	if player:
+		for hand_name in ["XROrigin3D/right_hand", "XROrigin3D/left_hand"]:
+			var ctrl = player.get_node_or_null(hand_name) as XRController3D
+			if ctrl and ctrl.get_is_active():
+				if ctrl.get_float("trigger") > 0.4:
+					return true
+				if ctrl.is_button_pressed("ax_button"):
+					return true
+				if ctrl.is_button_pressed("trigger_click"):
+					return true
+	return false
 
-[node name="BlockTrigger" type="Area3D" parent="." unique_id=1234567890]
-collision_layer = 0
-collision_mask = 131072
+func _trigger_haptic_feedback() -> void:
+	if XRServer.primary_interface:
+		for tracker in ["right_hand", "left_hand"]:
+			XRServer.primary_interface.trigger_haptic_pulse("haptic", tracker, 100.0, 0.7, 0.1, 0.0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="BlockTrigger" unique_id=820912904]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.038757324, 1.1874512, -0.70477295)
-shape = SubResource("BoxShape3D_block")
+func _on_hover_started() -> void:
+	_is_hovered = true
+	_update_pivot()
+	_target_scale = 1.07
+	
+	if _tween and _tween.is_valid():
+		_tween.kill()
+	_tween = create_tween().set_parallel(true)
+	_tween.tween_property(self, "theme_override_colors/font_color", COLOR_GLOW_TEXT, 0.18)
+	_tween.tween_property(self, "theme_override_colors/font_outline_color", COLOR_GLOW_NEON, 0.18)
+	_tween.tween_property(self, "theme_override_colors/font_shadow_color", COLOR_GLOW_AURA, 0.18)
+	_tween.tween_property(self, "theme_override_constants/outline_size", 5, 0.18)
+	_tween.tween_property(self, "theme_override_constants/shadow_offset_x", 0, 0.18)
+	_tween.tween_property(self, "theme_override_constants/shadow_offset_y", 0, 0.18)
+	queue_redraw()
+
+func _on_hover_ended() -> void:
+	_is_hovered = false
+	_is_input_holding = false
+	_target_scale = 1.0
+	
+	if _tween and _tween.is_valid():
+		_tween.kill()
+	_tween = create_tween().set_parallel(true)
+	_tween.tween_property(self, "theme_override_colors/font_color", COLOR_ENGRAVED_TEXT, 0.25)
+	_tween.tween_property(self, "theme_override_colors/font_outline_color", COLOR_ENGRAVED_OUTLINE, 0.25)
+	_tween.tween_property(self, "theme_override_colors/font_shadow_color", COLOR_ENGRAVED_SHADOW, 0.25)
+	_tween.tween_property(self, "theme_override_constants/outline_size", 2, 0.25)
+	_tween.tween_property(self, "theme_override_constants/shadow_offset_x", 2, 0.25)
+	_tween.tween_property(self, "theme_override_constants/shadow_offset_y", 3, 0.25)
+	queue_redraw()
+
+func _draw() -> void:
+	if not _is_hovered and _charge <= 0.01:
+		return
+		
+	var w := size.x
+	var h := size.y
+	var groove_w: float = min(w * 0.65, 340.0)
+	var groove_x: float = (w - groove_w) * 0.5
+	var groove_y: float = h - 6.0
+	var groove_h: float = 3.0
+	
+	draw_rect(Rect2(groove_x, groove_y, groove_w, groove_h), Color(0.02, 0.04, 0.06, 0.6), true)
+	
+	if _charge > 0.01:
+		var fill_w: float = groove_w * clamp(_charge, 0.0, 1.0)
+		draw_rect(Rect2(groove_x, groove_y - 1.0, fill_w, groove_h + 2.0), Color(0.0, 1.0, 0.64, 0.3), true)
+		draw_rect(Rect2(groove_x, groove_y, fill_w, groove_h), COLOR_GLOW_NEON, true)
+		draw_circle(Vector2(groove_x + fill_w, groove_y + groove_h * 0.5), 3.5, Color(1.0, 1.0, 1.0, 0.95))
 ````
 
 ## File: scripts/marionette.gd
@@ -4157,205 +4377,6 @@ func _trigger_jumpscare(reason: String):
 	await JumpscareHelper.execute(self, jumpscare_sound, [], "Marionette — " + reason)
 ````
 
-## File: scripts/hold_button.gd
-````
-extends Button
-class_name HoldButton
-
-## HoldButton — Interaktywny przycisk VR stylizowany na wyryty w betonowej ścianie.
-## Samo najechanie NIE ładuje opcji. Aby zatwierdzić, gracz musi PRZYTRZYMAĆ spust (trigger).
-## Po aktywacji przycisk jest zablokowany do momentu, gdy gracz PUŚCI trigger.
-
-@export var charge_time_hold: float = 0.55
-
-var _is_hovered: bool = false
-var _is_input_holding: bool = false
-var _charge: float = 0.0
-var _cooldown: float = 0.0
-var _current_scale: float = 1.0
-var _target_scale: float = 1.0
-var _tween: Tween
-var _wait_for_release: bool = false  # Blokada aż gracz puści trigger
-
-# Kolory kamiennego wyrycia (Normal)
-const COLOR_ENGRAVED_TEXT := Color(0.60, 0.66, 0.74, 0.8)
-const COLOR_ENGRAVED_SHADOW := Color(0.01, 0.015, 0.02, 0.95)
-const COLOR_ENGRAVED_OUTLINE := Color(0.03, 0.05, 0.07, 0.95)
-
-# Kolory rozżarzonego neonu w ścianie (Hover)
-const COLOR_GLOW_TEXT := Color(1.0, 1.0, 1.0, 1.0)
-const COLOR_GLOW_NEON := Color(0.0, 1.0, 0.64, 1.0)
-const COLOR_GLOW_AURA := Color(0.0, 1.0, 0.64, 0.6)
-
-func _ready() -> void:
-	disabled = false
-	toggle_mode = false
-	action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
-	
-	var empty_style := StyleBoxEmpty.new()
-	add_theme_stylebox_override("normal", empty_style)
-	add_theme_stylebox_override("hover", empty_style)
-	add_theme_stylebox_override("pressed", empty_style)
-	add_theme_stylebox_override("focus", empty_style)
-	add_theme_stylebox_override("disabled", empty_style)
-	
-	_apply_engraved_style()
-	
-	mouse_entered.connect(_on_hover_started)
-	focus_entered.connect(_on_hover_started)
-	mouse_exited.connect(_on_hover_ended)
-	focus_exited.connect(_on_hover_ended)
-	resized.connect(_update_pivot)
-	_update_pivot()
-
-func _update_pivot() -> void:
-	pivot_offset = size / 2.0
-
-func _apply_engraved_style() -> void:
-	add_theme_color_override("font_color", COLOR_ENGRAVED_TEXT)
-	add_theme_color_override("font_hover_color", COLOR_GLOW_TEXT)
-	add_theme_color_override("font_focus_color", COLOR_GLOW_TEXT)
-	add_theme_color_override("font_shadow_color", COLOR_ENGRAVED_SHADOW)
-	add_theme_color_override("font_outline_color", COLOR_ENGRAVED_OUTLINE)
-	add_theme_constant_override("shadow_offset_x", 2)
-	add_theme_constant_override("shadow_offset_y", 3)
-	add_theme_constant_override("outline_size", 2)
-
-func _input(event: InputEvent) -> void:
-	if not _is_hovered:
-		return
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		_is_input_holding = event.pressed
-		get_viewport().set_input_as_handled()
-
-func _process(delta: float) -> void:
-	# Cooldown po zatwierdzeniu
-	if _cooldown > 0.0:
-		_cooldown -= delta
-		_charge = 0.0
-		_is_input_holding = false
-		queue_redraw()
-		return
-
-	_current_scale = lerp(_current_scale, _target_scale, delta * 12.0)
-	scale = Vector2(_current_scale, _current_scale)
-	
-	if not _is_hovered:
-		_is_input_holding = false
-		_wait_for_release = false
-		if _charge > 0.0:
-			_charge = max(0.0, _charge - delta * 4.0)
-			queue_redraw()
-		return
-
-	var trigger_held := _is_input_holding or _is_trigger_down_on_controller()
-	
-	# Po aktywacji: czekamy aż gracz PUŚCI trigger zanim pozwolimy na kolejne ładowanie
-	if _wait_for_release:
-		if not trigger_held:
-			_wait_for_release = false
-		# Nie ładujemy — gracz wciąż trzyma trigger po poprzedniej aktywacji
-		return
-	
-	if trigger_held:
-		_charge += delta / max(0.05, charge_time_hold)
-		queue_redraw()
-		if _charge >= 1.0:
-			_trigger_activation()
-	else:
-		if _charge > 0.0:
-			_charge = max(0.0, _charge - delta * 4.0)
-			queue_redraw()
-
-func _trigger_activation() -> void:
-	_charge = 0.0
-	_is_input_holding = false
-	_cooldown = 0.3
-	_wait_for_release = true  # Blokada do puszczenia triggera!
-	queue_redraw()
-	
-	_current_scale = 1.14
-	scale = Vector2(_current_scale, _current_scale)
-	
-	print("[HoldButton] ACTIVATED: ", name, " | text: ", text)
-	
-	# Wywołanie akcji
-	pressed.emit()
-	
-	# Haptyka
-	_trigger_haptic_feedback()
-
-func _is_trigger_down_on_controller() -> bool:
-	var player = get_tree().get_first_node_in_group("player")
-	if player:
-		for hand_name in ["XROrigin3D/right_hand", "XROrigin3D/left_hand"]:
-			var ctrl = player.get_node_or_null(hand_name) as XRController3D
-			if ctrl and ctrl.get_is_active():
-				if ctrl.get_float("trigger") > 0.4:
-					return true
-				if ctrl.is_button_pressed("ax_button"):
-					return true
-				if ctrl.is_button_pressed("trigger_click"):
-					return true
-	return false
-
-func _trigger_haptic_feedback() -> void:
-	if XRServer.primary_interface:
-		for tracker in ["right_hand", "left_hand"]:
-			XRServer.primary_interface.trigger_haptic_pulse("haptic", tracker, 100.0, 0.7, 0.1, 0.0)
-
-func _on_hover_started() -> void:
-	_is_hovered = true
-	_update_pivot()
-	_target_scale = 1.07
-	
-	if _tween and _tween.is_valid():
-		_tween.kill()
-	_tween = create_tween().set_parallel(true)
-	_tween.tween_property(self, "theme_override_colors/font_color", COLOR_GLOW_TEXT, 0.18)
-	_tween.tween_property(self, "theme_override_colors/font_outline_color", COLOR_GLOW_NEON, 0.18)
-	_tween.tween_property(self, "theme_override_colors/font_shadow_color", COLOR_GLOW_AURA, 0.18)
-	_tween.tween_property(self, "theme_override_constants/outline_size", 5, 0.18)
-	_tween.tween_property(self, "theme_override_constants/shadow_offset_x", 0, 0.18)
-	_tween.tween_property(self, "theme_override_constants/shadow_offset_y", 0, 0.18)
-	queue_redraw()
-
-func _on_hover_ended() -> void:
-	_is_hovered = false
-	_is_input_holding = false
-	_target_scale = 1.0
-	
-	if _tween and _tween.is_valid():
-		_tween.kill()
-	_tween = create_tween().set_parallel(true)
-	_tween.tween_property(self, "theme_override_colors/font_color", COLOR_ENGRAVED_TEXT, 0.25)
-	_tween.tween_property(self, "theme_override_colors/font_outline_color", COLOR_ENGRAVED_OUTLINE, 0.25)
-	_tween.tween_property(self, "theme_override_colors/font_shadow_color", COLOR_ENGRAVED_SHADOW, 0.25)
-	_tween.tween_property(self, "theme_override_constants/outline_size", 2, 0.25)
-	_tween.tween_property(self, "theme_override_constants/shadow_offset_x", 2, 0.25)
-	_tween.tween_property(self, "theme_override_constants/shadow_offset_y", 3, 0.25)
-	queue_redraw()
-
-func _draw() -> void:
-	if not _is_hovered and _charge <= 0.01:
-		return
-		
-	var w := size.x
-	var h := size.y
-	var groove_w: float = min(w * 0.65, 340.0)
-	var groove_x: float = (w - groove_w) * 0.5
-	var groove_y: float = h - 6.0
-	var groove_h: float = 3.0
-	
-	draw_rect(Rect2(groove_x, groove_y, groove_w, groove_h), Color(0.02, 0.04, 0.06, 0.6), true)
-	
-	if _charge > 0.01:
-		var fill_w: float = groove_w * clamp(_charge, 0.0, 1.0)
-		draw_rect(Rect2(groove_x, groove_y - 1.0, fill_w, groove_h + 2.0), Color(0.0, 1.0, 0.64, 0.3), true)
-		draw_rect(Rect2(groove_x, groove_y, fill_w, groove_h), COLOR_GLOW_NEON, true)
-		draw_circle(Vector2(groove_x + fill_w, groove_y + groove_h * 0.5), 3.5, Color(1.0, 1.0, 1.0, 0.95))
-````
-
 ## File: scripts/ballora.gd
 ````
 extends CharacterBody3D
@@ -4580,8 +4601,8 @@ func _trigger_jumpscare():
 [ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="9_fade"]
 [ext_resource type="PackedScene" uid="uid://b3t54b22cxxxx" path="res://scenes/marionette.tscn" id="10_marnin"]
 [ext_resource type="PackedScene" uid="uid://cxabcf23t8foo" path="res://scenes/foxy.tscn" id="11_foxy"]
-[ext_resource type="PackedScene" uid="uid://phantom_grasp_scene_01" path="res://scenes/phantom_grasp.tscn" id="12_grasp"]
-[ext_resource type="PackedScene" uid="uid://pause_menu_scene_01" path="res://scenes/pause_menu.tscn" id="13_pause"]
+[ext_resource type="PackedScene" path="res://scenes/phantom_grasp.tscn" id="12_grasp"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="13_pause"]
 
 [sub_resource type="Environment" id="Environment_iau3x"]
 background_mode = 1
@@ -5345,11 +5366,11 @@ script = ExtResource("2_hold_btn")
 
 ## File: scenes/main_menu.tscn
 ````
-[gd_scene load_steps=18 format=3 uid="uid://cobrdt2tet5ga"]
+[gd_scene format=3 uid="uid://dqjc1nwqm8odk"]
 
-[ext_resource type="Script" path="res://scripts/main_menu.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://c1n8p7fin4eiq" path="res://scripts/main_menu.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="2_bqqt6"]
-[ext_resource type="PackedScene" path="res://scenes/main_menu_ui.tscn" id="3_ui"]
+[ext_resource type="PackedScene" uid="uid://bvwh78d1g322u" path="res://scenes/main_menu_ui.tscn" id="3_ui"]
 [ext_resource type="AudioStream" uid="uid://1c33sur8mvu1" path="res://assets/sounds/main_menu.mp3" id="4_wu84c"]
 [ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="5_player"]
 [ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="6_startxr"]
@@ -5374,6 +5395,17 @@ ambient_light_source = 2
 ambient_light_color = Color(0.08, 0.1, 0.14, 1)
 ambient_light_energy = 0.6
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(20, 1, 20)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.08, 0.09, 0.11, 1)
+roughness = 0.9
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
+material = SubResource("StandardMaterial3D_floor")
+size = Vector2(20, 20)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
 albedo_color = Color(0.48, 0.5, 0.52, 1)
 albedo_texture = ExtResource("8_wall_color")
@@ -5390,6 +5422,18 @@ size = Vector3(10, 4.8, 0.2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
 size = Vector3(10, 4.8, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pipe"]
+albedo_color = Color(0.18, 0.17, 0.16, 1)
+metallic = 0.88
+roughness = 0.38
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pipe"]
+material = SubResource("StandardMaterial3D_pipe")
+top_radius = 0.045
+bottom_radius = 0.045
+height = 4.8
+radial_segments = 16
 
 [sub_resource type="BoxMesh" id="BoxMesh_wall_side"]
 material = SubResource("StandardMaterial3D_wall")
@@ -5418,29 +5462,6 @@ bottom_radius = 0.25
 height = 0.1
 radial_segments = 16
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pipe"]
-albedo_color = Color(0.18, 0.17, 0.16, 1)
-metallic = 0.88
-roughness = 0.38
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_pipe"]
-material = SubResource("StandardMaterial3D_pipe")
-top_radius = 0.045
-bottom_radius = 0.045
-height = 4.8
-radial_segments = 16
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
-albedo_color = Color(0.08, 0.09, 0.11, 1)
-roughness = 0.9
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
-material = SubResource("StandardMaterial3D_floor")
-size = Vector2(20, 20)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
-size = Vector3(20, 1, 20)
-
 [node name="MainMenu" type="Node3D" unique_id=2052640717]
 script = ExtResource("1_script")
 
@@ -5452,11 +5473,10 @@ transform = Transform3D(1, 0, 0, 0, 0.9563048, 0.2923717, 0, -0.2923717, 0.95630
 light_color = Color(0.88, 0.93, 1, 1)
 light_energy = 2.6
 spot_range = 6.0
-spot_angle = 45.0
 spot_attenuation = 1.1
 
 [node name="MenuAmbientLight" type="OmniLight3D" parent="." unique_id=184910293]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, -1.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -1.2)
 light_color = Color(0.25, 0.55, 0.95, 1)
 light_energy = 0.4
 omni_range = 4.5
@@ -5474,68 +5494,68 @@ mesh = SubResource("PlaneMesh_floor")
 [node name="IndustrialWall" type="StaticBody3D" parent="." unique_id=992817263]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -2.8)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="IndustrialWall"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="IndustrialWall" unique_id=575337685]
 mesh = SubResource("BoxMesh_wall")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="IndustrialWall"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="IndustrialWall" unique_id=175644465]
 shape = SubResource("BoxShape3D_wall")
 
-[node name="Pipes" type="Node3D" parent="."]
+[node name="Pipes" type="Node3D" parent="." unique_id=2142528203]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -2.75)
 
-[node name="PipeLeft" type="MeshInstance3D" parent="Pipes"]
+[node name="PipeLeft" type="MeshInstance3D" parent="Pipes" unique_id=548966718]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.2, 0, 0)
 mesh = SubResource("CylinderMesh_pipe")
 
-[node name="PipeRight" type="MeshInstance3D" parent="Pipes"]
+[node name="PipeRight" type="MeshInstance3D" parent="Pipes" unique_id=1927873173]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, 0)
 mesh = SubResource("CylinderMesh_pipe")
 
-[node name="PipeTop" type="MeshInstance3D" parent="Pipes"]
+[node name="PipeTop" type="MeshInstance3D" parent="Pipes" unique_id=1440785262]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 2.1, 0.02)
 mesh = SubResource("CylinderMesh_pipe")
 
 [node name="BackWall" type="StaticBody3D" parent="." unique_id=194827101]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 6.2)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="BackWall"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="BackWall" unique_id=956818226]
 mesh = SubResource("BoxMesh_wall")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="BackWall"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BackWall" unique_id=2007040235]
 shape = SubResource("BoxShape3D_wall")
 
 [node name="LeftWall" type="StaticBody3D" parent="." unique_id=194827102]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.0, 2.2, 1.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 2.2, 1.7)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="LeftWall"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LeftWall" unique_id=819012728]
 mesh = SubResource("BoxMesh_wall_side")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="LeftWall"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LeftWall" unique_id=718482392]
 shape = SubResource("BoxShape3D_wall_side")
 
 [node name="RightWall" type="StaticBody3D" parent="." unique_id=194827103]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.0, 2.2, 1.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2.2, 1.7)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="RightWall"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RightWall" unique_id=1390380056]
 mesh = SubResource("BoxMesh_wall_side")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RightWall"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RightWall" unique_id=454655938]
 shape = SubResource("BoxShape3D_wall_side")
 
 [node name="Ceiling" type="StaticBody3D" parent="." unique_id=194827104]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 1.7)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Ceiling"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ceiling" unique_id=270118421]
 mesh = SubResource("BoxMesh_ceiling")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling" unique_id=409537979]
 shape = SubResource("BoxShape3D_ceiling")
 
-[node name="CeilingLampFixture" type="MeshInstance3D" parent="Ceiling"]
+[node name="CeilingLampFixture" type="MeshInstance3D" parent="Ceiling" unique_id=139906738]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
 mesh = SubResource("CylinderMesh_lamp")
 
-[node name="CeilingLight" type="OmniLight3D" parent="Ceiling"]
+[node name="CeilingLight" type="OmniLight3D" parent="Ceiling" unique_id=1928428580]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0)
 light_color = Color(0.65, 0.8, 1, 1)
 light_energy = 0.8
@@ -5558,7 +5578,6 @@ autoplay = true
 [node name="StartXR" parent="." unique_id=2039475675 instance=ExtResource("6_startxr")]
 
 [node name="Player" parent="." unique_id=629638343 instance=ExtResource("5_player")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Fade" parent="." unique_id=1653293877 instance=ExtResource("7_fade")]
 ````

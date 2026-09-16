@@ -125,8 +125,10 @@ func _trigger_wall_collision():
 
 func _trigger_collision_rumble():
 	if origin:
-		var left_ctrl = origin.get_node_or_null("left_hand") as XRController3D
-		var right_ctrl = origin.get_node_or_null("right_hand") as XRController3D
+		if left_ctrl == null:
+			left_ctrl = origin.get_node_or_null("left_hand") as XRController3D
+		if right_ctrl == null:
+			right_ctrl = origin.get_node_or_null("right_hand") as XRController3D
 		if left_ctrl:
 			left_ctrl.trigger_haptic_pulse("haptic", 120.0, 0.7, 0.2, 0.0)
 		if right_ctrl:

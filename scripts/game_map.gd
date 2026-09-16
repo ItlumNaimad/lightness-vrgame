@@ -91,13 +91,13 @@ func _process(delta: float):
 		timer_label.text = "%02d:%02d" % [minutes, seconds]
 
 	# 3. Pacing zagrożeń (Threat Director)
-	_update_threat_pacing()
+	_update_threat_pacing(delta)
 
 	# 4. Sprawdzanie progów 10 sekundowych
 	if time_survived >= next_milestone:
 		_trigger_milestone_event()
 
-func _update_threat_pacing():
+func _update_threat_pacing(delta: float):
 	if not _balora_active and time_survived >= balora_start_time:
 		_balora_active = true
 		if balora:
