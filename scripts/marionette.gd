@@ -126,24 +126,6 @@ func _process(delta: float):
 		
 		State.WHISPERING:
 			attack_timer += delta
-			
-			# Mechanika Whisper Freeze: ruch nogami gracza prowokuje natychmiastowy atak Marionetki!
-			var moving_feet := false
-			if player:
-				var pb = player.get_node_or_null("XROrigin3D/PlayerBody")
-				if pb:
-					if "ground_control_velocity" in pb:
-						var gcv = pb.ground_control_velocity
-						if (gcv is Vector2 or gcv is Vector3) and gcv.length() > 0.25:
-							moving_feet = true
-					elif "velocity" in pb and pb.velocity is Vector3 and pb.velocity.length() > 0.35:
-						moving_feet = true
-						
-			if moving_feet:
-				# Gracz nie zastyga w bezruchu: zegar ataku leci 3.5x szybciej!
-				attack_timer += delta * 3.5
-				if left_hand: left_hand.trigger_haptic_pulse("haptic", 120.0, 0.75, 0.05, 0.0)
-				if right_hand: right_hand.trigger_haptic_pulse("haptic", 120.0, 0.75, 0.05, 0.0)
 
 			if attack_timer > attack_duration_limit:
 				_trigger_jumpscare("Czas na reakcję (%.1fs) minął!" % attack_duration_limit)

@@ -26,9 +26,16 @@ var target_hand: XRController3D
 var _last_hand_pos: Vector3 = Vector3.ZERO
 var _haptic_loop_timer: float = 0.0
 
+var _orig_direct_speed: float = -1.0
+var _movement_sprint: XRToolsMovementSprint
+var _movement_direct: XRToolsMovementDirect
+
 func _ready():
 	_find_player()
 	_enter_dormant()
+
+func _exit_tree():
+	_restore_player_speed()
 
 func _find_player():
 	var root = get_tree().get_first_node_in_group("player")
@@ -39,10 +46,35 @@ func _find_player():
 			left_hand = origin.get_node_or_null("left_hand")
 			right_hand = origin.get_node_or_null("right_hand")
 
+func _apply_player_slowdown():
+	if not player_root:
+		_find_player()
+	if player_root:
+		var origin = player_root.get_node_or_null("XROrigin3D")
+		if origin:
+			_movement_sprint = origin.get_node_or_null("MovementSprint") as XRToolsMovementSprint
+			if _movement_sprint:
+				_movement_sprint.enabled = false
+			
+			var direct = origin.get_node_or_null("right_hand/MovementDirect") as XRToolsMovementDirect
+			if direct:
+				_movement_direct = direct
+				if _orig_direct_speed < 0.0:
+					_orig_direct_speed = direct.max_speed
+				direct.max_speed = 1.0 # Silne spowolnienie pod ciężarem macek
+	print("Phantom Grasp: Zablokowano sprint i spowolniono gracza!")
+
+func _restore_player_speed():
+	if _movement_sprint:
+		_movement_sprint.enabled = true
+	if _movement_direct and _orig_direct_speed > 0.0:
+		_movement_direct.max_speed = _orig_direct_speed
+
 func _enter_dormant():
 	current_state = State.DORMANT
 	_state_timer = randf_range(min_dormant_time, max_dormant_time)
 	target_hand = null
+	_restore_player_speed()
 	if crawl_sound:
 		crawl_sound.stop()
 	if grab_sound:
@@ -76,6 +108,8 @@ func _enter_grabbed():
 	_shake_count = 0
 	_shake_cooldown = 0.0
 	_haptic_loop_timer = 0.0
+	
+	_apply_player_slowdown()
 	
 	if crawl_sound:
 		crawl_sound.stop()
@@ -161,6 +195,8 @@ func _trigger_jumpscare():
 	if current_state == State.DORMANT:
 		return
 	print("Phantom Grasp: Jumpscare!")
+	_restore_player_speed()
 	if grab_sound:
 		grab_sound.stop()
 	await JumpscareHelper.execute(self, jumpscare_sound, [], "Phantom Grasp — Zmiażdżenie uściskiem macek")
+

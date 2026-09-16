@@ -1030,23 +1030,23 @@ Ręczne celowanie wskaźnikiem laserowym VR (`FunctionPointer`) w trójwymiarow�
   - Przypisano wszystkie źródła `AudioStreamPlayer3D` przeciwników (Balora, Marionette, Foxy, PhantomGrasp) do szyny `Enemies`, a ich jumpscare'y do `Jumpscare`.
   - Przypisano odtwarzacz obrotu w `player.tscn` do `Whoosh`, a odtwarzacze kroków w `movement_footstep.tscn` do `Footsteps`.
   - W `main_menu_ui.gd` i `main_menu_ui.tscn` dodano niezależne karty sterowania głośnością (0-100%) z odczytem lektorskim TTS.
-- [x] **Marionette powinna być trochę dalej od gracza bo bywa, że sam obrót gracza gdy ręce ma na dole pozbywa się jej. Gracz powinien wysunąć w jej stronę rękę:**
-  - Zwiększono dystans spawnu szeptu do 1.8m - 2.4m na wysokości głowy/uszu gracza (zamiast 0.8m).
+- [x] **Marionette (Dystans, Wymóg Ręki i Rezygnacja z Whisper Freeze):**
+  - Zwiększono dystans spawnu szeptu do 1.5m - 2.4m na wysokości głowy/uszu gracza (zamiast 0.8m).
   - W `marionette.gd` dodano wymóg uniesienia ręki (wysokość > 0.7m od stóp) oraz wysunięcia dłoni w kierunku szeptu (iloczyn skalarny `hand_to_whisper.dot(head_forward) > 0.15`), zapobiegając przypadkowemu odpędzaniu przy pasie.
-- [x] **Mechanika zatrzymania gracza (Whisper Freeze):**
-  - Gracz w trakcie trwania szeptu musi się zatrzymać. W `marionette.gd` dodano sprawdzanie prędkości horyzontalnej gracza: jeśli gracz stawia kroki/biegnie w trakcie szeptu (`move_speed > 0.25`), timer ataku przyspiesza 3.5-krotnie (`attack_timer += delta * 3.5`), drastycznie skracając czas na reakcję i wymuszając natychmiastowy bezruch.
-- [x] **PhantomGraspa nie da się pokonać - trzęsienie kontrolerami nie pokonuje phantomgraspa:**
+  - **Rezygnacja z Whisper Freeze u Marionetki:** Po testach VR wycofano przyspieszanie ataku szeptu podczas biegu gracza – gracz nie miał fizycznej możliwości natychmiastowego wyhamowania z biegu i natychmiast dostawał jumpscare ("broken"). Czas szeptu płynie stabilnie, dając szansę na reakcję.
+- [x] **PhantomGrasp (Wyszarpywanie oraz Spowolnienie i Blokada Sprintu):**
   - Usunięto niestabilne podwójne całkowanie przyspieszenia.
   - Wdrożono czytelne zliczanie nagłych zmian kierunku prędkości kontrolera (`shake_speed >= 1.2 m/s` z debouncem 0.22s).
-  - Zgodnie z ustaleniami zredukowano wymaganą liczbę szarpnięć do **dokładnie 2 energicznych potrząśnięć** (`required_shakes = 2`), dodając wyraźny impuls haptyczny przy każdym zaliczonym potrząśnięciu.
+  - Ustawiono **dokładnie 2 energiczne potrząśnięcia** (`required_shakes = 2`), dodając wyraźny impuls haptyczny przy każdym zaliczonym potrząśnięciu.
+  - **Spowolnienie i blokada sprintu podczas ataku:** W momencie złapania gracza (`_enter_grabbed()`) macki paraliżują ruch: `MovementSprint.enabled = false` (brak możliwości sprintowania) oraz `MovementDirect.max_speed = 1.0` (silne spowolnienie chodu pod ciężarem macek). Po wyrwaniu się z uścisku (`_break_free()`) lub jumpscare pełna mobilność gracza zostaje natychmiast przywrócona.
 - [x] **Ballora jest za cicha, nie słychać jej z daleka i trzeba podejść blisko niej:**
   - W `scenes/balora.tscn` zmieniono parametry dźwięku `BaloraTheme`: `max_distance = 65.0m`, `unit_size = 35.0m`, `volume_db = 7.5 dB`, a model tłumienia przestawiono na odwrotny/liniowy (`attenuation_model = 0`), dzięki czemu pozytywka jest słyszalna z dalekiego dystansu i pozwala na nawigację słuchową.
 - [x] **Kroki się glitchują i nakładają się na siebie. Być może jest to za długi dźwięk i to dlatego:**
   - W `addons/godot-xr-tools/functions/movement_footstep.gd` dodano zatrzymywanie poprzednio grających odtwarzaczy kroków przed wystartowaniem nowego stąpnięcia. Zapobiega to nakładaniu się wielu 12-sekundowych próbek `woodwalking.wav`.
   - Wymiana plików audio na krótkie próbki (chód vs bieg) zostanie wykonana przez użytkownika w kolejnym kroku.
-- [x] **Przyciski w MENU są zbyt małe. Powinny być trochę większe by łatwiej było nawigować. Aktywacja tylko po przytrzymaniu:**
+- [x] **Przyciski w MENU — Powiększenie oraz Całkowita Blokada Kliknięć (Wyłącznie Hold):**
   - Zwiększono rozmiary przycisków w menu głównym (StartButton: 650x88px font 40; Settings/Guide/Exit: 600x80px font 34; PanelContainer: 1120x720px).
-  - Zmodyfikowano `scripts/hold_button.gd`: wyłączono natychmiastowe kliknięcie (`accept_event()`), przycisk aktywuje się **wyłącznie po przytrzymaniu triggera na przycisku** do pełnego naładowania paska (Hold/Dwell 0.6s).
+  - **Rozwiązanie problemu natychmiastowej reakcji na trigger:** `Viewport2DIn3D` wysyłał zdarzenia `InputEventScreenTouch`, które omijały warunek `if event is InputEventMouseButton` i trafiały do natywnego `BaseButton` w silniku C++, generując kliknięcie. W `scripts/hold_button.gd` dodano pełne przechwytywanie i konsumowanie `InputEventScreenTouch`, `InputEventScreenDrag` oraz `ui_accept` przez `accept_event()`. Przycisk aktywuje się **wyłącznie po przytrzymaniu triggera przez 0.65s** i naładowaniu neonowego paska do 100%.
   - **Przycisk Menu Pauzy:** Pauza domyślnie wywoływana jest przyciskiem systemowym `menu_button` (na lewym kontrolerze Meta Quest / Pico - mały płaski przycisk z menu). W `scripts/pause_menu.gd` dodano obsługę alternatyw: przycisk `by_button` (górny przycisk Y na lewym kontrolerze lub B na prawym) oraz klawisze `Escape` i `P` na klawiaturze.
 
 ## SUGESTIE DO DŹWIĘKÓW NA PÓŹNIEJ:
@@ -1157,6 +1157,8 @@ Gra zorganizowana jest w 6 zróżnicowanych nocy, wprowadzających gracza krok p
 3. **Noc 2 (60s)**: Balora przyspieszająca co 10s + Marionette atakująca co 20s (zwieńczona podwójnym szeptem).
 4. **Noc 3**: Wprowadzenie Foxy'ego o wysokiej tolerancji na hałas. Nauka mechaniki ciszy i bloku.
 5. **Noc 4**: Eskalacja agresji Foxy'ego, serie szeptów Marionetki i uściski Phantom Grasp.
+6. **Noc 5 (Finał)**: Podwójny Foxy, superszybka Balora i pełna presja sensoryczna.
+
 
 ---
 
@@ -1164,13 +1166,13 @@ Gra zorganizowana jest w 6 zróżnicowanych nocy, wprowadzających gracza krok p
 Wdrożono kluczowe poprawki na podstawie testów VR z dnia 16.09.2026:
 - **Niezależne szyny audio (`default_bus_layout.tres`):** Pełna kontrola suwakami w UI nad głośnością szyn: Master, Enemies (dźwięki przeciwników), Footsteps (kroki gracza), Whoosh (odgłos obrotu) oraz Jumpscare.
 - **Usunięcie kompasu:** Skasowano dezorientujący dźwięk dzwonka kompasu (`Broken bell.ogg`); nawigacja obrotowa opiera się wyłącznie na czystym Whooshu.
-- **Marionette (Whisper Freeze & Dystans):** Zwiększono dystans spawnu do 1.8m-2.4m, dodano wymóg uniesienia i wyciągnięcia dłoni w kierunku szeptu (obrót z rękami przy pasie nie odpędza wroga). Wprowadzono mechanikę **Whisper Freeze**: ruch nogami w trakcie trwania szeptu przyspiesza atak 3.5x.
-- **Phantom Grasp (Wyszarpywanie):** Zastąpiono podwójne całkowanie prostą i niezawodną detekcją 2 gwałtownych potrząśnięć kontrolerem z feedbackiem haptycznym.
+- **Marionette (Dystans, Odpędzanie):** Zwiększono dystans spawnu do 1.5m-2.4m, dodano wymóg uniesienia i wyciągnięcia dłoni w kierunku szeptu (obrót z rękami przy pasie nie odpędza wroga). Zrezygnowano z mechaniki Whisper Freeze, zapewniając stabilny czas na orientację w przestrzeni.
+- **Phantom Grasp (Wyszarpywanie, Spowolnienie i Blokada Sprintu):** Zastąpiono podwójne całkowanie prostą detekcją 2 gwałtownych potrząśnięć kontrolerem z feedbackiem haptycznym. Podczas chwytu macek gracz zostaje natychmiast spowolniony (`max_speed = 1.0`), a sprint zostaje zablokowany aż do oswobodzenia.
 - **Ballora (Donośność pozytywki):** Zwiększono zasięg do 65m, `unit_size` do 35.0 i `volume_db` do 7.5 dB z modelem liniowym, przywracając orientację słuchową z oddali.
 - **Kroki:** Wstrzymywanie poprzednich instancji przed nowym stąpnięciem, eliminując nakładanie się 12-sekundowych próbek.
-- **Interfejs VR (Hold Button & Pauza):** Zwiększono rozmiary przycisków w menu, wymuszono aktywację wyłącznie po przytrzymaniu triggera (brak przypadkowych kliknięć). Dodano alternatywne mapowanie pauzy (`by_button` Y/B oraz Escape/P).
+- **Interfejs VR (Hold Button & Pauza):** Zwiększono rozmiary przycisków w menu, skonsumowano zdarzenia `InputEventScreenTouch` z viewportu VR, wymuszając aktywację **wyłącznie po przytrzymaniu triggera przez 0.65s** (brak przypadkowych kliknięć). Dodano alternatywne mapowanie pauzy (`by_button` Y/B oraz Escape/P).
 
-*Ostatnia aktualizacja:* v0.5.2 (16.09.2026) — Wdrożenie szyn audio, Whisper Freeze Marionetki, naprawa wyszarpywania Phantom Grasp, poprawa donośności Ballory, powiększenie i przytrzymanie przycisków VR.
+*Ostatnia aktualizacja:* v0.5.2 (16.09.2026) — Wdrożenie szyn audio, spowolnienie i blokada sprintu Phantom Grasp, naprawa wyszarpywania, poprawa donośności Ballory, powiększenie i 100% ochrona przycisków VR przed luźnym kliknięciem (Hold Button).
 ````
 
 ## File: scripts/ballora.gd.uid
@@ -1305,297 +1307,9 @@ func _on_menu_pressed() -> void:
 uid://dnxve3m5i3n4j
 ````
 
-## File: scripts/pause_menu.gd
-````
-extends Node3D
-
-@onready var viewport_2d: Node3D = $Viewport2Din3D
-
-var is_paused: bool = false
-var left_ctrl: XRController3D
-var right_ctrl: XRController3D
-var camera: XRCamera3D
-
-var _menu_btn_down: bool = false
-
-func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	visible = false
-	_find_vr_nodes()
-	
-	if viewport_2d and viewport_2d.has_method("get_scene_instance"):
-		var ui = viewport_2d.get_scene_instance()
-		if ui:
-			_connect_ui_signals(ui)
-	elif viewport_2d:
-		# Fallback - czekamy klatkę na załadowanie sceny w Viewport2D
-		call_deferred("_deferred_connect_ui")
-
-func _deferred_connect_ui() -> void:
-	if viewport_2d:
-		var sub_vp = viewport_2d.get_node_or_null("Viewport")
-		if sub_vp and sub_vp.get_child_count() > 0:
-			var ui = sub_vp.get_child(0)
-			_connect_ui_signals(ui)
-
-func _connect_ui_signals(ui: Node) -> void:
-	if ui.has_signal("resume_requested") and not ui.resume_requested.is_connected(toggle_pause):
-		ui.resume_requested.connect(toggle_pause)
-	if ui.has_signal("restart_requested") and not ui.restart_requested.is_connected(_on_restart):
-		ui.restart_requested.connect(_on_restart)
-	if ui.has_signal("main_menu_requested") and not ui.main_menu_requested.is_connected(_on_main_menu):
-		ui.main_menu_requested.connect(_on_main_menu)
-
-func _find_vr_nodes() -> void:
-	var head = get_tree().get_first_node_in_group("player_head")
-	var root = get_tree().get_first_node_in_group("player")
-	if head is XRCamera3D:
-		camera = head
-	elif root:
-		camera = root.get_node_or_null("XROrigin3D/XRCamera3D")
-		
-	if root:
-		var origin = root.get_node_or_null("XROrigin3D")
-		if origin:
-			left_ctrl = origin.get_node_or_null("left_hand")
-			right_ctrl = origin.get_node_or_null("right_hand")
-
-func _process(_delta: float) -> void:
-	if left_ctrl == null or right_ctrl == null:
-		_find_vr_nodes()
-
-	var pressed := false
-	if left_ctrl:
-		if left_ctrl.is_button_pressed("menu_button") or left_ctrl.is_button_pressed("by_button"):
-			pressed = true
-	if right_ctrl and not pressed:
-		if right_ctrl.is_button_pressed("menu_button") or right_ctrl.is_button_pressed("by_button"):
-			pressed = true
-			
-	if not pressed:
-		if Input.is_action_just_pressed("ui_cancel") or Input.is_key_pressed(KEY_ESCAPE) or Input.is_key_pressed(KEY_P):
-			pressed = true
-		
-	if pressed and not _menu_btn_down:
-		_menu_btn_down = true
-		toggle_pause()
-	elif not pressed and _menu_btn_down:
-		_menu_btn_down = false
-
-func toggle_pause() -> void:
-	if JumpscareHelper.is_jumpscaring_global:
-		return
-		
-	is_paused = !is_paused
-	get_tree().paused = is_paused
-	visible = is_paused
-	
-	if is_paused:
-		_position_in_front_of_player()
-		if TTSManager:
-			TTSManager.speak("Game paused", true)
-	else:
-		if TTSManager:
-			TTSManager.speak("Game resumed", true)
-
-func _position_in_front_of_player() -> void:
-	if camera:
-		var cam_forward = -camera.global_transform.basis.z.normalized()
-		cam_forward.y = 0.0
-		cam_forward = cam_forward.normalized()
-		
-		var target_pos = camera.global_position + cam_forward * 1.6
-		target_pos.y = camera.global_position.y - 0.1
-		global_position = target_pos
-		
-		# Obrót twarzą do gracza
-		look_at(camera.global_position, Vector3.UP)
-		rotate_y(PI)
-
-func _on_restart() -> void:
-	get_tree().paused = false
-	visible = false
-	SceneLoader.load_scene("res://scenes/game_map.tscn")
-
-func _on_main_menu() -> void:
-	get_tree().paused = false
-	visible = false
-	SceneLoader.load_scene("res://scenes/main_menu.tscn")
-````
-
 ## File: scripts/pause_menu.gd.uid
 ````
 uid://bcr15wxo5bwsm
-````
-
-## File: scripts/phantom_grasp.gd
-````
-extends Node3D
-
-enum State { DORMANT, STALKING, GRABBED }
-
-@export var min_dormant_time: float = 25.0
-@export var max_dormant_time: float = 45.0
-@export var stalk_duration: float = 3.0
-@export var escape_time_limit: float = 3.5
-@export var required_shakes: int = 2
-@export var shake_speed_threshold: float = 1.2
-
-@onready var crawl_sound: AudioStreamPlayer3D = $CrawlSound
-@onready var grab_sound: AudioStreamPlayer3D = $GrabSound
-@onready var jumpscare_sound: AudioStreamPlayer3D = $JumpscareSound
-
-var current_state: State = State.DORMANT
-var _state_timer: float = 0.0
-var _shake_count: int = 0
-var _shake_cooldown: float = 0.0
-
-var player_root: Node3D
-var left_hand: XRController3D
-var right_hand: XRController3D
-var target_hand: XRController3D
-
-var _last_hand_pos: Vector3 = Vector3.ZERO
-var _haptic_loop_timer: float = 0.0
-
-func _ready():
-	_find_player()
-	_enter_dormant()
-
-func _find_player():
-	var root = get_tree().get_first_node_in_group("player")
-	if root:
-		player_root = root
-		var origin = root.get_node_or_null("XROrigin3D")
-		if origin:
-			left_hand = origin.get_node_or_null("left_hand")
-			right_hand = origin.get_node_or_null("right_hand")
-
-func _enter_dormant():
-	current_state = State.DORMANT
-	_state_timer = randf_range(min_dormant_time, max_dormant_time)
-	target_hand = null
-	if crawl_sound:
-		crawl_sound.stop()
-	if grab_sound:
-		grab_sound.stop()
-
-func _enter_stalking():
-	if left_hand == null or right_hand == null:
-		_find_player()
-		if left_hand == null and right_hand == null:
-			_enter_dormant()
-			return
-
-	# Losowanie zaatakowanej ręki
-	var hands: Array[XRController3D] = []
-	if left_hand: hands.append(left_hand)
-	if right_hand: hands.append(right_hand)
-	target_hand = hands.pick_random()
-
-	current_state = State.STALKING
-	_state_timer = stalk_duration
-	
-	# Start dźwięku pełzania poniżej ręki
-	global_position = target_hand.global_position + Vector3(0, -0.6, 0)
-	if crawl_sound:
-		crawl_sound.play()
-	print("Phantom Grasp: Pełznie w stronę dłoni: ", target_hand.name)
-
-func _enter_grabbed():
-	current_state = State.GRABBED
-	_state_timer = escape_time_limit
-	_shake_count = 0
-	_shake_cooldown = 0.0
-	_haptic_loop_timer = 0.0
-	
-	if crawl_sound:
-		crawl_sound.stop()
-	if grab_sound:
-		grab_sound.play()
-		
-	if target_hand:
-		_last_hand_pos = target_hand.global_position
-	print("Phantom Grasp: CHWYT za dłoń! Wstrząśnij kontrolerem 2 razy, by się wyrwać!")
-
-func _process(delta: float):
-	match current_state:
-		State.DORMANT:
-			_state_timer -= delta
-			if _state_timer <= 0.0:
-				_enter_stalking()
-
-		State.STALKING:
-			_state_timer -= delta
-			if target_hand:
-				# Pełzanie zbliża się wprost do dłoni
-				var t = 1.0 - (_state_timer / stalk_duration)
-				global_position = target_hand.global_position + Vector3(0, lerp(-0.6, 0.0, t), 0)
-				
-			if _state_timer <= 0.0:
-				_enter_grabbed()
-
-		State.GRABBED:
-			_state_timer -= delta
-			if _shake_cooldown > 0.0:
-				_shake_cooldown -= delta
-				
-			if target_hand:
-				global_position = target_hand.global_position
-				
-				# Ciągła silna wibracja pochwyconego kontrolera
-				_haptic_loop_timer -= delta
-				if _haptic_loop_timer <= 0.0:
-					_haptic_loop_timer = 0.08
-					target_hand.trigger_haptic_pulse("haptic", 160.0, 1.0, 0.08, 0.0)
-
-				# Detekcja wyszarpywania (gwałtowne potrząśnięcie ręką)
-				var cur_pos = target_hand.global_position
-				var vel = (cur_pos - _last_hand_pos) / max(delta, 0.001)
-				var speed = vel.length()
-				_last_hand_pos = cur_pos
-				
-				if speed >= shake_speed_threshold and _shake_cooldown <= 0.0:
-					_shake_count += 1
-					_shake_cooldown = 0.22 # Wymaga 2 wyraźnych, oddzielnych ruchów
-					print("Phantom Grasp: Szarpnięcie! (", _shake_count, " / ", required_shakes, ")")
-					
-					# Impuls potwierdzenia szarpnięcia
-					target_hand.trigger_haptic_pulse("haptic", 180.0, 0.85, 0.12, 0.0)
-					
-					if _shake_count >= required_shakes:
-						_break_free()
-						return
-
-			if _state_timer <= 0.0:
-				_trigger_jumpscare()
-
-func _break_free():
-	print("Phantom Grasp: Wyrwano się z uścisku macek!")
-	if grab_sound:
-		grab_sound.stop()
-		
-	# Dźwięk sukcesu i impuls haptyczny
-	if target_hand:
-		target_hand.trigger_haptic_pulse("haptic", 80.0, 0.5, 0.2, 0.0)
-		
-	var break_sfx = AudioStreamPlayer.new()
-	break_sfx.stream = preload("res://assets/sounds/whoosh2.mp3")
-	break_sfx.volume_db = 2.0
-	break_sfx.pitch_scale = 0.85
-	add_child(break_sfx)
-	break_sfx.play()
-	break_sfx.finished.connect(break_sfx.queue_free)
-	
-	_enter_dormant()
-
-func _trigger_jumpscare():
-	if current_state == State.DORMANT:
-		return
-	print("Phantom Grasp: Jumpscare!")
-	if grab_sound:
-		grab_sound.stop()
-	await JumpscareHelper.execute(self, jumpscare_sound, [], "Phantom Grasp — Zmiażdżenie uściskiem macek")
 ````
 
 ## File: scripts/phantom_grasp.gd.uid
@@ -1807,6 +1521,329 @@ input_gamepad = true
 unshaded = true
 ````
 
+## File: scripts/pause_menu.gd
+````
+extends Node3D
+
+@onready var viewport_2d: Node3D = $Viewport2Din3D
+
+var is_paused: bool = false
+var left_ctrl: XRController3D
+var right_ctrl: XRController3D
+var camera: XRCamera3D
+
+var _menu_btn_down: bool = false
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	visible = false
+	_find_vr_nodes()
+	
+	if viewport_2d and viewport_2d.has_method("get_scene_instance"):
+		var ui = viewport_2d.get_scene_instance()
+		if ui:
+			_connect_ui_signals(ui)
+	elif viewport_2d:
+		# Fallback - czekamy klatkę na załadowanie sceny w Viewport2D
+		call_deferred("_deferred_connect_ui")
+
+func _deferred_connect_ui() -> void:
+	if viewport_2d:
+		var sub_vp = viewport_2d.get_node_or_null("Viewport")
+		if sub_vp and sub_vp.get_child_count() > 0:
+			var ui = sub_vp.get_child(0)
+			_connect_ui_signals(ui)
+
+func _connect_ui_signals(ui: Node) -> void:
+	if ui.has_signal("resume_requested") and not ui.resume_requested.is_connected(toggle_pause):
+		ui.resume_requested.connect(toggle_pause)
+	if ui.has_signal("restart_requested") and not ui.restart_requested.is_connected(_on_restart):
+		ui.restart_requested.connect(_on_restart)
+	if ui.has_signal("main_menu_requested") and not ui.main_menu_requested.is_connected(_on_main_menu):
+		ui.main_menu_requested.connect(_on_main_menu)
+
+func _find_vr_nodes() -> void:
+	var head = get_tree().get_first_node_in_group("player_head")
+	var root = get_tree().get_first_node_in_group("player")
+	if head is XRCamera3D:
+		camera = head
+	elif root:
+		camera = root.get_node_or_null("XROrigin3D/XRCamera3D")
+		
+	if root:
+		var origin = root.get_node_or_null("XROrigin3D")
+		if origin:
+			left_ctrl = origin.get_node_or_null("left_hand")
+			right_ctrl = origin.get_node_or_null("right_hand")
+
+func _process(_delta: float) -> void:
+	if left_ctrl == null or right_ctrl == null:
+		_find_vr_nodes()
+
+	var pressed := false
+	if left_ctrl:
+		if left_ctrl.is_button_pressed("menu_button") or left_ctrl.is_button_pressed("by_button"):
+			pressed = true
+	if right_ctrl and not pressed:
+		if right_ctrl.is_button_pressed("menu_button") or right_ctrl.is_button_pressed("by_button"):
+			pressed = true
+			
+	if not pressed:
+		if Input.is_action_just_pressed("ui_cancel") or Input.is_key_pressed(KEY_ESCAPE) or Input.is_key_pressed(KEY_P):
+			pressed = true
+		
+	if pressed and not _menu_btn_down:
+		_menu_btn_down = true
+		toggle_pause()
+	elif not pressed and _menu_btn_down:
+		_menu_btn_down = false
+
+func toggle_pause() -> void:
+	if JumpscareHelper.is_jumpscaring_global:
+		return
+		
+	is_paused = !is_paused
+	get_tree().paused = is_paused
+	visible = is_paused
+	
+	if is_paused:
+		_position_in_front_of_player()
+		if TTSManager:
+			TTSManager.speak("Game paused", true)
+	else:
+		if TTSManager:
+			TTSManager.speak("Game resumed", true)
+
+func _position_in_front_of_player() -> void:
+	if camera:
+		var cam_forward = -camera.global_transform.basis.z.normalized()
+		cam_forward.y = 0.0
+		cam_forward = cam_forward.normalized()
+		
+		var target_pos = camera.global_position + cam_forward * 1.6
+		target_pos.y = camera.global_position.y - 0.1
+		global_position = target_pos
+		
+		# Obrót twarzą do gracza
+		look_at(camera.global_position, Vector3.UP)
+		rotate_y(PI)
+
+func _on_restart() -> void:
+	get_tree().paused = false
+	visible = false
+	SceneLoader.load_scene("res://scenes/game_map.tscn")
+
+func _on_main_menu() -> void:
+	get_tree().paused = false
+	visible = false
+	SceneLoader.load_scene("res://scenes/main_menu.tscn")
+````
+
+## File: scripts/phantom_grasp.gd
+````
+extends Node3D
+
+enum State { DORMANT, STALKING, GRABBED }
+
+@export var min_dormant_time: float = 25.0
+@export var max_dormant_time: float = 45.0
+@export var stalk_duration: float = 3.0
+@export var escape_time_limit: float = 3.5
+@export var required_shakes: int = 2
+@export var shake_speed_threshold: float = 1.2
+
+@onready var crawl_sound: AudioStreamPlayer3D = $CrawlSound
+@onready var grab_sound: AudioStreamPlayer3D = $GrabSound
+@onready var jumpscare_sound: AudioStreamPlayer3D = $JumpscareSound
+
+var current_state: State = State.DORMANT
+var _state_timer: float = 0.0
+var _shake_count: int = 0
+var _shake_cooldown: float = 0.0
+
+var player_root: Node3D
+var left_hand: XRController3D
+var right_hand: XRController3D
+var target_hand: XRController3D
+
+var _last_hand_pos: Vector3 = Vector3.ZERO
+var _haptic_loop_timer: float = 0.0
+
+var _orig_direct_speed: float = -1.0
+var _movement_sprint: XRToolsMovementSprint
+var _movement_direct: XRToolsMovementDirect
+
+func _ready():
+	_find_player()
+	_enter_dormant()
+
+func _exit_tree():
+	_restore_player_speed()
+
+func _find_player():
+	var root = get_tree().get_first_node_in_group("player")
+	if root:
+		player_root = root
+		var origin = root.get_node_or_null("XROrigin3D")
+		if origin:
+			left_hand = origin.get_node_or_null("left_hand")
+			right_hand = origin.get_node_or_null("right_hand")
+
+func _apply_player_slowdown():
+	if not player_root:
+		_find_player()
+	if player_root:
+		var origin = player_root.get_node_or_null("XROrigin3D")
+		if origin:
+			_movement_sprint = origin.get_node_or_null("MovementSprint") as XRToolsMovementSprint
+			if _movement_sprint:
+				_movement_sprint.enabled = false
+			
+			var direct = origin.get_node_or_null("right_hand/MovementDirect") as XRToolsMovementDirect
+			if direct:
+				_movement_direct = direct
+				if _orig_direct_speed < 0.0:
+					_orig_direct_speed = direct.max_speed
+				direct.max_speed = 1.0 # Silne spowolnienie pod ciężarem macek
+	print("Phantom Grasp: Zablokowano sprint i spowolniono gracza!")
+
+func _restore_player_speed():
+	if _movement_sprint:
+		_movement_sprint.enabled = true
+	if _movement_direct and _orig_direct_speed > 0.0:
+		_movement_direct.max_speed = _orig_direct_speed
+
+func _enter_dormant():
+	current_state = State.DORMANT
+	_state_timer = randf_range(min_dormant_time, max_dormant_time)
+	target_hand = null
+	_restore_player_speed()
+	if crawl_sound:
+		crawl_sound.stop()
+	if grab_sound:
+		grab_sound.stop()
+
+func _enter_stalking():
+	if left_hand == null or right_hand == null:
+		_find_player()
+		if left_hand == null and right_hand == null:
+			_enter_dormant()
+			return
+
+	# Losowanie zaatakowanej ręki
+	var hands: Array[XRController3D] = []
+	if left_hand: hands.append(left_hand)
+	if right_hand: hands.append(right_hand)
+	target_hand = hands.pick_random()
+
+	current_state = State.STALKING
+	_state_timer = stalk_duration
+	
+	# Start dźwięku pełzania poniżej ręki
+	global_position = target_hand.global_position + Vector3(0, -0.6, 0)
+	if crawl_sound:
+		crawl_sound.play()
+	print("Phantom Grasp: Pełznie w stronę dłoni: ", target_hand.name)
+
+func _enter_grabbed():
+	current_state = State.GRABBED
+	_state_timer = escape_time_limit
+	_shake_count = 0
+	_shake_cooldown = 0.0
+	_haptic_loop_timer = 0.0
+	
+	_apply_player_slowdown()
+	
+	if crawl_sound:
+		crawl_sound.stop()
+	if grab_sound:
+		grab_sound.play()
+		
+	if target_hand:
+		_last_hand_pos = target_hand.global_position
+	print("Phantom Grasp: CHWYT za dłoń! Wstrząśnij kontrolerem 2 razy, by się wyrwać!")
+
+func _process(delta: float):
+	match current_state:
+		State.DORMANT:
+			_state_timer -= delta
+			if _state_timer <= 0.0:
+				_enter_stalking()
+
+		State.STALKING:
+			_state_timer -= delta
+			if target_hand:
+				# Pełzanie zbliża się wprost do dłoni
+				var t = 1.0 - (_state_timer / stalk_duration)
+				global_position = target_hand.global_position + Vector3(0, lerp(-0.6, 0.0, t), 0)
+				
+			if _state_timer <= 0.0:
+				_enter_grabbed()
+
+		State.GRABBED:
+			_state_timer -= delta
+			if _shake_cooldown > 0.0:
+				_shake_cooldown -= delta
+				
+			if target_hand:
+				global_position = target_hand.global_position
+				
+				# Ciągła silna wibracja pochwyconego kontrolera
+				_haptic_loop_timer -= delta
+				if _haptic_loop_timer <= 0.0:
+					_haptic_loop_timer = 0.08
+					target_hand.trigger_haptic_pulse("haptic", 160.0, 1.0, 0.08, 0.0)
+
+				# Detekcja wyszarpywania (gwałtowne potrząśnięcie ręką)
+				var cur_pos = target_hand.global_position
+				var vel = (cur_pos - _last_hand_pos) / max(delta, 0.001)
+				var speed = vel.length()
+				_last_hand_pos = cur_pos
+				
+				if speed >= shake_speed_threshold and _shake_cooldown <= 0.0:
+					_shake_count += 1
+					_shake_cooldown = 0.22 # Wymaga 2 wyraźnych, oddzielnych ruchów
+					print("Phantom Grasp: Szarpnięcie! (", _shake_count, " / ", required_shakes, ")")
+					
+					# Impuls potwierdzenia szarpnięcia
+					target_hand.trigger_haptic_pulse("haptic", 180.0, 0.85, 0.12, 0.0)
+					
+					if _shake_count >= required_shakes:
+						_break_free()
+						return
+
+			if _state_timer <= 0.0:
+				_trigger_jumpscare()
+
+func _break_free():
+	print("Phantom Grasp: Wyrwano się z uścisku macek!")
+	if grab_sound:
+		grab_sound.stop()
+		
+	# Dźwięk sukcesu i impuls haptyczny
+	if target_hand:
+		target_hand.trigger_haptic_pulse("haptic", 80.0, 0.5, 0.2, 0.0)
+		
+	var break_sfx = AudioStreamPlayer.new()
+	break_sfx.stream = preload("res://assets/sounds/whoosh2.mp3")
+	break_sfx.volume_db = 2.0
+	break_sfx.pitch_scale = 0.85
+	add_child(break_sfx)
+	break_sfx.play()
+	break_sfx.finished.connect(break_sfx.queue_free)
+	
+	_enter_dormant()
+
+func _trigger_jumpscare():
+	if current_state == State.DORMANT:
+		return
+	print("Phantom Grasp: Jumpscare!")
+	_restore_player_speed()
+	if grab_sound:
+		grab_sound.stop()
+	await JumpscareHelper.execute(self, jumpscare_sound, [], "Phantom Grasp — Zmiażdżenie uściskiem macek")
+````
+
 ## File: scenes/phantom_grasp.tscn
 ````
 [gd_scene format=3]
@@ -2009,29 +2046,6 @@ scene_properties_keys = PackedStringArray("game_over_ui.gd")
 [node name="Player" parent="." unique_id=845576995 instance=ExtResource("4_player")]
 
 [node name="Fade" parent="." unique_id=584986121 instance=ExtResource("6_fade")]
-````
-
-## File: scenes/marionette.tscn
-````
-[gd_scene format=3 uid="uid://b3t54b22cxxxx"]
-
-[ext_resource type="Script" uid="uid://b7ny004tb164f" path="res://scripts/marionette.gd" id="1_marnin"]
-[ext_resource type="AudioStream" uid="uid://dn1d2v8onqbl" path="res://assets/sounds/marionette/257784__xtrgamr__ominous-whispers.wav" id="2_y05hy"]
-[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="3_jump"]
-
-[node name="Marionette" type="Node3D" unique_id=1428825871 groups=["enemy"]]
-script = ExtResource("1_marnin")
-
-[node name="WhisperSound" type="AudioStreamPlayer3D" parent="." unique_id=279718808]
-stream = ExtResource("2_y05hy")
-volume_db = 8.0
-unit_size = 15.0
-max_distance = 25.0
-bus = &"Enemies"
-
-[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=1378429979]
-stream = ExtResource("3_jump")
-bus = &"Jumpscare"
 ````
 
 ## File: scripts/game_over_ui.gd
@@ -2509,6 +2523,29 @@ script = ExtResource("2_hold_btn")
 
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsContainer/RestartButton" to="." method="_on_restart_button_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ButtonsContainer/MenuButton" to="." method="_on_menu_button_pressed"]
+````
+
+## File: scenes/marionette.tscn
+````
+[gd_scene format=3 uid="uid://b3t54b22cxxxx"]
+
+[ext_resource type="Script" uid="uid://b7ny004tb164f" path="res://scripts/marionette.gd" id="1_marnin"]
+[ext_resource type="AudioStream" uid="uid://dn1d2v8onqbl" path="res://assets/sounds/marionette/257784__xtrgamr__ominous-whispers.wav" id="2_y05hy"]
+[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="3_jump"]
+
+[node name="Marionette" type="Node3D" unique_id=1428825871 groups=["enemy"]]
+script = ExtResource("1_marnin")
+
+[node name="WhisperSound" type="AudioStreamPlayer3D" parent="." unique_id=279718808]
+stream = ExtResource("2_y05hy")
+volume_db = 8.0
+unit_size = 15.0
+max_distance = 25.0
+bus = &"Enemies"
+
+[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=1378429979]
+stream = ExtResource("3_jump")
+bus = &"Jumpscare"
 ````
 
 ## File: scripts/main_menu.gd
@@ -3209,6 +3246,197 @@ collision_mask = 524289
 shape = SubResource("SphereShape3D_jumpscare")
 ````
 
+## File: scripts/game_map.gd
+````
+@tool
+extends XRToolsSceneBase
+
+var time_survived: float = 0.0
+var is_timer_running: bool = false
+var next_milestone: int = 10
+
+@export var balora_start_time: float = 15.0
+@export var marionette_start_time: float = 40.0
+@export var foxy_start_time: float = 75.0
+@export var phantom_grasp_start_time: float = 110.0
+
+@onready var timer_label: Label3D = $"Player/XROrigin3D/XRCamera3D/TimerLabel"
+@onready var milestone_audio: AudioStreamPlayer3D = $"Player/XROrigin3D/XRCamera3D/MilestoneAudio"
+@onready var nav_region: NavigationRegion3D = $NavigationRegion3D
+@onready var ambient_audio: AudioStreamPlayer = $AudioStreamPlayer
+
+@onready var balora: Node3D = get_node_or_null("Balora")
+@onready var marionette: Node3D = get_node_or_null("Marionette")
+@onready var foxy: Node3D = get_node_or_null("Foxy")
+@onready var phantom_grasp: Node3D = get_node_or_null("PhantomGrasp")
+
+var _balora_active: bool = false
+var _marionette_active: bool = false
+var _foxy_active: bool = false
+var _phantom_grasp_active: bool = false
+
+var _player_head: Node3D
+var _cached_enemies: Array[Node] = []
+var _enemy_refresh_timer: float = 0.0
+
+func _ready():
+	if Engine.is_editor_hint():
+		return
+		
+	if timer_label == null:
+		push_warning("TimerLabel niedostępny — HUD wyłączony (gra działa dalej).")
+	if milestone_audio == null:
+		push_warning("MilestoneAudio niedostępny.")
+	
+	# Automatyczny bake NavMesh przy starcie mapy, odroczony by nie blokować klatki
+	if nav_region and nav_region.navigation_mesh:
+		call_deferred("_deferred_bake_navmesh")
+	
+	# Reset stanu przy starcie mapy (każda scena jest samowystarczalna).
+	SceneLoader.reset_session_stats()
+	time_survived = 0.0
+	next_milestone = 10
+	is_timer_running = true
+	_init_threat_director()
+	_refresh_nodes()
+
+func _init_threat_director():
+	# Stopniowe wprowadzanie zagrożeń (pacing)
+	if balora:
+		balora.process_mode = Node.PROCESS_MODE_DISABLED
+		if balora.has_node("BaloraTheme"):
+			(balora.get_node("BaloraTheme") as AudioStreamPlayer3D).stop()
+	if marionette:
+		marionette.process_mode = Node.PROCESS_MODE_DISABLED
+		if marionette.has_node("WhisperSound"):
+			(marionette.get_node("WhisperSound") as AudioStreamPlayer3D).stop()
+	if foxy:
+		foxy.process_mode = Node.PROCESS_MODE_DISABLED
+	if phantom_grasp:
+		phantom_grasp.process_mode = Node.PROCESS_MODE_DISABLED
+
+func _refresh_nodes():
+	_cached_enemies = get_tree().get_nodes_in_group("enemy")
+	var head = get_tree().get_first_node_in_group("player_head")
+	if head:
+		_player_head = head
+	else:
+		var player_root = get_tree().get_first_node_in_group("player")
+		if player_root:
+			_player_head = player_root.get_node_or_null("XROrigin3D/XRCamera3D")
+			if _player_head == null:
+				_player_head = player_root
+
+func _deferred_bake_navmesh():
+	nav_region.bake_navigation_mesh()
+	
+func _process(delta: float):
+	if Engine.is_editor_hint():
+		return
+		
+	if not is_timer_running:
+		return
+	
+	# 1. Akumulacja czasu
+	time_survived += delta
+	
+	# 2. Formatowanie matematyczne (minuty:sekundy)
+	var total_seconds: int = int(time_survived)
+	var minutes: int = int(total_seconds / 60.0)
+	var seconds: int = total_seconds % 60
+	if timer_label:
+		timer_label.text = "%02d:%02d" % [minutes, seconds]
+
+	# 3. Pacing zagrożeń (Threat Director)
+	_update_threat_pacing(delta)
+
+	# 4. Sprawdzanie progów 10 sekundowych
+	if time_survived >= next_milestone:
+		_trigger_milestone_event()
+
+func _update_threat_pacing(delta: float):
+	if not _balora_active and time_survived >= balora_start_time:
+		_balora_active = true
+		if balora:
+			balora.process_mode = Node.PROCESS_MODE_INHERIT
+			if balora.has_node("BaloraTheme"):
+				(balora.get_node("BaloraTheme") as AudioStreamPlayer3D).play()
+			print("Threat Director: Balora aktywowana (", int(time_survived), "s)")
+			
+	if not _marionette_active and time_survived >= marionette_start_time:
+		_marionette_active = true
+		if marionette:
+			marionette.process_mode = Node.PROCESS_MODE_INHERIT
+			if marionette.has_method("_start_new_series"):
+				marionette._start_new_series()
+			print("Threat Director: Marionette aktywowana (", int(time_survived), "s)")
+			
+	if not _foxy_active and time_survived >= foxy_start_time:
+		_foxy_active = true
+		if foxy:
+			foxy.process_mode = Node.PROCESS_MODE_INHERIT
+			print("Threat Director: Foxy aktywowany (", int(time_survived), "s)")
+			
+	if not _phantom_grasp_active and time_survived >= phantom_grasp_start_time:
+		_phantom_grasp_active = true
+		if phantom_grasp:
+			phantom_grasp.process_mode = Node.PROCESS_MODE_INHERIT
+			print("Threat Director: Phantom Grasp aktywowany (", int(time_survived), "s)")
+		
+	# 4. Efekt Distortion (zbliżające się zagrożenie = obniżony, mroczny ton ambientu)
+	_enemy_refresh_timer -= delta
+	if _enemy_refresh_timer <= 0.0:
+		_enemy_refresh_timer = 1.0
+		_cached_enemies = get_tree().get_nodes_in_group("enemy")
+		
+	_update_distortion_effect(delta)
+
+func _update_distortion_effect(delta: float):
+	if ambient_audio == null:
+		return
+		
+	if _player_head == null:
+		_refresh_nodes()
+		if _player_head == null:
+			return
+			
+	var p_pos = _player_head.global_position
+	var closest_dist = 999.0
+	for e in _cached_enemies:
+		if is_instance_valid(e) and e is Node3D:
+			var d = (e as Node3D).global_position.distance_to(p_pos)
+			if d < closest_dist:
+				closest_dist = d
+				
+	# Mapowanie dystansu: < 2 metry -> silny pitch (0.4), > 10 metrów -> normalny (1.0)
+	var target_pitch = 1.0
+	if closest_dist < 10.0:
+		target_pitch = remap(closest_dist, 2.0, 10.0, 0.4, 1.0)
+		target_pitch = clamp(target_pitch, 0.4, 1.0)
+		
+	ambient_audio.pitch_scale = lerp(ambient_audio.pitch_scale, target_pitch, delta * 3.0)
+		
+func _trigger_milestone_event():
+	# Przesuwamy próg o kolejne 10 sekund
+	var current_reached_milestone = next_milestone
+	next_milestone += 10
+	
+	# Odtworzenie sygnału dźwiękowego bezpośrednio przy uchu gracza
+	if milestone_audio and not milestone_audio.playing:
+		milestone_audio.play()
+		
+	# Eskalacja poziomu trudności dla wrogów podłączonych do EventBus
+	if EventBus:
+		EventBus.milestone_reached.emit(current_reached_milestone)
+		
+	print("Osiągnięto próg! Aktualny próg: ", current_reached_milestone, ", następny: ", next_milestone)
+	
+func stop_timer_and_save():
+	is_timer_running = false
+	# Zapisanie wyniku do pamięci
+	SceneLoader.last_survival_time = time_survived
+````
+
 ## File: scripts/main_menu_ui.gd
 ````
 extends Control
@@ -3458,6 +3686,63 @@ func _on_tts_toggle_pressed() -> void:
 			TTSManager.speak("TTS voice enabled", true)
 ````
 
+## File: README.md
+````markdown
+# Lightless VR
+
+**Lightless** to autorski, inżynierski projekt gry w wirtualnej rzeczywistości (VR) utworzony w silniku Godot Engine. Gra jest survival horrorem zaprojektowanym w taki sposób, aby była w pełni dostępna dla osób niewidomych – bodźce wizualne dają minimalną (lub żadną) przewagę rozgrywki.
+
+## Najnowsze zmiany (Version Log)
+- **v0.5.2** - Kompleksowa realizacja zaleceń audytu technicznego i poprawek stabilności: Naprawa systemu Fade w `SceneLoader.gd` (usunięcie nieskutecznych guardów `ClassDB.class_exists`, podwójny `await process_frame` po zmianie sceny, reset `is_loading` przy błędzie). Prawidłowy tracking gracza z poziomu głowy VR (`XRCamera3D` w grupie `player_head`) dla efektu zniekształcenia dźwięku (Distortion) i namierzania Foxy'ego. Rozdzielenie próbek audio (`danger.wav`, `whoosh2.mp3`, `Broken bell.ogg`, `nice-sfx.mp3`). Akustyka i haptyka kolizji ze ścianami (`EventBus.noise_emitted`). Nowa maszyna stanów Balory (Patrol, Alert z przyspieszającą pozytywką, Pościg, Ucieczka na odległość) i dopasowany NavMesh. Aktywna obrona przed Marionetką poprzez zamach kontrolerem VR z haptyką bliskości ucha. Threat Director (pacing pojawiania się wrogów na osi czasu). Nowy przeciwnik **Phantom Grasp** (chwyt za kontroler, wibracje i mechanika wyszarpywania). System **Echolokacji** (puls dźwiękowo-haptyczny na przycisku A/X sondujący układ ścian kosztem hałasu). Dedykowane **Menu Pauzy VR** (`scenes/pause_menu.tscn`). Naprawa wyłącznika lektora TTS w ustawieniach oraz zabezpieczenia `is_inside_tree()`. Architektura przestrzenna Menu Głównego 3D z industrialnym klimatem Google Stitch i cyfrowym glitchem `RubikGlitch`.
+- **v0.5.1** - Przebudowa Menu Głównego na styl industrialnej ściany 3D z wyrytymi napisami (inspirowane projektem z Google Stitch), dynamiczny efekt animacji glitch tytułu "LIGHTLESS", komponent `HoldButton` (Hold-to-Click 0.6s), eliminacja lagów TTS przez Dwell Debounce (80ms), fizyczne blokowanie rąk gracza (`CollisionHand`), subtelniejsze wskaźniki laserowe VR w chłodnej błękitnej tonacji oraz podpis autorski.
+- **v0.5.0** - Wdrożenie dedykowanego ekranu Game Over (`scenes/game_over.tscn`), systemu śledzenia telemetrii sesji w `SceneLoader` (czas przetrwania, statystyki obrony, powód porażki) oraz integracji z Google Stitch i `DESIGN.md`.
+- **v0.4.0** - Optymalizacja audio przy starcie mapy, wdrożenie "Kompasu Dźwiękowego", efekt zniekształcenia dźwięku Ambient (Distortion) w zależności od bliskości wrogów oraz re-balans AI (naprawa kolizji między wrogami, crescendo dla Marionetki, wibracje haptyczne HMD).
+- **v0.3.0** - Wdrożenie logiki przeciwników (Balora, Marionette) bazującej na wektorach kierunkowych (VR) i systemie punktów nawigacyjnych (NavMesh) oraz wspólnego systemu JumpscareHelper.
+- **v0.2.0** - Zaprojektowanie założeń koncepcyjnych oraz opracowanie customowego systemu zarządzania scenami (SceneLoader) rozwiązującego problemy fizyki XR podczas przeładowywania map.
+
+## Znane błędy i uwagi techniczne (Known Issues)
+- **Kliknięcie vs Przytrzymanie**: W bieżącej wersji przyciski reagują zarówno na natychmiastowe kliknięcie triggera, jak i na przytrzymanie do napełnienia paska – planowane jest usunięcie animacji ładowania paska na rzecz bezpośredniej reakcji na spust.
+
+## O projekcie
+Głównym założeniem technologicznym było zbudowanie stabilnego szkieletu scen w VR z wykorzystaniem asynchronicznego menedżera `SceneLoader`, w którym każda scena jest w 100% samowystarczalna (zawiera własne instancje `Player`, `StartXR` i `Fade`). Zapobiega to błędom fizyki i kolizji przy przeładowaniach. Rozgrywka opiera się na dźwiękowej orientacji przestrzennej i odpowiednich interakcjach z przeciwnikami. Interfejs gry zaprojektowano z myślą o pełnej dostępności – obok wskaźnika laserowego VR oferuje kompletną nawigację gałką analogową kontrolera (joystickiem) z odczytem lektorskim (TTS) i haptyką, umożliwiając osobom niewidomym intuicyjną obsługę menu bez konieczności celowania w przestrzeni 3D.
+
+## Stack technologiczny
+- **Godot Engine 4.x** (wersja Godot 4.7 / 4.x, ustawienia Mobile Renderer dla płynności)
+- **OpenXR** (Główna biblioteka do połączenia z goglami VR)
+- **Godot XR Tools** - standardowe pakiety fizyki dłoni i bazowych obiektów, dostosowane na potrzeby projektu.
+
+## Uruchomienie i testowanie
+Projekt przeznaczony jest na gogle VR obsługujące OpenXR (np. Meta Quest podpięty przez Meta Quest Link / SteamVR).
+1. Sklonuj repozytorium.
+2. Otwórz w **Godot 4.x** (wersja z obsługą .NET nie jest wymagana, używamy GDScript).
+3. Projekt uruchamia się bezpośrednio od `scenes/main_menu.tscn` (wbudowany autostart OpenXR). Za przechodzenie między mapami odpowiada asynchroniczny autoload `SceneLoader.gd`.
+
+## Sounds:
+- Sound Effect by <a href="https://pixabay.com/users/freesounds123-49985424/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335600">free sound creator</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335600">Pixabay</a>
+- Sound Effect by <a href="https://pixabay.com/users/freesound_community-46691455/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=102254">freesound_community</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=102254">Pixabay</a>
+- Sound Effect by <a href="https://pixabay.com/users/freesounds123-49985424/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335599">free sound creator</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335599">Pixabay</a>
+- Sound Effect by <a href="https://pixabay.com/users/sound_effects75-54573118/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=485532">Sound_effects75</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=485532">Pixabay</a>
+
+shadow_v3a.aif by thanvannispen -- https://freesound.org/s/79713/ -- License: Attribution 4.0
+Whisper Evil Little Nothings to Me by SoundBiterSFX -- https://freesound.org/s/730965/ -- License: Creative Commons 0
+Whispers.wav by KrystalSounds7 -- https://freesound.org/s/466309/ -- License: Creative Commons 0
+whispers.wav by SophieMezaM -- https://freesound.org/s/446083/ -- License: Attribution 3.0
+Ominous whispers.wav by xtrgamr -- https://freesound.org/s/257784/ -- License: Attribution 4.0
+
+runing.wav - Pasos_Rapid.wav by anez -- https://freesound.org/s/403437/ -- License: Attribution 4.0
+foxy_runing.mp3 Demon Stomping Run.mp3 by Hoshenko -- https://freesound.org/s/697645/ -- License: Attribution 4.0
+
+footstep_slow2.wav by stradie -- https://freesound.org/s/255569/ -- License: Attribution 4.0
+
+WoodWalking.wav by szegvari -- https://freesound.org/s/514146/ -- License: Creative Commons 0
+Sound Effect by <a href="https://pixabay.com/users/freesound_community-46691455/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=101127">freesound_community</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=101127">Pixabay</a>
+
+foxy_walking.mp3 big metallic robot footsteps by gladkiy -- https://freesound.org/s/342235/ -- License: Creative Commons 0
+whoosh2 Whoosh away by jriches1 -- https://freesound.org/s/817959/ -- License: Creative Commons 0
+
+danger Cinematic Alarm Hit by Rizzard -- https://freesound.org/s/560157/ -- License: Creative Commons 0
+````
+
 ## File: scenes/foxy.tscn
 ````
 [gd_scene format=3 uid="uid://cxabcf23t8foo"]
@@ -3535,197 +3820,6 @@ collision_mask = 131072
 [node name="CollisionShape3D" type="CollisionShape3D" parent="BlockTrigger" unique_id=820912904]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.038757324, 1.1874512, -0.70477295)
 shape = SubResource("BoxShape3D_block")
-````
-
-## File: scripts/game_map.gd
-````
-@tool
-extends XRToolsSceneBase
-
-var time_survived: float = 0.0
-var is_timer_running: bool = false
-var next_milestone: int = 10
-
-@export var balora_start_time: float = 15.0
-@export var marionette_start_time: float = 40.0
-@export var foxy_start_time: float = 75.0
-@export var phantom_grasp_start_time: float = 110.0
-
-@onready var timer_label: Label3D = $"Player/XROrigin3D/XRCamera3D/TimerLabel"
-@onready var milestone_audio: AudioStreamPlayer3D = $"Player/XROrigin3D/XRCamera3D/MilestoneAudio"
-@onready var nav_region: NavigationRegion3D = $NavigationRegion3D
-@onready var ambient_audio: AudioStreamPlayer = $AudioStreamPlayer
-
-@onready var balora: Node3D = get_node_or_null("Balora")
-@onready var marionette: Node3D = get_node_or_null("Marionette")
-@onready var foxy: Node3D = get_node_or_null("Foxy")
-@onready var phantom_grasp: Node3D = get_node_or_null("PhantomGrasp")
-
-var _balora_active: bool = false
-var _marionette_active: bool = false
-var _foxy_active: bool = false
-var _phantom_grasp_active: bool = false
-
-var _player_head: Node3D
-var _cached_enemies: Array[Node] = []
-var _enemy_refresh_timer: float = 0.0
-
-func _ready():
-	if Engine.is_editor_hint():
-		return
-		
-	if timer_label == null:
-		push_warning("TimerLabel niedostępny — HUD wyłączony (gra działa dalej).")
-	if milestone_audio == null:
-		push_warning("MilestoneAudio niedostępny.")
-	
-	# Automatyczny bake NavMesh przy starcie mapy, odroczony by nie blokować klatki
-	if nav_region and nav_region.navigation_mesh:
-		call_deferred("_deferred_bake_navmesh")
-	
-	# Reset stanu przy starcie mapy (każda scena jest samowystarczalna).
-	SceneLoader.reset_session_stats()
-	time_survived = 0.0
-	next_milestone = 10
-	is_timer_running = true
-	_init_threat_director()
-	_refresh_nodes()
-
-func _init_threat_director():
-	# Stopniowe wprowadzanie zagrożeń (pacing)
-	if balora:
-		balora.process_mode = Node.PROCESS_MODE_DISABLED
-		if balora.has_node("BaloraTheme"):
-			(balora.get_node("BaloraTheme") as AudioStreamPlayer3D).stop()
-	if marionette:
-		marionette.process_mode = Node.PROCESS_MODE_DISABLED
-		if marionette.has_node("WhisperSound"):
-			(marionette.get_node("WhisperSound") as AudioStreamPlayer3D).stop()
-	if foxy:
-		foxy.process_mode = Node.PROCESS_MODE_DISABLED
-	if phantom_grasp:
-		phantom_grasp.process_mode = Node.PROCESS_MODE_DISABLED
-
-func _refresh_nodes():
-	_cached_enemies = get_tree().get_nodes_in_group("enemy")
-	var head = get_tree().get_first_node_in_group("player_head")
-	if head:
-		_player_head = head
-	else:
-		var player_root = get_tree().get_first_node_in_group("player")
-		if player_root:
-			_player_head = player_root.get_node_or_null("XROrigin3D/XRCamera3D")
-			if _player_head == null:
-				_player_head = player_root
-
-func _deferred_bake_navmesh():
-	nav_region.bake_navigation_mesh()
-	
-func _process(delta: float):
-	if Engine.is_editor_hint():
-		return
-		
-	if not is_timer_running:
-		return
-	
-	# 1. Akumulacja czasu
-	time_survived += delta
-	
-	# 2. Formatowanie matematyczne (minuty:sekundy)
-	var total_seconds: int = int(time_survived)
-	var minutes: int = int(total_seconds / 60.0)
-	var seconds: int = total_seconds % 60
-	if timer_label:
-		timer_label.text = "%02d:%02d" % [minutes, seconds]
-
-	# 3. Pacing zagrożeń (Threat Director)
-	_update_threat_pacing(delta)
-
-	# 4. Sprawdzanie progów 10 sekundowych
-	if time_survived >= next_milestone:
-		_trigger_milestone_event()
-
-func _update_threat_pacing(delta: float):
-	if not _balora_active and time_survived >= balora_start_time:
-		_balora_active = true
-		if balora:
-			balora.process_mode = Node.PROCESS_MODE_INHERIT
-			if balora.has_node("BaloraTheme"):
-				(balora.get_node("BaloraTheme") as AudioStreamPlayer3D).play()
-			print("Threat Director: Balora aktywowana (", int(time_survived), "s)")
-			
-	if not _marionette_active and time_survived >= marionette_start_time:
-		_marionette_active = true
-		if marionette:
-			marionette.process_mode = Node.PROCESS_MODE_INHERIT
-			if marionette.has_method("_start_new_series"):
-				marionette._start_new_series()
-			print("Threat Director: Marionette aktywowana (", int(time_survived), "s)")
-			
-	if not _foxy_active and time_survived >= foxy_start_time:
-		_foxy_active = true
-		if foxy:
-			foxy.process_mode = Node.PROCESS_MODE_INHERIT
-			print("Threat Director: Foxy aktywowany (", int(time_survived), "s)")
-			
-	if not _phantom_grasp_active and time_survived >= phantom_grasp_start_time:
-		_phantom_grasp_active = true
-		if phantom_grasp:
-			phantom_grasp.process_mode = Node.PROCESS_MODE_INHERIT
-			print("Threat Director: Phantom Grasp aktywowany (", int(time_survived), "s)")
-		
-	# 4. Efekt Distortion (zbliżające się zagrożenie = obniżony, mroczny ton ambientu)
-	_enemy_refresh_timer -= delta
-	if _enemy_refresh_timer <= 0.0:
-		_enemy_refresh_timer = 1.0
-		_cached_enemies = get_tree().get_nodes_in_group("enemy")
-		
-	_update_distortion_effect(delta)
-
-func _update_distortion_effect(delta: float):
-	if ambient_audio == null:
-		return
-		
-	if _player_head == null:
-		_refresh_nodes()
-		if _player_head == null:
-			return
-			
-	var p_pos = _player_head.global_position
-	var closest_dist = 999.0
-	for e in _cached_enemies:
-		if is_instance_valid(e) and e is Node3D:
-			var d = (e as Node3D).global_position.distance_to(p_pos)
-			if d < closest_dist:
-				closest_dist = d
-				
-	# Mapowanie dystansu: < 2 metry -> silny pitch (0.4), > 10 metrów -> normalny (1.0)
-	var target_pitch = 1.0
-	if closest_dist < 10.0:
-		target_pitch = remap(closest_dist, 2.0, 10.0, 0.4, 1.0)
-		target_pitch = clamp(target_pitch, 0.4, 1.0)
-		
-	ambient_audio.pitch_scale = lerp(ambient_audio.pitch_scale, target_pitch, delta * 3.0)
-		
-func _trigger_milestone_event():
-	# Przesuwamy próg o kolejne 10 sekund
-	var current_reached_milestone = next_milestone
-	next_milestone += 10
-	
-	# Odtworzenie sygnału dźwiękowego bezpośrednio przy uchu gracza
-	if milestone_audio and not milestone_audio.playing:
-		milestone_audio.play()
-		
-	# Eskalacja poziomu trudności dla wrogów podłączonych do EventBus
-	if EventBus:
-		EventBus.milestone_reached.emit(current_reached_milestone)
-		
-	print("Osiągnięto próg! Aktualny próg: ", current_reached_milestone, ", następny: ", next_milestone)
-	
-func stop_timer_and_save():
-	is_timer_running = false
-	# Zapisanie wyniku do pamięci
-	SceneLoader.last_survival_time = time_survived
 ````
 
 ## File: scripts/player_audio_manager.gd
@@ -3986,63 +4080,6 @@ shaders/enabled=true
 default_bus_layout="res://default_bus_layout.tres"
 ````
 
-## File: README.md
-````markdown
-# Lightless VR
-
-**Lightless** to autorski, inżynierski projekt gry w wirtualnej rzeczywistości (VR) utworzony w silniku Godot Engine. Gra jest survival horrorem zaprojektowanym w taki sposób, aby była w pełni dostępna dla osób niewidomych – bodźce wizualne dają minimalną (lub żadną) przewagę rozgrywki.
-
-## Najnowsze zmiany (Version Log)
-- **v0.5.2** - Kompleksowa realizacja zaleceń audytu technicznego i poprawek stabilności: Naprawa systemu Fade w `SceneLoader.gd` (usunięcie nieskutecznych guardów `ClassDB.class_exists`, podwójny `await process_frame` po zmianie sceny, reset `is_loading` przy błędzie). Prawidłowy tracking gracza z poziomu głowy VR (`XRCamera3D` w grupie `player_head`) dla efektu zniekształcenia dźwięku (Distortion) i namierzania Foxy'ego. Rozdzielenie próbek audio (`danger.wav`, `whoosh2.mp3`, `Broken bell.ogg`, `nice-sfx.mp3`). Akustyka i haptyka kolizji ze ścianami (`EventBus.noise_emitted`). Nowa maszyna stanów Balory (Patrol, Alert z przyspieszającą pozytywką, Pościg, Ucieczka na odległość) i dopasowany NavMesh. Aktywna obrona przed Marionetką poprzez zamach kontrolerem VR z haptyką bliskości ucha. Threat Director (pacing pojawiania się wrogów na osi czasu). Nowy przeciwnik **Phantom Grasp** (chwyt za kontroler, wibracje i mechanika wyszarpywania). System **Echolokacji** (puls dźwiękowo-haptyczny na przycisku A/X sondujący układ ścian kosztem hałasu). Dedykowane **Menu Pauzy VR** (`scenes/pause_menu.tscn`). Naprawa wyłącznika lektora TTS w ustawieniach oraz zabezpieczenia `is_inside_tree()`. Architektura przestrzenna Menu Głównego 3D z industrialnym klimatem Google Stitch i cyfrowym glitchem `RubikGlitch`.
-- **v0.5.1** - Przebudowa Menu Głównego na styl industrialnej ściany 3D z wyrytymi napisami (inspirowane projektem z Google Stitch), dynamiczny efekt animacji glitch tytułu "LIGHTLESS", komponent `HoldButton` (Hold-to-Click 0.6s), eliminacja lagów TTS przez Dwell Debounce (80ms), fizyczne blokowanie rąk gracza (`CollisionHand`), subtelniejsze wskaźniki laserowe VR w chłodnej błękitnej tonacji oraz podpis autorski.
-- **v0.5.0** - Wdrożenie dedykowanego ekranu Game Over (`scenes/game_over.tscn`), systemu śledzenia telemetrii sesji w `SceneLoader` (czas przetrwania, statystyki obrony, powód porażki) oraz integracji z Google Stitch i `DESIGN.md`.
-- **v0.4.0** - Optymalizacja audio przy starcie mapy, wdrożenie "Kompasu Dźwiękowego", efekt zniekształcenia dźwięku Ambient (Distortion) w zależności od bliskości wrogów oraz re-balans AI (naprawa kolizji między wrogami, crescendo dla Marionetki, wibracje haptyczne HMD).
-- **v0.3.0** - Wdrożenie logiki przeciwników (Balora, Marionette) bazującej na wektorach kierunkowych (VR) i systemie punktów nawigacyjnych (NavMesh) oraz wspólnego systemu JumpscareHelper.
-- **v0.2.0** - Zaprojektowanie założeń koncepcyjnych oraz opracowanie customowego systemu zarządzania scenami (SceneLoader) rozwiązującego problemy fizyki XR podczas przeładowywania map.
-
-## Znane błędy i uwagi techniczne (Known Issues)
-- **Kliknięcie vs Przytrzymanie**: W bieżącej wersji przyciski reagują zarówno na natychmiastowe kliknięcie triggera, jak i na przytrzymanie do napełnienia paska – planowane jest usunięcie animacji ładowania paska na rzecz bezpośredniej reakcji na spust.
-
-## O projekcie
-Głównym założeniem technologicznym było zbudowanie stabilnego szkieletu scen w VR z wykorzystaniem asynchronicznego menedżera `SceneLoader`, w którym każda scena jest w 100% samowystarczalna (zawiera własne instancje `Player`, `StartXR` i `Fade`). Zapobiega to błędom fizyki i kolizji przy przeładowaniach. Rozgrywka opiera się na dźwiękowej orientacji przestrzennej i odpowiednich interakcjach z przeciwnikami. Interfejs gry zaprojektowano z myślą o pełnej dostępności – obok wskaźnika laserowego VR oferuje kompletną nawigację gałką analogową kontrolera (joystickiem) z odczytem lektorskim (TTS) i haptyką, umożliwiając osobom niewidomym intuicyjną obsługę menu bez konieczności celowania w przestrzeni 3D.
-
-## Stack technologiczny
-- **Godot Engine 4.x** (wersja Godot 4.7 / 4.x, ustawienia Mobile Renderer dla płynności)
-- **OpenXR** (Główna biblioteka do połączenia z goglami VR)
-- **Godot XR Tools** - standardowe pakiety fizyki dłoni i bazowych obiektów, dostosowane na potrzeby projektu.
-
-## Uruchomienie i testowanie
-Projekt przeznaczony jest na gogle VR obsługujące OpenXR (np. Meta Quest podpięty przez Meta Quest Link / SteamVR).
-1. Sklonuj repozytorium.
-2. Otwórz w **Godot 4.x** (wersja z obsługą .NET nie jest wymagana, używamy GDScript).
-3. Projekt uruchamia się bezpośrednio od `scenes/main_menu.tscn` (wbudowany autostart OpenXR). Za przechodzenie między mapami odpowiada asynchroniczny autoload `SceneLoader.gd`.
-
-## Sounds:
-- Sound Effect by <a href="https://pixabay.com/users/freesounds123-49985424/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335600">free sound creator</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335600">Pixabay</a>
-- Sound Effect by <a href="https://pixabay.com/users/freesound_community-46691455/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=102254">freesound_community</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=102254">Pixabay</a>
-- Sound Effect by <a href="https://pixabay.com/users/freesounds123-49985424/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335599">free sound creator</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335599">Pixabay</a>
-- Sound Effect by <a href="https://pixabay.com/users/sound_effects75-54573118/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=485532">Sound_effects75</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=485532">Pixabay</a>
-
-shadow_v3a.aif by thanvannispen -- https://freesound.org/s/79713/ -- License: Attribution 4.0
-Whisper Evil Little Nothings to Me by SoundBiterSFX -- https://freesound.org/s/730965/ -- License: Creative Commons 0
-Whispers.wav by KrystalSounds7 -- https://freesound.org/s/466309/ -- License: Creative Commons 0
-whispers.wav by SophieMezaM -- https://freesound.org/s/446083/ -- License: Attribution 3.0
-Ominous whispers.wav by xtrgamr -- https://freesound.org/s/257784/ -- License: Attribution 4.0
-
-runing.wav - Pasos_Rapid.wav by anez -- https://freesound.org/s/403437/ -- License: Attribution 4.0
-foxy_runing.mp3 Demon Stomping Run.mp3 by Hoshenko -- https://freesound.org/s/697645/ -- License: Attribution 4.0
-
-footstep_slow2.wav by stradie -- https://freesound.org/s/255569/ -- License: Attribution 4.0
-
-WoodWalking.wav by szegvari -- https://freesound.org/s/514146/ -- License: Creative Commons 0
-Sound Effect by <a href="https://pixabay.com/users/freesound_community-46691455/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=101127">freesound_community</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=101127">Pixabay</a>
-
-foxy_walking.mp3 big metallic robot footsteps by gladkiy -- https://freesound.org/s/342235/ -- License: Creative Commons 0
-whoosh2 Whoosh away by jriches1 -- https://freesound.org/s/817959/ -- License: Creative Commons 0
-
-danger Cinematic Alarm Hit by Rizzard -- https://freesound.org/s/560157/ -- License: Creative Commons 0
-````
-
 ## File: scripts/hold_button.gd
 ````
 extends Button
@@ -4052,7 +4089,8 @@ class_name HoldButton
 ## Samo najechanie NIE ładuje opcji. Aby zatwierdzić, gracz musi PRZYTRZYMAĆ spust (trigger).
 ## Po aktywacji przycisk jest zablokowany do momentu, gdy gracz PUŚCI trigger.
 
-@export var charge_time_hold: float = 0.6
+@export var charge_time_hold: float = 0.65
+@export var allow_repeat_on_hold: bool = false
 
 var _is_hovered: bool = false
 var _is_input_holding: bool = false
@@ -4106,16 +4144,40 @@ func _apply_engraved_style() -> void:
 	add_theme_constant_override("shadow_offset_y", 3)
 	add_theme_constant_override("outline_size", 2)
 
+## Przesłaniamy _gui_input i bezwzględnie konsumujemy każde zdarzenie kliknięcia/dotyku,
+## aby natywny BaseButton z silnika C++ NIGDY nie wyemitował pressed samowolnie!
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			_is_input_holding = event.pressed
+		accept_event()
+		return
+		
+	if event is InputEventScreenTouch:
 		_is_input_holding = event.pressed
-		accept_event() # Blokuje standardową natychmiastową aktywację bazy Button!
+		accept_event()
+		return
+		
+	if event is InputEventScreenDrag:
+		accept_event()
+		return
+		
+	if event.is_action("ui_accept"):
+		_is_input_holding = event.is_pressed()
+		accept_event()
+		return
 
 func _input(event: InputEvent) -> void:
 	if not _is_hovered:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		_is_input_holding = event.pressed
+		get_viewport().set_input_as_handled()
+	elif event is InputEventScreenTouch:
+		_is_input_holding = event.pressed
+		get_viewport().set_input_as_handled()
+	elif event.is_action("ui_accept"):
+		_is_input_holding = event.is_pressed()
 		get_viewport().set_input_as_handled()
 
 func _process(delta: float) -> void:
@@ -4140,11 +4202,15 @@ func _process(delta: float) -> void:
 
 	var trigger_held := _is_input_holding or _is_trigger_down_on_controller()
 	
-	# Po aktywacji: czekamy aż gracz PUŚCI trigger zanim pozwolimy na kolejne ładowanie
+	# Po aktywacji: czekamy aż gracz PUŚCI trigger zanim pozwolimy na kolejne ładowanie (chyba że allow_repeat_on_hold)
 	if _wait_for_release:
 		if not trigger_held:
 			_wait_for_release = false
-		# Nie ładujemy — gracz wciąż trzyma trigger po poprzedniej aktywacji
+		elif allow_repeat_on_hold:
+			_charge += delta / max(0.05, charge_time_hold)
+			queue_redraw()
+			if _charge >= 1.0:
+				_trigger_activation()
 		return
 	
 	if trigger_held:
@@ -4244,300 +4310,6 @@ func _draw() -> void:
 		draw_rect(Rect2(groove_x, groove_y - 1.0, fill_w, groove_h + 2.0), Color(0.0, 1.0, 0.64, 0.3), true)
 		draw_rect(Rect2(groove_x, groove_y, fill_w, groove_h), COLOR_GLOW_NEON, true)
 		draw_circle(Vector2(groove_x + fill_w, groove_y + groove_h * 0.5), 3.5, Color(1.0, 1.0, 1.0, 0.95))
-````
-
-## File: scripts/marionette.gd
-````
-extends Node3D
-
-enum State { HIDDEN, WHISPERING, JUMPSCARE }
-var current_state: State = State.HIDDEN
-
-## Włącz widoczny mesh debugowy (kula), żeby widzieć gdzie Marionette się pojawia
-@export var debug_visible: bool = false
-
-## Granice spawnu Marionette (do konfiguracji w edytorze)
-@export var map_bounds_min: Vector3 = Vector3(-9.0, 0.0, -9.0)
-@export var map_bounds_max: Vector3 = Vector3(9.0, 3.0, 9.0)
-
-## Dystans spawnu od gracza
-@export var spawn_distance_min: float = 1.8
-@export var spawn_distance_max: float = 2.4
-
-## Prędkość zamachu kontrolera (m/s) wymagana do odpędzenia szeptu
-@export var swing_speed_threshold: float = 1.1
-
-## Dystans uderzenia dłonią w szept
-@export var swing_proximity_distance: float = 0.65
-
-## Maksymalny czas na reakcję przed Jumpscare'em (sekundy)
-@export var attack_duration_limit: float = 5.5
-
-## Czas łaski na zorientowanie się po pojawieniu szeptów (sekundy)
-@export var grace_time: float = 1.0
-
-## Minimalna / maksymalna liczba szeptów w jednej serii
-@export var min_whisper_rounds: int = 1
-@export var max_whisper_rounds: int = 3
-
-## Przerwa między szeptami w serii (sekundy)
-@export var series_pause_min: float = 1.0
-@export var series_pause_max: float = 2.5
-
-## Przerwa między seriami (sekundy)
-@export var long_pause_min: float = 8.0
-@export var long_pause_max: float = 18.0
-
-@onready var whisper_sound: AudioStreamPlayer3D = $WhisperSound
-@onready var jumpscare_sound: AudioStreamPlayer3D = $JumpscareSound
-
-var player: Node3D
-var camera: XRCamera3D
-var left_hand: XRController3D
-var right_hand: XRController3D
-
-var _last_left_pos: Vector3 = Vector3.ZERO
-var _last_right_pos: Vector3 = Vector3.ZERO
-var _haptic_warning_timer: float = 0.0
-
-var state_timer: float = 0.0
-var grace_timer: float = 0.0
-var attack_timer: float = 0.0
-
-var initial_player_pos: Vector3 = Vector3.ZERO
-var current_offset: Vector3 = Vector3.ZERO
-
-## Ile rund szeptów zostało w bieżącej serii
-var _rounds_remaining: int = 0
-
-# Debug mesh (kula do wizualizacji pozycji)
-var _debug_mesh: MeshInstance3D
-
-func _ready():
-	# Tworzenie kuli debugowej
-	_debug_mesh = MeshInstance3D.new()
-	var sphere = SphereMesh.new()
-	sphere.radius = 0.3
-	sphere.height = 0.6
-	_debug_mesh.mesh = sphere
-	var mat = StandardMaterial3D.new()
-	mat.albedo_color = Color(1.0, 0.0, 0.5, 0.7)
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.emission_enabled = true
-	mat.emission = Color(1.0, 0.0, 0.5)
-	mat.emission_energy_multiplier = 2.0
-	_debug_mesh.material_override = mat
-	_debug_mesh.visible = false
-	add_child(_debug_mesh)
-
-	_find_player()
-	_start_new_series()
-
-	if EventBus:
-		EventBus.milestone_reached.connect(_on_milestone_reached)
-
-func _find_player():
-	var player_head = get_tree().get_first_node_in_group("player_head")
-	var player_root = get_tree().get_first_node_in_group("player")
-	if player_root:
-		player = player_root
-		camera = player_head if player_head is XRCamera3D else player_root.get_node_or_null("XROrigin3D/XRCamera3D")
-		var origin = player_root.get_node_or_null("XROrigin3D")
-		if origin:
-			left_hand = origin.get_node_or_null("left_hand")
-			right_hand = origin.get_node_or_null("right_hand")
-			if left_hand:
-				_last_left_pos = left_hand.global_position
-			if right_hand:
-				_last_right_pos = right_hand.global_position
-
-func _on_milestone_reached(milestone: int):
-	# Eskalacja trudności Marionetki wraz z czasem przetrwania
-	attack_duration_limit = max(3.0, 5.5 - float(milestone) / 60.0 * 1.5)
-	if milestone >= 30:
-		min_whisper_rounds = 2
-		max_whisper_rounds = 4
-	if milestone >= 60:
-		min_whisper_rounds = 3
-		max_whisper_rounds = 5
-	print("Marionette eskalacja! Czas reakcji: ", attack_duration_limit, "s, serie: ", min_whisper_rounds, "-", max_whisper_rounds)
-
-func _process(delta: float):
-	if camera == null:
-		_find_player()
-		if camera == null:
-			return
-
-	match current_state:
-		State.HIDDEN:
-			state_timer -= delta
-			if state_timer <= 0.0:
-				_enter_whispering()
-		
-		State.WHISPERING:
-			attack_timer += delta
-			
-			# Mechanika Whisper Freeze: ruch nogami gracza prowokuje natychmiastowy atak Marionetki!
-			var moving_feet := false
-			if player:
-				var pb = player.get_node_or_null("XROrigin3D/PlayerBody")
-				if pb:
-					if "ground_control_velocity" in pb:
-						var gcv = pb.ground_control_velocity
-						if (gcv is Vector2 or gcv is Vector3) and gcv.length() > 0.25:
-							moving_feet = true
-					elif "velocity" in pb and pb.velocity is Vector3 and pb.velocity.length() > 0.35:
-						moving_feet = true
-						
-			if moving_feet:
-				# Gracz nie zastyga w bezruchu: zegar ataku leci 3.5x szybciej!
-				attack_timer += delta * 3.5
-				if left_hand: left_hand.trigger_haptic_pulse("haptic", 120.0, 0.75, 0.05, 0.0)
-				if right_hand: right_hand.trigger_haptic_pulse("haptic", 120.0, 0.75, 0.05, 0.0)
-
-			if attack_timer > attack_duration_limit:
-				_trigger_jumpscare("Czas na reakcję (%.1fs) minął!" % attack_duration_limit)
-				return
-				
-			# Przyczepienie do gracza: ciągłe podążanie za głową gracza z wylosowanym kątem
-			# Efekt crescendo: dystans z czasem maleje o max 50% potęgując wrażenie zbliżania szeptu do ucha
-			var crescendo_mult = 1.0 - (attack_timer / attack_duration_limit) * 0.5
-			var target_pos = camera.global_position + (current_offset * crescendo_mult)
-			target_pos.x = clamp(target_pos.x, map_bounds_min.x, map_bounds_max.x)
-			target_pos.y = clamp(target_pos.y, map_bounds_min.y, map_bounds_max.y)
-			target_pos.z = clamp(target_pos.z, map_bounds_min.z, map_bounds_max.z)
-			global_position = target_pos
-			
-			# Haptyka bliskiego zagrożenia (AGENTS.md:28) - gdy szept jest krytycznie blisko ucha
-			var remaining_time = attack_duration_limit - attack_timer
-			if remaining_time <= 1.8:
-				_haptic_warning_timer -= delta
-				if _haptic_warning_timer <= 0.0:
-					_haptic_warning_timer = 0.15
-					var intensity = clamp(remap(remaining_time, 1.8, 0.0, 0.3, 1.0), 0.3, 1.0)
-					if left_hand:
-						left_hand.trigger_haptic_pulse("haptic", 100.0, intensity, 0.1, 0.0)
-					if right_hand:
-						right_hand.trigger_haptic_pulse("haptic", 100.0, intensity, 0.1, 0.0)
-			
-			# Sprawdzenie zamachu kontrolera (aktywne odpędzenie machnięciem w stronę szeptu)
-			_check_controller_defense(delta)
-
-func _check_controller_defense(delta: float):
-	if delta <= 0.0001 or camera == null:
-		return
-
-	var to_whisper = (global_position - camera.global_position).normalized()
-	
-	for ctrl in [left_hand, right_hand]:
-		if ctrl == null:
-			continue
-			
-		var cur_pos = ctrl.global_position
-		var last_pos = _last_left_pos if ctrl == left_hand else _last_right_pos
-		var vel = (cur_pos - last_pos) / delta
-		var speed = vel.length()
-		var dist = cur_pos.distance_to(global_position)
-		
-		if ctrl == left_hand:
-			_last_left_pos = cur_pos
-		else:
-			_last_right_pos = cur_pos
-			
-		# 1. Ręka musi być uniesiona powyżej pasa
-		var is_hand_raised = cur_pos.y > (camera.global_position.y - 0.45)
-		
-		# 2. Ręka musi być wysunięta w stronę szeptu
-		var hand_vector = cur_pos - camera.global_position
-		var is_hand_facing = hand_vector.normalized().dot(to_whisper) > 0.2
-		
-		if is_hand_raised and is_hand_facing:
-			var swing_dir = vel.normalized()
-			var is_swing_towards = swing_dir.dot(to_whisper) > 0.25
-			
-			# Odparcie szeptu: energiczny zamach w stronę szeptu LUB przybliżenie ręki blisko szeptu
-			if (speed >= swing_speed_threshold and is_swing_towards) or (dist < swing_proximity_distance and speed >= 0.7):
-				_whisper_survived(ctrl)
-				return
-
-## Gracz odpędził jeden szept machnięciem dłoni
-func _whisper_survived(controller: XRController3D = null):
-	_rounds_remaining -= 1
-	SceneLoader.marionettes_defended += 1
-	whisper_sound.stop()
-	if _debug_mesh:
-		_debug_mesh.visible = false
-		
-	# Haptyka potwierdzenia na kontrolerze, którym wykonano udany zamach
-	if controller:
-		controller.trigger_haptic_pulse("haptic", 140.0, 1.0, 0.35, 0.0)
-		
-	# Dedykowany dźwięk sukcesu: satysfakcjonujący świst rozproszenia (whoosh2.mp3)
-	var success_player = AudioStreamPlayer.new()
-	success_player.stream = preload("res://assets/sounds/whoosh2.mp3")
-	success_player.volume_db = -2.0
-	add_child(success_player)
-	success_player.play()
-	success_player.finished.connect(success_player.queue_free)
-	
-	if _rounds_remaining > 0:
-		# Krótka przerwa, potem następny szept z INNEGO kierunku
-		current_state = State.HIDDEN
-		state_timer = randf_range(series_pause_min, series_pause_max)
-		print("Marionette: Odpędzono szept machnięciem! Zostało jeszcze ", _rounds_remaining, " rund.")
-	else:
-		# Seria zakończona — długa przerwa
-		_start_new_series()
-		print("Marionette: Seria szeptów zakończona sukcesem. Odpoczynek.")
-
-## Rozpoczyna nową serię z losową liczbą rund
-func _start_new_series():
-	current_state = State.HIDDEN
-	if whisper_sound:
-		whisper_sound.stop()
-	_rounds_remaining = randi_range(min_whisper_rounds, max_whisper_rounds)
-	state_timer = randf_range(long_pause_min, long_pause_max)
-
-func _enter_whispering():
-	current_state = State.WHISPERING
-	attack_timer = 0.0
-	grace_timer = grace_time
-	_haptic_warning_timer = 0.0
-	
-	if camera:
-		initial_player_pos = camera.global_position
-		
-		# Obliczenie losowego kąta wokół głowy gracza
-		var angle = randf_range(0, TAU)
-		var distance = randf_range(spawn_distance_min, spawn_distance_max)
-		current_offset = Vector3(cos(angle) * distance, randf_range(0.05, 0.35), sin(angle) * distance)
-		
-		var spawn_pos = initial_player_pos + current_offset
-		spawn_pos.x = clamp(spawn_pos.x, map_bounds_min.x, map_bounds_max.x)
-		spawn_pos.y = clamp(spawn_pos.y, map_bounds_min.y, map_bounds_max.y)
-		spawn_pos.z = clamp(spawn_pos.z, map_bounds_min.z, map_bounds_max.z)
-		
-		global_position = spawn_pos
-		
-	if left_hand:
-		_last_left_pos = left_hand.global_position
-	if right_hand:
-		_last_right_pos = right_hand.global_position
-		
-	if _debug_mesh:
-		_debug_mesh.visible = debug_visible
-	whisper_sound.play()
-
-func _trigger_jumpscare(reason: String):
-	if current_state == State.JUMPSCARE:
-		return
-	current_state = State.JUMPSCARE
-	print("Marionette Atak: ", reason)
-	
-	whisper_sound.stop()
-	
-	# Delegacja do wspólnego helpera (zatrzymanie timera, reparenting, haptyka, ekran Game Over)
-	await JumpscareHelper.execute(self, jumpscare_sound, [], "Marionette — " + reason)
 ````
 
 ## File: scripts/ballora.gd
@@ -4747,6 +4519,439 @@ func _trigger_jumpscare():
 		audio_player.stop()
 	
 	await JumpscareHelper.execute(self, jumpscare_sound, [mesh_instance, audio_player], "Balora — Złapanie w strefie krytycznej")
+````
+
+## File: scripts/marionette.gd
+````
+extends Node3D
+
+enum State { HIDDEN, WHISPERING, JUMPSCARE }
+var current_state: State = State.HIDDEN
+
+## Włącz widoczny mesh debugowy (kula), żeby widzieć gdzie Marionette się pojawia
+@export var debug_visible: bool = false
+
+## Granice spawnu Marionette (do konfiguracji w edytorze)
+@export var map_bounds_min: Vector3 = Vector3(-9.0, 0.0, -9.0)
+@export var map_bounds_max: Vector3 = Vector3(9.0, 3.0, 9.0)
+
+## Dystans spawnu od gracza
+@export var spawn_distance_min: float = 1.8
+@export var spawn_distance_max: float = 2.4
+
+## Prędkość zamachu kontrolera (m/s) wymagana do odpędzenia szeptu
+@export var swing_speed_threshold: float = 1.1
+
+## Dystans uderzenia dłonią w szept
+@export var swing_proximity_distance: float = 0.65
+
+## Maksymalny czas na reakcję przed Jumpscare'em (sekundy)
+@export var attack_duration_limit: float = 5.5
+
+## Czas łaski na zorientowanie się po pojawieniu szeptów (sekundy)
+@export var grace_time: float = 1.0
+
+## Minimalna / maksymalna liczba szeptów w jednej serii
+@export var min_whisper_rounds: int = 1
+@export var max_whisper_rounds: int = 3
+
+## Przerwa między szeptami w serii (sekundy)
+@export var series_pause_min: float = 1.0
+@export var series_pause_max: float = 2.5
+
+## Przerwa między seriami (sekundy)
+@export var long_pause_min: float = 8.0
+@export var long_pause_max: float = 18.0
+
+@onready var whisper_sound: AudioStreamPlayer3D = $WhisperSound
+@onready var jumpscare_sound: AudioStreamPlayer3D = $JumpscareSound
+
+var player: Node3D
+var camera: XRCamera3D
+var left_hand: XRController3D
+var right_hand: XRController3D
+
+var _last_left_pos: Vector3 = Vector3.ZERO
+var _last_right_pos: Vector3 = Vector3.ZERO
+var _haptic_warning_timer: float = 0.0
+
+var state_timer: float = 0.0
+var grace_timer: float = 0.0
+var attack_timer: float = 0.0
+
+var initial_player_pos: Vector3 = Vector3.ZERO
+var current_offset: Vector3 = Vector3.ZERO
+
+## Ile rund szeptów zostało w bieżącej serii
+var _rounds_remaining: int = 0
+
+# Debug mesh (kula do wizualizacji pozycji)
+var _debug_mesh: MeshInstance3D
+
+func _ready():
+	# Tworzenie kuli debugowej
+	_debug_mesh = MeshInstance3D.new()
+	var sphere = SphereMesh.new()
+	sphere.radius = 0.3
+	sphere.height = 0.6
+	_debug_mesh.mesh = sphere
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.0, 0.5, 0.7)
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.emission_enabled = true
+	mat.emission = Color(1.0, 0.0, 0.5)
+	mat.emission_energy_multiplier = 2.0
+	_debug_mesh.material_override = mat
+	_debug_mesh.visible = false
+	add_child(_debug_mesh)
+
+	_find_player()
+	_start_new_series()
+
+	if EventBus:
+		EventBus.milestone_reached.connect(_on_milestone_reached)
+
+func _find_player():
+	var player_head = get_tree().get_first_node_in_group("player_head")
+	var player_root = get_tree().get_first_node_in_group("player")
+	if player_root:
+		player = player_root
+		camera = player_head if player_head is XRCamera3D else player_root.get_node_or_null("XROrigin3D/XRCamera3D")
+		var origin = player_root.get_node_or_null("XROrigin3D")
+		if origin:
+			left_hand = origin.get_node_or_null("left_hand")
+			right_hand = origin.get_node_or_null("right_hand")
+			if left_hand:
+				_last_left_pos = left_hand.global_position
+			if right_hand:
+				_last_right_pos = right_hand.global_position
+
+func _on_milestone_reached(milestone: int):
+	# Eskalacja trudności Marionetki wraz z czasem przetrwania
+	attack_duration_limit = max(3.0, 5.5 - float(milestone) / 60.0 * 1.5)
+	if milestone >= 30:
+		min_whisper_rounds = 2
+		max_whisper_rounds = 4
+	if milestone >= 60:
+		min_whisper_rounds = 3
+		max_whisper_rounds = 5
+	print("Marionette eskalacja! Czas reakcji: ", attack_duration_limit, "s, serie: ", min_whisper_rounds, "-", max_whisper_rounds)
+
+func _process(delta: float):
+	if camera == null:
+		_find_player()
+		if camera == null:
+			return
+
+	match current_state:
+		State.HIDDEN:
+			state_timer -= delta
+			if state_timer <= 0.0:
+				_enter_whispering()
+		
+		State.WHISPERING:
+			attack_timer += delta
+
+			if attack_timer > attack_duration_limit:
+				_trigger_jumpscare("Czas na reakcję (%.1fs) minął!" % attack_duration_limit)
+				return
+				
+			# Przyczepienie do gracza: ciągłe podążanie za głową gracza z wylosowanym kątem
+			# Efekt crescendo: dystans z czasem maleje o max 50% potęgując wrażenie zbliżania szeptu do ucha
+			var crescendo_mult = 1.0 - (attack_timer / attack_duration_limit) * 0.5
+			var target_pos = camera.global_position + (current_offset * crescendo_mult)
+			target_pos.x = clamp(target_pos.x, map_bounds_min.x, map_bounds_max.x)
+			target_pos.y = clamp(target_pos.y, map_bounds_min.y, map_bounds_max.y)
+			target_pos.z = clamp(target_pos.z, map_bounds_min.z, map_bounds_max.z)
+			global_position = target_pos
+			
+			# Haptyka bliskiego zagrożenia (AGENTS.md:28) - gdy szept jest krytycznie blisko ucha
+			var remaining_time = attack_duration_limit - attack_timer
+			if remaining_time <= 1.8:
+				_haptic_warning_timer -= delta
+				if _haptic_warning_timer <= 0.0:
+					_haptic_warning_timer = 0.15
+					var intensity = clamp(remap(remaining_time, 1.8, 0.0, 0.3, 1.0), 0.3, 1.0)
+					if left_hand:
+						left_hand.trigger_haptic_pulse("haptic", 100.0, intensity, 0.1, 0.0)
+					if right_hand:
+						right_hand.trigger_haptic_pulse("haptic", 100.0, intensity, 0.1, 0.0)
+			
+			# Sprawdzenie zamachu kontrolera (aktywne odpędzenie machnięciem w stronę szeptu)
+			_check_controller_defense(delta)
+
+func _check_controller_defense(delta: float):
+	if delta <= 0.0001 or camera == null:
+		return
+
+	var to_whisper = (global_position - camera.global_position).normalized()
+	
+	for ctrl in [left_hand, right_hand]:
+		if ctrl == null:
+			continue
+			
+		var cur_pos = ctrl.global_position
+		var last_pos = _last_left_pos if ctrl == left_hand else _last_right_pos
+		var vel = (cur_pos - last_pos) / delta
+		var speed = vel.length()
+		var dist = cur_pos.distance_to(global_position)
+		
+		if ctrl == left_hand:
+			_last_left_pos = cur_pos
+		else:
+			_last_right_pos = cur_pos
+			
+		# 1. Ręka musi być uniesiona powyżej pasa
+		var is_hand_raised = cur_pos.y > (camera.global_position.y - 0.45)
+		
+		# 2. Ręka musi być wysunięta w stronę szeptu
+		var hand_vector = cur_pos - camera.global_position
+		var is_hand_facing = hand_vector.normalized().dot(to_whisper) > 0.2
+		
+		if is_hand_raised and is_hand_facing:
+			var swing_dir = vel.normalized()
+			var is_swing_towards = swing_dir.dot(to_whisper) > 0.25
+			
+			# Odparcie szeptu: energiczny zamach w stronę szeptu LUB przybliżenie ręki blisko szeptu
+			if (speed >= swing_speed_threshold and is_swing_towards) or (dist < swing_proximity_distance and speed >= 0.7):
+				_whisper_survived(ctrl)
+				return
+
+## Gracz odpędził jeden szept machnięciem dłoni
+func _whisper_survived(controller: XRController3D = null):
+	_rounds_remaining -= 1
+	SceneLoader.marionettes_defended += 1
+	whisper_sound.stop()
+	if _debug_mesh:
+		_debug_mesh.visible = false
+		
+	# Haptyka potwierdzenia na kontrolerze, którym wykonano udany zamach
+	if controller:
+		controller.trigger_haptic_pulse("haptic", 140.0, 1.0, 0.35, 0.0)
+		
+	# Dedykowany dźwięk sukcesu: satysfakcjonujący świst rozproszenia (whoosh2.mp3)
+	var success_player = AudioStreamPlayer.new()
+	success_player.stream = preload("res://assets/sounds/whoosh2.mp3")
+	success_player.volume_db = -2.0
+	add_child(success_player)
+	success_player.play()
+	success_player.finished.connect(success_player.queue_free)
+	
+	if _rounds_remaining > 0:
+		# Krótka przerwa, potem następny szept z INNEGO kierunku
+		current_state = State.HIDDEN
+		state_timer = randf_range(series_pause_min, series_pause_max)
+		print("Marionette: Odpędzono szept machnięciem! Zostało jeszcze ", _rounds_remaining, " rund.")
+	else:
+		# Seria zakończona — długa przerwa
+		_start_new_series()
+		print("Marionette: Seria szeptów zakończona sukcesem. Odpoczynek.")
+
+## Rozpoczyna nową serię z losową liczbą rund
+func _start_new_series():
+	current_state = State.HIDDEN
+	if whisper_sound:
+		whisper_sound.stop()
+	_rounds_remaining = randi_range(min_whisper_rounds, max_whisper_rounds)
+	state_timer = randf_range(long_pause_min, long_pause_max)
+
+func _enter_whispering():
+	current_state = State.WHISPERING
+	attack_timer = 0.0
+	grace_timer = grace_time
+	_haptic_warning_timer = 0.0
+	
+	if camera:
+		initial_player_pos = camera.global_position
+		
+		# Obliczenie losowego kąta wokół głowy gracza
+		var angle = randf_range(0, TAU)
+		var distance = randf_range(spawn_distance_min, spawn_distance_max)
+		current_offset = Vector3(cos(angle) * distance, randf_range(0.05, 0.35), sin(angle) * distance)
+		
+		var spawn_pos = initial_player_pos + current_offset
+		spawn_pos.x = clamp(spawn_pos.x, map_bounds_min.x, map_bounds_max.x)
+		spawn_pos.y = clamp(spawn_pos.y, map_bounds_min.y, map_bounds_max.y)
+		spawn_pos.z = clamp(spawn_pos.z, map_bounds_min.z, map_bounds_max.z)
+		
+		global_position = spawn_pos
+		
+	if left_hand:
+		_last_left_pos = left_hand.global_position
+	if right_hand:
+		_last_right_pos = right_hand.global_position
+		
+	if _debug_mesh:
+		_debug_mesh.visible = debug_visible
+	whisper_sound.play()
+
+func _trigger_jumpscare(reason: String):
+	if current_state == State.JUMPSCARE:
+		return
+	current_state = State.JUMPSCARE
+	print("Marionette Atak: ", reason)
+	
+	whisper_sound.stop()
+	
+	# Delegacja do wspólnego helpera (zatrzymanie timera, reparenting, haptyka, ekran Game Over)
+	await JumpscareHelper.execute(self, jumpscare_sound, [], "Marionette — " + reason)
+````
+
+## File: scenes/game_map.tscn
+````
+[gd_scene format=3 uid="uid://cjyxx2d4hafto"]
+
+[ext_resource type="Script" uid="uid://cbilw02reekmp" path="res://scripts/game_map.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://d3qvt0affmqvn" path="res://assets/textures/Wooden Floor Texture/wood2_COLOR.jpg" id="2_lp764"]
+[ext_resource type="Texture2D" uid="uid://ch8av1pfgrixv" path="res://assets/textures/Wooden Floor Texture/wood2_OCC.jpg" id="3_m2cng"]
+[ext_resource type="Texture2D" uid="uid://bkxkmyk7y0hl4" path="res://assets/textures/Wooden Floor Texture/wood2_NRM.jpg" id="4_oviui"]
+[ext_resource type="AudioStream" uid="uid://bv6a0kufxjmtr" path="res://assets/sounds/ambience.mp3" id="5_m2cng"]
+[ext_resource type="PackedScene" uid="uid://b4ml2o2jh5ooc" path="res://scenes/balora.tscn" id="6_oviui"]
+[ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="7_player"]
+[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="8_startxr"]
+[ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="9_fade"]
+[ext_resource type="PackedScene" uid="uid://b3t54b22cxxxx" path="res://scenes/marionette.tscn" id="10_marnin"]
+[ext_resource type="PackedScene" uid="uid://cxabcf23t8foo" path="res://scenes/foxy.tscn" id="11_foxy"]
+[ext_resource type="PackedScene" path="res://scenes/phantom_grasp.tscn" id="12_grasp"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="13_pause"]
+
+[sub_resource type="Environment" id="Environment_iau3x"]
+background_mode = 1
+background_color = Color(0.1, 0.1, 0.1, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.2, 0.2, 0.2, 1)
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_new"]
+geometry_parsed_geometry_type = 1
+agent_height = 2.75
+agent_radius = 0.75
+cell_size = 0.25
+cell_height = 0.25
+
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_test"]
+size = Vector3(40.593994, 1, 43.245117)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_test"]
+lightmap_size_hint = Vector2i(102, 102)
+size = Vector2(40, 43)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial_test"]
+disable_specular_occlusion = true
+albedo_texture = ExtResource("2_lp764")
+normal_enabled = true
+normal_scale = 14.51
+normal_texture = ExtResource("4_oviui")
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = ExtResource("3_m2cng")
+uv1_triplanar = true
+uv1_triplanar_sharpness = 1.6008334
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ns"]
+size = Vector3(40.58618, 4, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_ns"]
+size = Vector3(40, 4, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial_wall"]
+albedo_color = Color(0.15, 0.12, 0.1, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ew"]
+size = Vector3(0.5, 4, 43.78125)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_ew"]
+size = Vector3(0.5, 4, 44)
+
+[node name="GameMap" type="Node3D" unique_id=120756022]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=982597785]
+environment = SubResource("Environment_iau3x")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1915778391]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10, 0)
+light_energy = 2.0
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=990958998]
+navigation_mesh = SubResource("NavigationMesh_new")
+
+[node name="Floor" type="StaticBody3D" parent="NavigationRegion3D" unique_id=309467535]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Floor" unique_id=1961788420]
+shape = SubResource("BoxShape3D_test")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Floor" unique_id=1559076285]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("PlaneMesh_test")
+surface_material_override/0 = SubResource("StandardMaterial_test")
+
+[node name="WallNorth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=723940986]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 21.738867)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallNorth" unique_id=1396440935]
+shape = SubResource("BoxShape3D_wall_ns")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallNorth" unique_id=730965168]
+mesh = SubResource("BoxMesh_wall_ns")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="WallSouth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=118626652]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -21.617676)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallSouth" unique_id=913572083]
+shape = SubResource("BoxShape3D_wall_ns")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallSouth" unique_id=1717054843]
+mesh = SubResource("BoxMesh_wall_ns")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="WallEast" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1399451984]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.171703, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallEast" unique_id=727175830]
+shape = SubResource("BoxShape3D_wall_ew")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallEast" unique_id=350134398]
+mesh = SubResource("BoxMesh_wall_ew")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="WallWest" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1916824261]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.25622, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallWest" unique_id=584697121]
+shape = SubResource("BoxShape3D_wall_ew")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallWest" unique_id=1766290024]
+mesh = SubResource("BoxMesh_wall_ew")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=569793408]
+stream = ExtResource("5_m2cng")
+volume_db = -1.273
+autoplay = true
+
+[node name="Marionette" parent="." unique_id=958148592 instance=ExtResource("10_marnin")]
+
+[node name="StartXR" parent="." unique_id=1224595367 instance=ExtResource("8_startxr")]
+
+[node name="Player" parent="." unique_id=805658640 instance=ExtResource("7_player")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.8063904, -1.6275938)
+
+[node name="Fade" parent="." unique_id=1010360029 instance=ExtResource("9_fade")]
+
+[node name="Balora" parent="." unique_id=1656694762 instance=ExtResource("6_oviui")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4395071, 16.287754)
+
+[node name="Foxy" parent="." unique_id=123456789 instance=ExtResource("11_foxy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1.4, -18.799488)
+
+[node name="PhantomGrasp" parent="." unique_id=987654321 instance=ExtResource("12_grasp")]
+
+[node name="PauseMenu" parent="." instance=ExtResource("13_pause")]
+
+[editable path="Player"]
 ````
 
 ## File: scenes/main_menu_ui.tscn
@@ -5534,163 +5739,6 @@ script = ExtResource("2_hold_btn")
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscarePlusBtn" to="." method="_on_jumpscare_plus_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/BackFromSettingsButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/BackFromGuideButton" to="." method="_on_back_pressed"]
-````
-
-## File: scenes/game_map.tscn
-````
-[gd_scene format=3 uid="uid://cjyxx2d4hafto"]
-
-[ext_resource type="Script" uid="uid://cbilw02reekmp" path="res://scripts/game_map.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://d3qvt0affmqvn" path="res://assets/textures/Wooden Floor Texture/wood2_COLOR.jpg" id="2_lp764"]
-[ext_resource type="Texture2D" uid="uid://ch8av1pfgrixv" path="res://assets/textures/Wooden Floor Texture/wood2_OCC.jpg" id="3_m2cng"]
-[ext_resource type="Texture2D" uid="uid://bkxkmyk7y0hl4" path="res://assets/textures/Wooden Floor Texture/wood2_NRM.jpg" id="4_oviui"]
-[ext_resource type="AudioStream" uid="uid://bv6a0kufxjmtr" path="res://assets/sounds/ambience.mp3" id="5_m2cng"]
-[ext_resource type="PackedScene" uid="uid://b4ml2o2jh5ooc" path="res://scenes/balora.tscn" id="6_oviui"]
-[ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="7_player"]
-[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="8_startxr"]
-[ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="9_fade"]
-[ext_resource type="PackedScene" uid="uid://b3t54b22cxxxx" path="res://scenes/marionette.tscn" id="10_marnin"]
-[ext_resource type="PackedScene" uid="uid://cxabcf23t8foo" path="res://scenes/foxy.tscn" id="11_foxy"]
-[ext_resource type="PackedScene" path="res://scenes/phantom_grasp.tscn" id="12_grasp"]
-[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="13_pause"]
-
-[sub_resource type="Environment" id="Environment_iau3x"]
-background_mode = 1
-background_color = Color(0.1, 0.1, 0.1, 1)
-ambient_light_source = 2
-ambient_light_color = Color(0.2, 0.2, 0.2, 1)
-
-[sub_resource type="NavigationMesh" id="NavigationMesh_new"]
-geometry_parsed_geometry_type = 1
-agent_height = 2.75
-agent_radius = 0.75
-cell_size = 0.25
-cell_height = 0.25
-
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_test"]
-size = Vector3(40.593994, 1, 43.245117)
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_test"]
-lightmap_size_hint = Vector2i(102, 102)
-size = Vector2(40, 43)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial_test"]
-disable_specular_occlusion = true
-albedo_texture = ExtResource("2_lp764")
-normal_enabled = true
-normal_scale = 14.51
-normal_texture = ExtResource("4_oviui")
-ao_enabled = true
-ao_light_affect = 1.0
-ao_texture = ExtResource("3_m2cng")
-uv1_triplanar = true
-uv1_triplanar_sharpness = 1.6008334
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ns"]
-size = Vector3(40.58618, 4, 0.5)
-
-[sub_resource type="BoxMesh" id="BoxMesh_wall_ns"]
-size = Vector3(40, 4, 0.5)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial_wall"]
-albedo_color = Color(0.15, 0.12, 0.1, 1)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ew"]
-size = Vector3(0.5, 4, 43.78125)
-
-[sub_resource type="BoxMesh" id="BoxMesh_wall_ew"]
-size = Vector3(0.5, 4, 44)
-
-[node name="GameMap" type="Node3D" unique_id=120756022]
-script = ExtResource("1_script")
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=982597785]
-environment = SubResource("Environment_iau3x")
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1915778391]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10, 0)
-light_energy = 2.0
-
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=990958998]
-navigation_mesh = SubResource("NavigationMesh_new")
-
-[node name="Floor" type="StaticBody3D" parent="NavigationRegion3D" unique_id=309467535]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Floor" unique_id=1961788420]
-shape = SubResource("BoxShape3D_test")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Floor" unique_id=1559076285]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-mesh = SubResource("PlaneMesh_test")
-surface_material_override/0 = SubResource("StandardMaterial_test")
-
-[node name="WallNorth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=723940986]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 21.738867)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallNorth" unique_id=1396440935]
-shape = SubResource("BoxShape3D_wall_ns")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallNorth" unique_id=730965168]
-mesh = SubResource("BoxMesh_wall_ns")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="WallSouth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=118626652]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -21.617676)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallSouth" unique_id=913572083]
-shape = SubResource("BoxShape3D_wall_ns")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallSouth" unique_id=1717054843]
-mesh = SubResource("BoxMesh_wall_ns")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="WallEast" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1399451984]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.171703, 2, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallEast" unique_id=727175830]
-shape = SubResource("BoxShape3D_wall_ew")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallEast" unique_id=350134398]
-mesh = SubResource("BoxMesh_wall_ew")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="WallWest" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1916824261]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.25622, 2, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallWest" unique_id=584697121]
-shape = SubResource("BoxShape3D_wall_ew")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallWest" unique_id=1766290024]
-mesh = SubResource("BoxMesh_wall_ew")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=569793408]
-stream = ExtResource("5_m2cng")
-volume_db = -1.273
-autoplay = true
-
-[node name="Marionette" parent="." unique_id=958148592 instance=ExtResource("10_marnin")]
-
-[node name="StartXR" parent="." unique_id=1224595367 instance=ExtResource("8_startxr")]
-
-[node name="Player" parent="." unique_id=805658640 instance=ExtResource("7_player")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.8063904, -1.6275938)
-
-[node name="Fade" parent="." unique_id=1010360029 instance=ExtResource("9_fade")]
-
-[node name="Balora" parent="." unique_id=1656694762 instance=ExtResource("6_oviui")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4395071, 16.287754)
-
-[node name="Foxy" parent="." unique_id=123456789 instance=ExtResource("11_foxy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1.4, -18.799488)
-
-[node name="PhantomGrasp" parent="." unique_id=987654321 instance=ExtResource("12_grasp")]
-
-[node name="PauseMenu" parent="." instance=ExtResource("13_pause")]
-
-[editable path="Player"]
 ````
 
 ## File: scenes/main_menu.tscn

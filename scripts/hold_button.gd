@@ -5,7 +5,8 @@ class_name HoldButton
 ## Samo najechanie NIE ładuje opcji. Aby zatwierdzić, gracz musi PRZYTRZYMAĆ spust (trigger).
 ## Po aktywacji przycisk jest zablokowany do momentu, gdy gracz PUŚCI trigger.
 
-@export var charge_time_hold: float = 0.6
+@export var charge_time_hold: float = 0.65
+@export var allow_repeat_on_hold: bool = false
 
 var _is_hovered: bool = false
 var _is_input_holding: bool = false
@@ -59,16 +60,40 @@ func _apply_engraved_style() -> void:
 	add_theme_constant_override("shadow_offset_y", 3)
 	add_theme_constant_override("outline_size", 2)
 
+## Przesłaniamy _gui_input i bezwzględnie konsumujemy każde zdarzenie kliknięcia/dotyku,
+## aby natywny BaseButton z silnika C++ NIGDY nie wyemitował pressed samowolnie!
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			_is_input_holding = event.pressed
+		accept_event()
+		return
+		
+	if event is InputEventScreenTouch:
 		_is_input_holding = event.pressed
-		accept_event() # Blokuje standardową natychmiastową aktywację bazy Button!
+		accept_event()
+		return
+		
+	if event is InputEventScreenDrag:
+		accept_event()
+		return
+		
+	if event.is_action("ui_accept"):
+		_is_input_holding = event.is_pressed()
+		accept_event()
+		return
 
 func _input(event: InputEvent) -> void:
 	if not _is_hovered:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		_is_input_holding = event.pressed
+		get_viewport().set_input_as_handled()
+	elif event is InputEventScreenTouch:
+		_is_input_holding = event.pressed
+		get_viewport().set_input_as_handled()
+	elif event.is_action("ui_accept"):
+		_is_input_holding = event.is_pressed()
 		get_viewport().set_input_as_handled()
 
 func _process(delta: float) -> void:
@@ -93,11 +118,15 @@ func _process(delta: float) -> void:
 
 	var trigger_held := _is_input_holding or _is_trigger_down_on_controller()
 	
-	# Po aktywacji: czekamy aż gracz PUŚCI trigger zanim pozwolimy na kolejne ładowanie
+	# Po aktywacji: czekamy aż gracz PUŚCI trigger zanim pozwolimy na kolejne ładowanie (chyba że allow_repeat_on_hold)
 	if _wait_for_release:
 		if not trigger_held:
 			_wait_for_release = false
-		# Nie ładujemy — gracz wciąż trzyma trigger po poprzedniej aktywacji
+		elif allow_repeat_on_hold:
+			_charge += delta / max(0.05, charge_time_hold)
+			queue_redraw()
+			if _charge >= 1.0:
+				_trigger_activation()
 		return
 	
 	if trigger_held:

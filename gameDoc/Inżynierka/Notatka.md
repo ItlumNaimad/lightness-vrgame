@@ -337,23 +337,23 @@ Ręczne celowanie wskaźnikiem laserowym VR (`FunctionPointer`) w trójwymiarow�
   - Przypisano wszystkie źródła `AudioStreamPlayer3D` przeciwników (Balora, Marionette, Foxy, PhantomGrasp) do szyny `Enemies`, a ich jumpscare'y do `Jumpscare`.
   - Przypisano odtwarzacz obrotu w `player.tscn` do `Whoosh`, a odtwarzacze kroków w `movement_footstep.tscn` do `Footsteps`.
   - W `main_menu_ui.gd` i `main_menu_ui.tscn` dodano niezależne karty sterowania głośnością (0-100%) z odczytem lektorskim TTS.
-- [x] **Marionette powinna być trochę dalej od gracza bo bywa, że sam obrót gracza gdy ręce ma na dole pozbywa się jej. Gracz powinien wysunąć w jej stronę rękę:**
-  - Zwiększono dystans spawnu szeptu do 1.8m - 2.4m na wysokości głowy/uszu gracza (zamiast 0.8m).
+- [x] **Marionette (Dystans, Wymóg Ręki i Rezygnacja z Whisper Freeze):**
+  - Zwiększono dystans spawnu szeptu do 1.5m - 2.4m na wysokości głowy/uszu gracza (zamiast 0.8m).
   - W `marionette.gd` dodano wymóg uniesienia ręki (wysokość > 0.7m od stóp) oraz wysunięcia dłoni w kierunku szeptu (iloczyn skalarny `hand_to_whisper.dot(head_forward) > 0.15`), zapobiegając przypadkowemu odpędzaniu przy pasie.
-- [x] **Mechanika zatrzymania gracza (Whisper Freeze):**
-  - Gracz w trakcie trwania szeptu musi się zatrzymać. W `marionette.gd` dodano sprawdzanie prędkości horyzontalnej gracza: jeśli gracz stawia kroki/biegnie w trakcie szeptu (`move_speed > 0.25`), timer ataku przyspiesza 3.5-krotnie (`attack_timer += delta * 3.5`), drastycznie skracając czas na reakcję i wymuszając natychmiastowy bezruch.
-- [x] **PhantomGraspa nie da się pokonać - trzęsienie kontrolerami nie pokonuje phantomgraspa:**
+  - **Rezygnacja z Whisper Freeze u Marionetki:** Po testach VR wycofano przyspieszanie ataku szeptu podczas biegu gracza – gracz nie miał fizycznej możliwości natychmiastowego wyhamowania z biegu i natychmiast dostawał jumpscare ("broken"). Czas szeptu płynie stabilnie, dając szansę na reakcję.
+- [x] **PhantomGrasp (Wyszarpywanie oraz Spowolnienie i Blokada Sprintu):**
   - Usunięto niestabilne podwójne całkowanie przyspieszenia.
   - Wdrożono czytelne zliczanie nagłych zmian kierunku prędkości kontrolera (`shake_speed >= 1.2 m/s` z debouncem 0.22s).
-  - Zgodnie z ustaleniami zredukowano wymaganą liczbę szarpnięć do **dokładnie 2 energicznych potrząśnięć** (`required_shakes = 2`), dodając wyraźny impuls haptyczny przy każdym zaliczonym potrząśnięciu.
+  - Ustawiono **dokładnie 2 energiczne potrząśnięcia** (`required_shakes = 2`), dodając wyraźny impuls haptyczny przy każdym zaliczonym potrząśnięciu.
+  - **Spowolnienie i blokada sprintu podczas ataku:** W momencie złapania gracza (`_enter_grabbed()`) macki paraliżują ruch: `MovementSprint.enabled = false` (brak możliwości sprintowania) oraz `MovementDirect.max_speed = 1.0` (silne spowolnienie chodu pod ciężarem macek). Po wyrwaniu się z uścisku (`_break_free()`) lub jumpscare pełna mobilność gracza zostaje natychmiast przywrócona.
 - [x] **Ballora jest za cicha, nie słychać jej z daleka i trzeba podejść blisko niej:**
   - W `scenes/balora.tscn` zmieniono parametry dźwięku `BaloraTheme`: `max_distance = 65.0m`, `unit_size = 35.0m`, `volume_db = 7.5 dB`, a model tłumienia przestawiono na odwrotny/liniowy (`attenuation_model = 0`), dzięki czemu pozytywka jest słyszalna z dalekiego dystansu i pozwala na nawigację słuchową.
 - [x] **Kroki się glitchują i nakładają się na siebie. Być może jest to za długi dźwięk i to dlatego:**
   - W `addons/godot-xr-tools/functions/movement_footstep.gd` dodano zatrzymywanie poprzednio grających odtwarzaczy kroków przed wystartowaniem nowego stąpnięcia. Zapobiega to nakładaniu się wielu 12-sekundowych próbek `woodwalking.wav`.
   - Wymiana plików audio na krótkie próbki (chód vs bieg) zostanie wykonana przez użytkownika w kolejnym kroku.
-- [x] **Przyciski w MENU są zbyt małe. Powinny być trochę większe by łatwiej było nawigować. Aktywacja tylko po przytrzymaniu:**
+- [x] **Przyciski w MENU — Powiększenie oraz Całkowita Blokada Kliknięć (Wyłącznie Hold):**
   - Zwiększono rozmiary przycisków w menu głównym (StartButton: 650x88px font 40; Settings/Guide/Exit: 600x80px font 34; PanelContainer: 1120x720px).
-  - Zmodyfikowano `scripts/hold_button.gd`: wyłączono natychmiastowe kliknięcie (`accept_event()`), przycisk aktywuje się **wyłącznie po przytrzymaniu triggera na przycisku** do pełnego naładowania paska (Hold/Dwell 0.6s).
+  - **Rozwiązanie problemu natychmiastowej reakcji na trigger:** `Viewport2DIn3D` wysyłał zdarzenia `InputEventScreenTouch`, które omijały warunek `if event is InputEventMouseButton` i trafiały do natywnego `BaseButton` w silniku C++, generując kliknięcie. W `scripts/hold_button.gd` dodano pełne przechwytywanie i konsumowanie `InputEventScreenTouch`, `InputEventScreenDrag` oraz `ui_accept` przez `accept_event()`. Przycisk aktywuje się **wyłącznie po przytrzymaniu triggera przez 0.65s** i naładowaniu neonowego paska do 100%.
   - **Przycisk Menu Pauzy:** Pauza domyślnie wywoływana jest przyciskiem systemowym `menu_button` (na lewym kontrolerze Meta Quest / Pico - mały płaski przycisk z menu). W `scripts/pause_menu.gd` dodano obsługę alternatyw: przycisk `by_button` (górny przycisk Y na lewym kontrolerze lub B na prawym) oraz klawisze `Escape` i `P` na klawiaturze.
 
 ## SUGESTIE DO DŹWIĘKÓW NA PÓŹNIEJ:
