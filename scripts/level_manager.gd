@@ -12,98 +12,87 @@ const SETTINGS_PATH := "user://settings.json"
 var selected_night: int = 1
 var unlocked_night: int = 1 # Noc 0 i 1 są zawsze dostępne na start
 
-var nights: Dictionary = {
-	0: {
-		"title": "Night 0: Test Room",
-		"desc": "Safe exploration training. No enemies. Practice walking, wall collisions and sound direction.",
-		"duration": 60.0,
-		"has_balora": false,
-		"balora_speed": 0.0,
-		"balora_boost_time": 0.0,
-		"has_marionette": false,
-		"has_foxy": false,
-		"foxy_count": 0,
-		"foxy_threshold": 999.0,
-		"has_phantom_grasp": false
-	},
-	1: {
-		"title": "Night 1: First Contact",
-		"desc": "Survive 30 seconds. Slow Balora patrols the maze, speeding up in the final seconds.",
-		"duration": 30.0,
-		"has_balora": true,
-		"balora_speed": 1.2,
-		"balora_boost_time": 6.0, # Przyspieszenie w ostatnich 6 sekundach
-		"has_marionette": false,
-		"has_foxy": false,
-		"foxy_count": 0,
-		"foxy_threshold": 999.0,
-		"has_phantom_grasp": false
-	},
-	2: {
-		"title": "Night 2: Whispering Shadows",
-		"desc": "Survive 60 seconds. Balora accelerates every 10s. Marionette whispers from the dark.",
-		"duration": 60.0,
-		"has_balora": true,
-		"balora_speed": 1.5,
-		"balora_boost_time": 0.0,
-		"has_marionette": true,
-		"has_foxy": false,
-		"foxy_count": 0,
-		"foxy_threshold": 999.0,
-		"has_phantom_grasp": false
-	},
-	3: {
-		"title": "Night 3: Silence and Charge",
-		"desc": "Survive 90 seconds. Foxy joins the hunt, reacting to accumulated movement noise.",
-		"duration": 90.0,
-		"has_balora": true,
-		"balora_speed": 1.6,
-		"balora_boost_time": 0.0,
-		"has_marionette": true,
-		"has_foxy": true,
-		"foxy_count": 1,
-		"foxy_threshold": 24.0, # Bardzo cierpliwy na hałas
-		"has_phantom_grasp": false
-	},
-	4: {
-		"title": "Night 4: The Deep Dark",
-		"desc": "Survive 120 seconds. Aggressive Foxy, frequent Marionette whispers, and Phantom Grasp tentacles.",
-		"duration": 120.0,
-		"has_balora": true,
-		"balora_speed": 1.8,
-		"balora_boost_time": 0.0,
-		"has_marionette": true,
-		"has_foxy": true,
-		"foxy_count": 1,
-		"foxy_threshold": 14.0, # Aktywny łowca
-		"has_phantom_grasp": true
-	},
-	5: {
-		"title": "Night 5: Nightmare Finale",
-		"desc": "Survive 150 seconds. Full speed Balora, TWO independent Foxies, Marionette and Phantom Grasp.",
-		"duration": 150.0,
-		"has_balora": true,
-		"balora_speed": 2.2,
-		"balora_boost_time": 0.0,
-		"has_marionette": true,
-		"has_foxy": true,
-		"foxy_count": 2, # Dwóch łowców!
-		"foxy_threshold": 12.0,
-		"has_phantom_grasp": true
-	}
+const MAX_NIGHT := 6
+
+const NIGHT_RESOURCE_PATHS := {
+	0: "res://resources/nights/night_0.tres",
+	1: "res://resources/nights/night_1.tres",
+	2: "res://resources/nights/night_2.tres",
+	3: "res://resources/nights/night_3.tres",
+	4: "res://resources/nights/night_4.tres",
+	5: "res://resources/nights/night_5.tres",
+	6: "res://resources/nights/night_6_endless.tres"
 }
 
+var night_data_cache: Dictionary = {}
+
 func _ready() -> void:
+	_load_night_resources()
 	load_game()
 	load_and_apply_settings()
 
+func _load_night_resources() -> void:
+	for idx in NIGHT_RESOURCE_PATHS.keys():
+		var path = NIGHT_RESOURCE_PATHS[idx]
+		if ResourceLoader.exists(path):
+			var res = load(path)
+			if res is NightData:
+				night_data_cache[idx] = res
+			else:
+				push_warning("[LevelManager] Resource at %s is not NightData" % path)
+		else:
+			push_warning("[LevelManager] Missing NightData resource: %s" % path)
+
+func get_current_night_data() -> NightData:
+	if night_data_cache.has(selected_night):
+		return night_data_cache[selected_night]
+	if night_data_cache.has(1):
+		return night_data_cache[1]
+	return null
+
+func get_night_data(idx: int) -> NightData:
+	return night_data_cache.get(idx, null)
+
+func get_night_title(idx: int) -> String:
+	var data = get_night_data(idx)
+	if data:
+		return data.title
+	return "Night %d" % idx
+
+## Zgodność wsteczna ze słownikiem konfiguracji
 func get_current_night_config() -> Dictionary:
-	if nights.has(selected_night):
-		return nights[selected_night]
-	return nights[1]
+	var data = get_current_night_data()
+	if not data:
+		return {
+			"title": "Night 1",
+			"desc": "Survive.",
+			"duration": 30.0,
+			"has_balora": true,
+			"balora_speed": 1.2,
+			"balora_boost_time": 0.0,
+			"has_marionette": false,
+			"has_foxy": false,
+			"foxy_count": 0,
+			"foxy_threshold": 999.0,
+			"has_phantom_grasp": false
+		}
+	return {
+		"title": data.title,
+		"desc": data.description,
+		"duration": data.duration,
+		"is_endless": data.is_endless,
+		"has_balora": data.has_balora,
+		"balora_speed": data.balora_base_speed,
+		"balora_boost_time": 0.0,
+		"has_marionette": data.has_marionette,
+		"has_foxy": data.has_foxy,
+		"foxy_count": data.foxy_count,
+		"foxy_threshold": data.foxy_initial_threshold,
+		"has_phantom_grasp": data.has_phantom_grasp
+	}
 
 func select_night(night_idx: int) -> bool:
-	if night_idx < 0 or night_idx > 5:
+	if night_idx < 0 or night_idx > MAX_NIGHT:
 		return false
 	if night_idx > unlocked_night and night_idx != 0:
 		return false # Zablokowana noc
@@ -112,13 +101,19 @@ func select_night(night_idx: int) -> bool:
 	save_game()
 	return true
 
-func unlock_next_night() -> void:
-	var next_night = selected_night + 1
-	if next_night <= 5 and next_night > unlocked_night:
-		unlocked_night = next_night
-		night_unlocked.emit(unlocked_night)
+## Po ukończeniu nocy odblokowujemy kolejną i automatycznie ustawiamy ją jako wybraną
+func unlock_next_night(completed_night: int = -1) -> void:
+	var target = selected_night if completed_night < 0 else completed_night
+	var next_night = target + 1
+	if next_night <= MAX_NIGHT:
+		if next_night > unlocked_night:
+			unlocked_night = next_night
+			night_unlocked.emit(unlocked_night)
+		# Automatyczna podmiana na nowo odblokowaną noc
+		selected_night = unlocked_night
+		night_selected.emit(selected_night)
 		save_game()
-		print("[LevelManager] Odblokowano Noc: ", unlocked_night)
+		print("[LevelManager] Odblokowano i automatycznie wybrano Noc: ", selected_night)
 
 func save_game() -> void:
 	var data := {
@@ -140,7 +135,7 @@ func load_game() -> void:
 		file.close()
 		var parsed = JSON.parse_string(json_text)
 		if parsed is Dictionary:
-			unlocked_night = clamp(int(parsed.get("unlocked_night", 1)), 1, 5)
+			unlocked_night = clamp(int(parsed.get("unlocked_night", 1)), 1, MAX_NIGHT)
 			selected_night = clamp(int(parsed.get("selected_night", 1)), 0, unlocked_night)
 
 # --- TRWAŁY ZAPIS I ODCZYT USTAWIEŃ ---

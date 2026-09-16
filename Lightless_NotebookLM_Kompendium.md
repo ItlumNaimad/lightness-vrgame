@@ -1084,6 +1084,43 @@ Ręczne celowanie wskaźnikiem laserowym VR (`FunctionPointer`) w trójwymiarow�
 - [x] **HoldButton — Całkowite Wyzerowanie `button_mask = 0`:**
   - Aby zapobiec samowolnemu emitowaniu zdarzenia `pressed` przez silnik C++ przy krótkim kliknięciu triggera, wyzerowano maskę przycisków myszy `button_mask = 0` w `scripts/hold_button.gd`.
   - Sygnał `pressed` emitowany jest wyłącznie po przytrzymaniu triggera przez 0.65s i naładowaniu paska.
+
+### Ustalenia i Poprawki UX & Dostępności — 16.09.2026 (Sesja Popołudniowa)
+- [x] **Usunięcie Sound Beam (Echolokacji) z przycisku A:**
+  - Przycisk A na kontrolerze VR służy do zatwierdzania opcji w menu. Poprzednia eksperymentalna mechanika echolokacji na przycisku A (`Broken bell.ogg`) kolidowała z obsługą interfejsu i powodowała niepożądane dźwięki.
+  - Usunięto nasłuchiwanie `ax_button` w `player_audio_manager.gd` oraz metody `_trigger_echolocation()` i `_spawn_delayed_echo()`.
+- [x] **Blokada odczytu TTS menu pauzy podczas ruchu gracza na mapie:**
+  - W trakcie chodzenia gracza gałką analogową w `game_map.tscn`, `VRUINavigator` z ukrytego menu pauzy interpretował ruchy gałki i wyzwalał odczyty lektora ("Resume", "Restart", "Menu").
+  - Rozwiązanie wielopoziomowe:
+    1. W `vr_ui_navigator.gd` dodano flagę `enabled` oraz weryfikację widoczności nadrzędnego węzła 3D (`Viewport2Din3D.is_visible_in_tree()`) – w Godot węzły `Control` wewnątrz `SubViewport` raportują `is_visible_in_tree() == true`, nawet gdy nadrzędny obiekt 3D jest niewidoczny w świecie gry.
+    2. W `pause_menu_ui.gd` domyślnie dezaktywowano navigator (`_navigator.enabled = false`) i wystawiono metodę `set_active(bool)`.
+    3. W `pause_menu.gd` w `toggle_pause()` zintegrowano wywołanie `set_active(is_paused)`.
+- [x] **Wygodna nawigacja w Settings (Góra-Dół wybiera opcję, Lewo-Prawo reguluje głośność):**
+  - Etykiety wierszy głośności w `scenes/main_menu_ui.tscn` zastąpiono przyciskami wierszy: `MasterRowBtn`, `EnemiesRowBtn`, `FootstepsRowBtn`, `JumpscareRowBtn` ze stylowym neonowym podświetleniem focusu (`StyleBoxFlat_pill_hover`).
+  - Na przyciskach krokowych `MinusBtn` i `PlusBtn` ustawiono `focus_mode = FOCUS_NONE` (0), dzięki czemu gałka góra/dół przeskakuje wyłącznie pomiędzy wierszami (TTS Voice, Master, Enemies, Footsteps, Jumpscare, Back), a wskaźnik laserowy nadal może klikać w `−` i `+`.
+  - W `vr_ui_navigator.gd` zaimplementowano sygnał `horizontal_navigated(direction)`, a w `main_menu_ui.gd` podłączono go do zmiany głośności aktywnego suwaka o ±10% z natychmiastowym odczytem lektorskim nowej wartości i impulsem haptycznym.
+  - W `tts_manager.gd` dodano metodę `flush_pending_speech()`, zapobiegającą nadpisywaniu dynamicznych komunikatów wierszy przez surowy tekst przycisku.
+- [x] **Natychmiastowy start wybranej nocy (Select Night):**
+  - W `main_menu_ui.gd` po kliknięciu odblokowanej nocy w panelu `NightsPanel`, funkcja `_select_night_idx()` natychmiast zapowiada start przez TTS ("Starting Night X") i wywołuje `SceneLoader.load_scene("res://scenes/game_map.tscn")`, bez wymuszania ręcznego powrotu do menu głównego i klikania Start Game.
+
+### Percepcja Przestrzenna & Rytm Wrogów — 16.09.2026 (Sesja Wieczorna)
+- [x] **Kierunkowe i donośne stuknięcie w ścianę (`scripts/player_audio_manager.gd`):**
+  - Analiza wektorów normalnych z `player_body.get_slide_collision()` pod kątem kierunku głowy gracza (`XRCamera3D`).
+  - Rozróżnienie 4 stanów zderzenia:
+    1. **PRZÓD (FRONT):** Uderzenie czołowe, twardy dźwięk 3D z przodu (`pitch = 0.72`, `volume_db = 9.5`), wibracja obu kontrolerów.
+    2. **LEWY BOK (LEFT):** Dźwięk otarcia/stuknięcia z lewej słuchawki (`pitch = 0.88`), wibracja lewego kontrolera.
+    3. **PRAWY BOK (RIGHT):** Dźwięk z prawej słuchawki (`pitch = 0.88`), wibracja prawego kontrolera.
+    4. **RÓG (CORNER):** Wykrycie co najmniej dwóch ścian tworzących kąt narożny (35°-150°). Wyzwolenie **podwójnego tąpnięcia** ("puk-puk" z odstępem 80ms i przesunięciem przestrzennym) oraz podwójnego impulsu wstrząsowego na obu kontrolerach VR.
+  - Przeniesienie odgłosu uderzenia na szynę `Footsteps` z pozycjonowaniem przestrzennym `AudioStreamPlayer3D`.
+- [x] **Skokowy rytm kroków Foxy'ego co 2.5s (`scripts/foxy.gd`):**
+  - W stanie `State.LISTENING` zastąpiono ciągły, monotonny ślizg miarowym cyklem stąpnięć animatronika trwającym 2.5s (`step_interval = 2.5`).
+  - Przez pierwsze 0.65s cyklu Foxy wykonuje krok w kierunku gracza (`step_speed = 2.4`) i odtwarza `walk_sound.play(0.0)`.
+  - Przez pozostałe 1.85s Foxy stoi nieruchomo i nasłuchuje.
+  - Dzięki temu gracz bezbłędnie namierza położenie Foxy'ego na słuch po regularnych, wyrazistych uderzeniach stóp o podłoże.
+- [x] **Płynne tłumienie pozytywki Ballory z odległością (`scenes/balora.tscn`):**
+  - Poprawiono błędny parametr `unit_size = 35.0m` (który powodował, że na całej 30-metrowej mapie Balora grała z pełną głośnością +7.5 dB) na `unit_size = 2.8m`.
+  - Ustawiono `max_distance = 32.0m` oraz bazową głośność `volume_db = 2.5 dB`.
+  - Dźwięk pozytywki płynnie i wyraźnie cichnie w miarę oddalania się, umożliwiając natychmiastową intuicyjną ocenę dystansu.
 ````
 
 ## File: gameDoc/Inżynierka/README.md
@@ -1200,8 +1237,17 @@ Wdrożono kluczowe poprawki na podstawie testów VR z dnia 16.09.2026:
 - **Ballora (Donośność pozytywki):** Zwiększono zasięg do 65m, `unit_size` do 35.0 i `volume_db` do 7.5 dB z modelem liniowym, przywracając orientację słuchową z oddali.
 - **Kroki:** Wstrzymywanie poprzednich instancji przed nowym stąpnięciem, eliminując nakładanie się 12-sekundowych próbek.
 - **Interfejs VR (Hold Button & Pauza):** Zwiększono rozmiary przycisków w menu, skonsumowano zdarzenia `InputEventScreenTouch` z viewportu VR, wymuszając aktywację **wyłącznie po przytrzymaniu triggera przez 0.65s** (brak przypadkowych kliknięć). Dodano alternatywne mapowanie pauzy (`by_button` Y/B oraz Escape/P).
+- **Poprawki UX & Dostępności (Nawigacja i Dźwięk):**
+  - Wycięto sound beam (dzwonek echolokacji) z przycisku A, eliminując kolizje z zatwierdzaniem UI.
+  - Zablokowano odczytywanie menu pauzy przez TTS podczas poruszania się gracza joystickiem na mapie gry.
+  - Wdrożono dwuosiową nawigację w menu Ustawień: gałka góra/dół wybiera wiersz (podświetlany neonem), gałka lewo/prawo płynnie zmienia głośność o ±10% z odczytem TTS i haptyką.
+  - Wybór nocy w Select Night natychmiast rozpoczyna rozgrywkę bez zbędnych kroków.
+- **Percepcja Przestrzenna & Rytm Wrogów:**
+  - **Kierunkowe uderzenia w ściany:** Dźwięk 3D zlokalizowany po stronie zderzenia (lewa/prawa/przód/róg), podwyższona donośność (9.5 dB) i kierunkowa haptyka na kontrolerach L/R z podwójnym tąpnięciem w narożnikach.
+  - **Rytm kroków Foxy'ego:** Poruszanie się skokowe w cyklu 2.5s (0.65s krok naprzód z dźwiękiem stąpnięcia, 1.85s bezruch i nasłuch), co ułatwia precyzyjne lokalizowanie łowcy na słuch.
+  - **Tłumienie pozytywki Ballory:** Korekta parametru `unit_size = 2.8m` i `max_distance = 32.0m` — dźwięk płynnie i wyraźnie cichnie z odległością.
 
-*Ostatnia aktualizacja:* v0.5.2 (16.09.2026) — Wdrożenie szyn audio, spowolnienie i blokada sprintu Phantom Grasp, naprawa wyszarpywania, poprawa donośności Ballory, powiększenie i 100% ochrona przycisków VR przed luźnym kliknięciem (Hold Button).
+*Ostatnia aktualizacja:* v0.5.2 (16.09.2026) — Kierunkowe kolizje 3D ze ścianami, skokowy krok Foxy'ego co 2.5s, poprawa tłumienia Ballory, nawigacja joystickiem VR i bezpieczny Hold Button.
 ````
 
 ## File: scripts/ballora.gd.uid
@@ -1532,163 +1578,6 @@ uid://b0l72c2rig2ql
 uid://bin4f34eliqc8
 ````
 
-## File: scripts/vr_ui_navigator.gd
-````
-extends Node
-class_name VRUINavigator
-
-## VRUINavigator — Komponent uniwersalnej nawigacji joystickiem VR w menu.
-## Zapewnia pełną dostępność dla osób niewidomych:
-## - Wychylenie gałki góra/dół sekwencyjnie przenosi focus między przyciskami
-## - Automatyczny odczyt lektorski TTS zaznaczonej opcji
-## - Impuls haptyczny w kontrolerze przy każdej zmianie focusu
-## - Wciśnięcie przycisku A (ax_button) lub pociągnięcie spustu zatwierdza wybór
-
-@export var root_control: Control
-@export var debounce_time: float = 0.28
-
-var _cooldown: float = 0.0
-var _current_buttons: Array[Button] = []
-var _current_index: int = -1
-
-var _left_ctrl: XRController3D
-var _right_ctrl: XRController3D
-
-func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	if root_control == null and get_parent() is Control:
-		root_control = get_parent() as Control
-	_find_controllers()
-	refresh_buttons()
-
-func _find_controllers() -> void:
-	var player = get_tree().get_first_node_in_group("player")
-	if player:
-		var origin = player.get_node_or_null("XROrigin3D")
-		if origin:
-			_left_ctrl = origin.get_node_or_null("left_hand") as XRController3D
-			_right_ctrl = origin.get_node_or_null("right_hand") as XRController3D
-
-func refresh_buttons() -> void:
-	_current_buttons.clear()
-	if root_control:
-		_gather_buttons(root_control, _current_buttons)
-	
-	if not _current_buttons.is_empty():
-		# Szukamy aktualnie sfokusowanego przycisku
-		_current_index = -1
-		for i in range(_current_buttons.size()):
-			if _current_buttons[i].has_focus():
-				_current_index = i
-				break
-		if _current_index == -1:
-			_current_index = 0
-			# Nie wymuszamy natychmiastowego TTS przy starcie, aby nie zagłuszyć zapowiedzi ekranu
-			_current_buttons[0].grab_focus()
-
-func _gather_buttons(node: Node, out_list: Array[Button]) -> void:
-	if node is CanvasItem:
-		if not (node as CanvasItem).is_visible_in_tree():
-			return
-	elif node is Node3D:
-		if not (node as Node3D).is_visible_in_tree():
-			return
-
-	if node is Button and not node.disabled and (node as CanvasItem).is_visible_in_tree():
-		out_list.append(node)
-	for child in node.get_children():
-		_gather_buttons(child, out_list)
-
-func _process(delta: float) -> void:
-	if _cooldown > 0.0:
-		_cooldown -= delta
-		return
-
-	if _left_ctrl == null or _right_ctrl == null:
-		_find_controllers()
-
-	# Odczyt gałki z kontrolerów VR
-	var stick_y := 0.0
-	var active_ctrl: XRController3D = null
-	
-	if _left_ctrl and _left_ctrl.get_is_active():
-		var v = _left_ctrl.get_vector2("primary")
-		if abs(v.y) > 0.45:
-			stick_y = v.y
-			active_ctrl = _left_ctrl
-			
-	if active_ctrl == null and _right_ctrl and _right_ctrl.get_is_active():
-		var v = _right_ctrl.get_vector2("primary")
-		if abs(v.y) > 0.45:
-			stick_y = v.y
-			active_ctrl = _right_ctrl
-
-	# Fallback dla klawiatury PC podczas testów
-	if stick_y == 0.0:
-		if Input.is_action_just_pressed("ui_down") or Input.is_key_pressed(KEY_DOWN) or Input.is_key_pressed(KEY_S):
-			stick_y = -1.0
-		elif Input.is_action_just_pressed("ui_up") or Input.is_key_pressed(KEY_UP) or Input.is_key_pressed(KEY_W):
-			stick_y = 1.0
-
-	# Nawigacja góra / dół
-	if stick_y != 0.0 and not _current_buttons.is_empty():
-		_cooldown = debounce_time
-		
-		# W OpenXR / Godot: zazwyczaj wychylenie gałki w dół ma wartość ujemną (lub dodatnią zależnie od mapowania)
-		if stick_y < 0.0:
-			# Następny przycisk w dół
-			_current_index = (_current_index + 1) % _current_buttons.size()
-		else:
-			# Poprzedni przycisk w górę
-			_current_index = (_current_index - 1 + _current_buttons.size()) % _current_buttons.size()
-			
-		_apply_focus_to_current(active_ctrl)
-		return
-
-	# Zatwierdzenie przyciskiem A (ax_button) na kontrolerze VR
-	var confirm_pressed := false
-	if _left_ctrl and (_left_ctrl.is_button_pressed("ax_button") or _left_ctrl.is_button_pressed("trigger_click")):
-		confirm_pressed = true
-		active_ctrl = _left_ctrl
-	elif _right_ctrl and (_right_ctrl.is_button_pressed("ax_button") or _right_ctrl.is_button_pressed("trigger_click")):
-		confirm_pressed = true
-		active_ctrl = _right_ctrl
-
-	if confirm_pressed and not _current_buttons.is_empty() and _current_index >= 0 and _current_index < _current_buttons.size():
-		_cooldown = 0.45 # Debounce zatwierdzenia
-		var target_btn = _current_buttons[_current_index]
-		if is_instance_valid(target_btn):
-			if active_ctrl:
-				active_ctrl.trigger_haptic_pulse("haptic", 160.0, 0.8, 0.12, 0.0)
-			if target_btn is HoldButton:
-				(target_btn as HoldButton)._trigger_activation()
-			else:
-				target_btn.pressed.emit()
-
-func _apply_focus_to_current(ctrl: XRController3D) -> void:
-	if _current_buttons.is_empty() or _current_index < 0 or _current_index >= _current_buttons.size():
-		return
-		
-	var target_btn = _current_buttons[_current_index]
-	if not is_instance_valid(target_btn):
-		refresh_buttons()
-		return
-		
-	target_btn.grab_focus()
-	
-	# Haptyka
-	if ctrl:
-		ctrl.trigger_haptic_pulse("haptic", 120.0, 0.5, 0.06, 0.0)
-		
-	# Odczyt lektora TTS
-	if TTSManager:
-		var txt = target_btn.text.strip_edges()
-		if txt.is_empty() and target_btn.tooltip_text:
-			txt = target_btn.tooltip_text
-		if not txt.is_empty():
-			TTSManager.speak(txt, true)
-````
-
 ## File: scripts/vr_ui_navigator.gd.uid
 ````
 uid://cioohvcyfqwpl
@@ -1883,6 +1772,53 @@ input_gamepad = true
 unshaded = true
 ````
 
+## File: scenes/phantom_grasp.tscn
+````
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://ck2hvdc2sbygk" path="res://scripts/phantom_grasp.gd" id="1_grasp"]
+[ext_resource type="AudioStream" uid="uid://dn1d2v8onqbl" path="res://assets/sounds/marionette/257784__xtrgamr__ominous-whispers.wav" id="2_crawl"]
+[ext_resource type="AudioStream" uid="uid://c7yasims5j5dg" path="res://assets/sounds/danger.wav" id="3_grab"]
+[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="4_jump"]
+
+[node name="PhantomGrasp" type="Node3D" groups=["enemy"]]
+script = ExtResource("1_grasp")
+
+[node name="CrawlSound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("2_crawl")
+volume_db = 2.0
+unit_size = 8.0
+max_distance = 15.0
+pitch_scale = 0.65
+bus = &"Enemies"
+
+[node name="GrabSound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("3_grab")
+volume_db = 8.0
+unit_size = 10.0
+max_distance = 20.0
+pitch_scale = 1.3
+bus = &"Enemies"
+
+[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("4_jump")
+volume_db = 10.0
+bus = &"Jumpscare"
+````
+
+## File: scripts/event_bus.gd
+````
+extends Node
+
+## Globalny emiter sygnałów powiązanych z hałasem gracza
+@warning_ignore("unused_signal")
+signal noise_emitted(global_pos: Vector3, noise_level: float)
+
+## Sygnał wywoływany co próg przetrwania (np. co 10s) dla eskalacji trudności
+@warning_ignore("unused_signal")
+signal milestone_reached(milestone: int)
+````
+
 ## File: scripts/pause_menu_ui.gd
 ````
 extends Control
@@ -1901,13 +1837,18 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_setup_accessibility()
 	_navigator = VRUINavigator.new()
+	_navigator.name = "VRUINavigator"
 	_navigator.root_control = self
+	_navigator.enabled = false
 	add_child(_navigator)
-	visibility_changed.connect(_on_visibility_changed)
+	visible = false
 
-func _on_visibility_changed() -> void:
-	if visible and _navigator:
-		_navigator.refresh_buttons()
+func set_active(active: bool) -> void:
+	visible = active
+	if _navigator:
+		_navigator.enabled = active
+		if active:
+			_navigator.refresh_buttons()
 
 func _setup_accessibility() -> void:
 	if TTSManager:
@@ -1958,7 +1899,12 @@ func _deferred_connect_ui() -> void:
 			var ui = sub_vp.get_child(0)
 			_connect_ui_signals(ui)
 
+var _ui_instance: Node = null
+
 func _connect_ui_signals(ui: Node) -> void:
+	_ui_instance = ui
+	if _ui_instance and _ui_instance.has_method("set_active"):
+		_ui_instance.set_active(false)
 	if ui.has_signal("resume_requested") and not ui.resume_requested.is_connected(toggle_pause):
 		ui.resume_requested.connect(toggle_pause)
 	if ui.has_signal("restart_requested") and not ui.restart_requested.is_connected(_on_restart):
@@ -2010,6 +1956,9 @@ func toggle_pause() -> void:
 	get_tree().paused = is_paused
 	visible = is_paused
 	
+	if _ui_instance and _ui_instance.has_method("set_active"):
+		_ui_instance.set_active(is_paused)
+	
 	if is_paused:
 		_position_in_front_of_player()
 		if TTSManager:
@@ -2041,53 +1990,6 @@ func _on_main_menu() -> void:
 	get_tree().paused = false
 	visible = false
 	SceneLoader.load_scene("res://scenes/main_menu.tscn")
-````
-
-## File: scenes/phantom_grasp.tscn
-````
-[gd_scene format=3]
-
-[ext_resource type="Script" uid="uid://ck2hvdc2sbygk" path="res://scripts/phantom_grasp.gd" id="1_grasp"]
-[ext_resource type="AudioStream" uid="uid://dn1d2v8onqbl" path="res://assets/sounds/marionette/257784__xtrgamr__ominous-whispers.wav" id="2_crawl"]
-[ext_resource type="AudioStream" uid="uid://c7yasims5j5dg" path="res://assets/sounds/danger.wav" id="3_grab"]
-[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="4_jump"]
-
-[node name="PhantomGrasp" type="Node3D" groups=["enemy"]]
-script = ExtResource("1_grasp")
-
-[node name="CrawlSound" type="AudioStreamPlayer3D" parent="."]
-stream = ExtResource("2_crawl")
-volume_db = 2.0
-unit_size = 8.0
-max_distance = 15.0
-pitch_scale = 0.65
-bus = &"Enemies"
-
-[node name="GrabSound" type="AudioStreamPlayer3D" parent="."]
-stream = ExtResource("3_grab")
-volume_db = 8.0
-unit_size = 10.0
-max_distance = 20.0
-pitch_scale = 1.3
-bus = &"Enemies"
-
-[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="."]
-stream = ExtResource("4_jump")
-volume_db = 10.0
-bus = &"Jumpscare"
-````
-
-## File: scripts/event_bus.gd
-````
-extends Node
-
-## Globalny emiter sygnałów powiązanych z hałasem gracza
-@warning_ignore("unused_signal")
-signal noise_emitted(global_pos: Vector3, noise_level: float)
-
-## Sygnał wywoływany co próg przetrwania (np. co 10s) dla eskalacji trudności
-@warning_ignore("unused_signal")
-signal milestone_reached(milestone: int)
 ````
 
 ## File: scripts/phantom_grasp.gd
@@ -2618,6 +2520,202 @@ func _start_major_glitch() -> void:
 	_char_shuffle_timer = 0.0
 ````
 
+## File: scripts/vr_ui_navigator.gd
+````
+extends Node
+class_name VRUINavigator
+
+## VRUINavigator — Komponent uniwersalnej nawigacji joystickiem VR w menu.
+## Zapewnia pełną dostępność dla osób niewidomych:
+## - Wychylenie gałki góra/dół sekwencyjnie przenosi focus między przyciskami
+## - Automatyczny odczyt lektorski TTS zaznaczonej opcji
+## - Impuls haptyczny w kontrolerze przy każdej zmianie focusu
+## - Wciśnięcie przycisku A (ax_button) lub pociągnięcie spustu zatwierdza wybór
+
+signal horizontal_navigated(direction: int)
+
+@export var root_control: Control
+@export var debounce_time: float = 0.28
+@export var enabled: bool = true
+
+var _cooldown: float = 0.0
+var _current_buttons: Array[Button] = []
+var _current_index: int = -1
+
+var _left_ctrl: XRController3D
+var _right_ctrl: XRController3D
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	if root_control == null and get_parent() is Control:
+		root_control = get_parent() as Control
+	_find_controllers()
+	refresh_buttons()
+
+func _find_controllers() -> void:
+	var player = get_tree().get_first_node_in_group("player")
+	if player:
+		var origin = player.get_node_or_null("XROrigin3D")
+		if origin:
+			_left_ctrl = origin.get_node_or_null("left_hand") as XRController3D
+			_right_ctrl = origin.get_node_or_null("right_hand") as XRController3D
+
+func refresh_buttons() -> void:
+	_current_buttons.clear()
+	if root_control:
+		_gather_buttons(root_control, _current_buttons)
+	
+	if not _current_buttons.is_empty():
+		# Szukamy aktualnie sfokusowanego przycisku
+		_current_index = -1
+		for i in range(_current_buttons.size()):
+			if _current_buttons[i].has_focus():
+				_current_index = i
+				break
+		if _current_index == -1:
+			_current_index = 0
+			# Nie wymuszamy natychmiastowego TTS przy starcie, aby nie zagłuszyć zapowiedzi ekranu
+			_current_buttons[0].grab_focus()
+
+func _gather_buttons(node: Node, out_list: Array[Button]) -> void:
+	if node is CanvasItem:
+		if not (node as CanvasItem).is_visible_in_tree():
+			return
+	elif node is Node3D:
+		if not (node as Node3D).is_visible_in_tree():
+			return
+
+	if node is Button and not node.disabled and node.focus_mode != Control.FOCUS_NONE and (node as CanvasItem).is_visible_in_tree():
+		out_list.append(node)
+	for child in node.get_children():
+		_gather_buttons(child, out_list)
+
+func _process(delta: float) -> void:
+	if not enabled:
+		return
+	if root_control == null or not is_instance_valid(root_control):
+		return
+	if not root_control.is_visible_in_tree():
+		return
+		
+	# Sprawdzamy czy nadrzędny węzeł 3D (np. Viewport2Din3D) nie jest ukryty w świecie gry
+	var vp = root_control.get_viewport()
+	if vp and vp.get_parent() is Node3D:
+		if not (vp.get_parent() as Node3D).is_visible_in_tree():
+			return
+
+	if _cooldown > 0.0:
+		_cooldown -= delta
+		return
+
+	if _left_ctrl == null or _right_ctrl == null:
+		_find_controllers()
+
+	# Odczyt gałki z kontrolerów VR
+	var stick_y := 0.0
+	var stick_x := 0.0
+	var active_ctrl: XRController3D = null
+	
+	if _left_ctrl and _left_ctrl.get_is_active():
+		var v = _left_ctrl.get_vector2("primary")
+		if abs(v.y) > 0.45:
+			stick_y = v.y
+			active_ctrl = _left_ctrl
+		if abs(v.x) > 0.45:
+			stick_x = v.x
+			active_ctrl = _left_ctrl
+			
+	if active_ctrl == null and _right_ctrl and _right_ctrl.get_is_active():
+		var v = _right_ctrl.get_vector2("primary")
+		if abs(v.y) > 0.45:
+			stick_y = v.y
+			active_ctrl = _right_ctrl
+		if abs(v.x) > 0.45:
+			stick_x = v.x
+			active_ctrl = _right_ctrl
+
+	# Fallback dla klawiatury PC podczas testów
+	if stick_y == 0.0:
+		if Input.is_action_just_pressed("ui_down") or Input.is_key_pressed(KEY_DOWN) or Input.is_key_pressed(KEY_S):
+			stick_y = -1.0
+		elif Input.is_action_just_pressed("ui_up") or Input.is_key_pressed(KEY_UP) or Input.is_key_pressed(KEY_W):
+			stick_y = 1.0
+
+	if stick_x == 0.0:
+		if Input.is_action_just_pressed("ui_left") or Input.is_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_A):
+			stick_x = -1.0
+		elif Input.is_action_just_pressed("ui_right") or Input.is_key_pressed(KEY_RIGHT) or Input.is_key_pressed(KEY_D):
+			stick_x = 1.0
+
+	# Nawigacja pozioma lewo / prawo (np. suwaki w settings)
+	if stick_x != 0.0:
+		_cooldown = debounce_time
+		var dir = -1 if stick_x < 0.0 else 1
+		if active_ctrl:
+			active_ctrl.trigger_haptic_pulse("haptic", 100.0, 0.4, 0.05, 0.0)
+		horizontal_navigated.emit(dir)
+		return
+
+	# Nawigacja góra / dół
+	if stick_y != 0.0 and not _current_buttons.is_empty():
+		_cooldown = debounce_time
+		
+		# W OpenXR / Godot: wychylenie gałki w dół ma wartość ujemną
+		if stick_y < 0.0:
+			_current_index = (_current_index + 1) % _current_buttons.size()
+		else:
+			_current_index = (_current_index - 1 + _current_buttons.size()) % _current_buttons.size()
+			
+		_apply_focus_to_current(active_ctrl)
+		return
+
+	# Zatwierdzenie przyciskiem A (ax_button) na kontrolerze VR
+	var confirm_pressed := false
+	if _left_ctrl and (_left_ctrl.is_button_pressed("ax_button") or _left_ctrl.is_button_pressed("trigger_click")):
+		confirm_pressed = true
+		active_ctrl = _left_ctrl
+	elif _right_ctrl and (_right_ctrl.is_button_pressed("ax_button") or _right_ctrl.is_button_pressed("trigger_click")):
+		confirm_pressed = true
+		active_ctrl = _right_ctrl
+
+	if confirm_pressed and not _current_buttons.is_empty() and _current_index >= 0 and _current_index < _current_buttons.size():
+		_cooldown = 0.45 # Debounce zatwierdzenia
+		var target_btn = _current_buttons[_current_index]
+		if is_instance_valid(target_btn):
+			if active_ctrl:
+				active_ctrl.trigger_haptic_pulse("haptic", 160.0, 0.8, 0.12, 0.0)
+			if target_btn is HoldButton:
+				(target_btn as HoldButton)._trigger_activation()
+			else:
+				target_btn.pressed.emit()
+
+func _apply_focus_to_current(ctrl: XRController3D) -> void:
+	if _current_buttons.is_empty() or _current_index < 0 or _current_index >= _current_buttons.size():
+		return
+		
+	var target_btn = _current_buttons[_current_index]
+	if not is_instance_valid(target_btn):
+		refresh_buttons()
+		return
+		
+	target_btn.grab_focus()
+	
+	# Haptyka
+	if ctrl:
+		ctrl.trigger_haptic_pulse("haptic", 120.0, 0.5, 0.06, 0.0)
+		
+	# Odczyt lektora TTS (z pierwszeństwem dla zarejestrowanych funkcji TTSManager.setup_button)
+	if TTSManager:
+		if TTSManager.has_method("flush_pending_speech") and not TTSManager._pending_speech_text.is_empty():
+			TTSManager.flush_pending_speech()
+		else:
+			var txt = target_btn.text.strip_edges()
+			if txt.is_empty() and target_btn.tooltip_text:
+				txt = target_btn.tooltip_text
+			if not txt.is_empty():
+				TTSManager.speak(txt, true)
+````
+
 ## File: scenes/game_over_ui.tscn
 ````
 [gd_scene load_steps=15 format=3 uid="uid://cg2xvyk5lm41o"]
@@ -3013,166 +3111,6 @@ func _on_exit_pressed():
 	get_tree().quit()
 ````
 
-## File: scripts/tts_manager.gd
-````
-extends Node
-
-## TTSManager — Globalny menedżer lektora (Text-to-Speech) i dostępności UI
-## Wykorzystuje natywne API DisplayServer w Godot 4.x z buforowaniem i odrzucaniem spamu (Dwell Debounce).
-
-var tts_enabled: bool = true
-var sound_compass_enabled: bool = true
-var whoosh_volume_db: float = 3.0
-var voice_rate: float = 1.0
-var voice_volume: int = 80
-var current_voice_id: String = ""
-
-var _last_spoken_text: String = ""
-var _last_spoken_time: float = 0.0
-var _currently_hovered_control: Control = null
-
-# Dwell Debounce — zapobiega zacinaniu wątku SAPI Windows przy szybkim przesuwaniu lasera
-var _pending_speech_text: String = ""
-var _pending_dwell_time: float = 0.0
-const DWELL_THRESHOLD: float = 0.08 # 80ms pauzy na przycisku zanim lektor zacznie mówić
-
-func _ready() -> void:
-	_init_voices()
-	call_deferred("_warmup_tts")
-
-func _process(delta: float) -> void:
-	if _pending_dwell_time > 0.0:
-		_pending_dwell_time -= delta
-		if _pending_dwell_time <= 0.0 and not _pending_speech_text.is_empty():
-			_execute_speak(_pending_speech_text)
-			_pending_speech_text = ""
-
-func _init_voices() -> void:
-	if DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH):
-		var voices = DisplayServer.tts_get_voices()
-		if voices.size() > 0:
-			current_voice_id = voices[0]["id"]
-			# Prefer English TTS voice (en, eng, english)
-			for v in voices:
-				var lang = v.get("language", "").to_lower()
-				var v_name = v.get("name", "").to_lower()
-				if "en" in lang or "eng" in lang or "english" in v_name:
-					current_voice_id = v["id"]
-					break
-
-func _warmup_tts() -> void:
-	if DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH) and not current_voice_id.is_empty():
-		DisplayServer.tts_speak(" ", current_voice_id, 0, 1.0, 1.0)
-		DisplayServer.tts_stop()
-
-## Wypowiada dany tekst natychmiast lub z opóźnieniem dwell
-func speak(text: String, interrupt: bool = true) -> void:
-	if not tts_enabled or text.is_empty():
-		return
-		
-	if not DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH):
-		return
-		
-	# Bezpośrednie wywołanie dla kliknięć / akcji
-	_pending_speech_text = ""
-	_pending_dwell_time = 0.0
-	_execute_speak(text, interrupt)
-
-func _execute_speak(text: String, interrupt: bool = true) -> void:
-	if not tts_enabled or text.is_empty():
-		return
-		
-	var now = Time.get_ticks_msec() / 1000.0
-	if text == _last_spoken_text and (now - _last_spoken_time) < 0.35:
-		return
-		
-	_last_spoken_text = text
-	_last_spoken_time = now
-	
-	if interrupt and DisplayServer.tts_is_speaking():
-		DisplayServer.tts_stop()
-		
-	if not current_voice_id.is_empty():
-		DisplayServer.tts_speak(text, current_voice_id, voice_volume, 1.0, voice_rate)
-	else:
-		var voices = DisplayServer.tts_get_voices()
-		if voices.size() > 0:
-			current_voice_id = voices[0]["id"]
-			DisplayServer.tts_speak(text, current_voice_id, voice_volume, 1.0, voice_rate)
-
-## Zatrzymuje aktualną mowę
-func stop() -> void:
-	_pending_speech_text = ""
-	_pending_dwell_time = 0.0
-	if DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH) and DisplayServer.tts_is_speaking():
-		DisplayServer.tts_stop()
-
-## Zapowiedź otwartego panelu
-func announce_panel(panel_text: String) -> void:
-	_currently_hovered_control = null
-	speak(panel_text, true)
-
-## Konfiguruje dostępność przycisku
-func setup_button(button: Button, text_or_callable = "") -> void:
-	if button == null:
-		return
-		
-	if not button.focus_entered.is_connected(_on_control_hovered.bind(button, text_or_callable)):
-		button.focus_entered.connect(_on_control_hovered.bind(button, text_or_callable))
-	if not button.mouse_entered.is_connected(_on_control_hovered.bind(button, text_or_callable)):
-		button.mouse_entered.connect(_on_control_hovered.bind(button, text_or_callable))
-	if not button.mouse_exited.is_connected(_on_control_unhovered.bind(button)):
-		button.mouse_exited.connect(_on_control_unhovered.bind(button))
-	if not button.focus_exited.is_connected(_on_control_unhovered.bind(button)):
-		button.focus_exited.connect(_on_control_unhovered.bind(button))
-	if not button.pressed.is_connected(_on_button_pressed):
-		button.pressed.connect(_on_button_pressed)
-
-func _on_control_hovered(control: Control, text_or_callable) -> void:
-	if _currently_hovered_control == control:
-		return
-	_currently_hovered_control = control
-	
-	var speech_text = ""
-	if text_or_callable is Callable:
-		speech_text = str(text_or_callable.call())
-	elif text_or_callable is String and not text_or_callable.is_empty():
-		speech_text = text_or_callable
-	elif control is Button:
-		speech_text = control.text
-		
-	speech_text = _clean_symbols(speech_text)
-	
-	# Kolejkujemy z dwell threshold, by nie blokować wątku SAPI przy przesuwaniu lasera
-	_pending_speech_text = speech_text
-	_pending_dwell_time = DWELL_THRESHOLD
-	_trigger_ui_haptic(35.0, 0.25, 0.04)
-
-func _on_control_unhovered(control: Control) -> void:
-	if _currently_hovered_control == control:
-		_currently_hovered_control = null
-		_pending_speech_text = ""
-		_pending_dwell_time = 0.0
-
-func _on_button_pressed() -> void:
-	_pending_speech_text = ""
-	_pending_dwell_time = 0.0
-	_trigger_ui_haptic(100.0, 0.8, 0.1)
-
-func _clean_symbols(text: String) -> String:
-	return text.replace("⟳", "").replace("⌂", "").replace("▶", "").replace("⚙", "").replace("✕", "").replace("🎮", "").replace("⮌", "").replace("•", "").replace("—", "-").strip_edges()
-
-func _trigger_ui_haptic(frequency: float, amplitude: float, duration: float) -> void:
-	var player_root = get_tree().get_first_node_in_group("player")
-	if player_root:
-		var left_hand = player_root.get_node_or_null("XROrigin3D/left_hand")
-		var right_hand = player_root.get_node_or_null("XROrigin3D/right_hand")
-		if left_hand and left_hand is XRController3D:
-			left_hand.trigger_haptic_pulse("haptic", frequency, amplitude, duration, 0.0)
-		if right_hand and right_hand is XRController3D:
-			right_hand.trigger_haptic_pulse("haptic", frequency, amplitude, duration, 0.0)
-````
-
 ## File: scripts/jumpscare_helper.gd
 ````
 ## Wspólne narzędzia dla przeciwników w Lightness VR
@@ -3347,6 +3285,175 @@ func _apply_fade_color(color: Color):
 	XRToolsFade.set_fade("scene_transition", color)
 ````
 
+## File: scripts/tts_manager.gd
+````
+extends Node
+
+## TTSManager — Globalny menedżer lektora (Text-to-Speech) i dostępności UI
+## Wykorzystuje natywne API DisplayServer w Godot 4.x z buforowaniem i odrzucaniem spamu (Dwell Debounce).
+
+var tts_enabled: bool = true
+var sound_compass_enabled: bool = true
+var whoosh_volume_db: float = 3.0
+var voice_rate: float = 1.0
+var voice_volume: int = 80
+var current_voice_id: String = ""
+
+var _last_spoken_text: String = ""
+var _last_spoken_time: float = 0.0
+var _currently_hovered_control: Control = null
+
+# Dwell Debounce — zapobiega zacinaniu wątku SAPI Windows przy szybkim przesuwaniu lasera
+var _pending_speech_text: String = ""
+var _pending_dwell_time: float = 0.0
+const DWELL_THRESHOLD: float = 0.08 # 80ms pauzy na przycisku zanim lektor zacznie mówić
+
+func _ready() -> void:
+	_init_voices()
+	call_deferred("_warmup_tts")
+
+func _process(delta: float) -> void:
+	if _pending_dwell_time > 0.0:
+		_pending_dwell_time -= delta
+		if _pending_dwell_time <= 0.0 and not _pending_speech_text.is_empty():
+			_execute_speak(_pending_speech_text)
+			_pending_speech_text = ""
+
+func _init_voices() -> void:
+	if DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH):
+		var voices = DisplayServer.tts_get_voices()
+		if voices.size() > 0:
+			current_voice_id = voices[0]["id"]
+			# Prefer English TTS voice (en, eng, english)
+			for v in voices:
+				var lang = v.get("language", "").to_lower()
+				var v_name = v.get("name", "").to_lower()
+				if "en" in lang or "eng" in lang or "english" in v_name:
+					current_voice_id = v["id"]
+					break
+
+func _warmup_tts() -> void:
+	if DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH) and not current_voice_id.is_empty():
+		DisplayServer.tts_speak(" ", current_voice_id, 0, 1.0, 1.0)
+		DisplayServer.tts_stop()
+
+## Wypowiada dany tekst natychmiast lub z opóźnieniem dwell
+func speak(text: String, interrupt: bool = true) -> void:
+	if not tts_enabled or text.is_empty():
+		return
+		
+	if not DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH):
+		return
+		
+	# Bezpośrednie wywołanie dla kliknięć / akcji
+	_pending_speech_text = ""
+	_pending_dwell_time = 0.0
+	_execute_speak(text, interrupt)
+
+func _execute_speak(text: String, interrupt: bool = true) -> void:
+	if not tts_enabled or text.is_empty():
+		return
+		
+	var now = Time.get_ticks_msec() / 1000.0
+	if text == _last_spoken_text and (now - _last_spoken_time) < 0.35:
+		return
+		
+	_last_spoken_text = text
+	_last_spoken_time = now
+	
+	if interrupt and DisplayServer.tts_is_speaking():
+		DisplayServer.tts_stop()
+		
+	if not current_voice_id.is_empty():
+		DisplayServer.tts_speak(text, current_voice_id, voice_volume, 1.0, voice_rate)
+	else:
+		var voices = DisplayServer.tts_get_voices()
+		if voices.size() > 0:
+			current_voice_id = voices[0]["id"]
+			DisplayServer.tts_speak(text, current_voice_id, voice_volume, 1.0, voice_rate)
+
+## Zatrzymuje aktualną mowę
+func stop() -> void:
+	_pending_speech_text = ""
+	_pending_dwell_time = 0.0
+	if DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH) and DisplayServer.tts_is_speaking():
+		DisplayServer.tts_stop()
+
+## Natychmiast wypowiada zakolejkowany tekst dwell debounce (np. przy nawigacji gałką)
+func flush_pending_speech() -> void:
+	if not _pending_speech_text.is_empty():
+		var text_to_speak = _pending_speech_text
+		_pending_speech_text = ""
+		_pending_dwell_time = 0.0
+		_execute_speak(text_to_speak, true)
+
+
+## Zapowiedź otwartego panelu
+func announce_panel(panel_text: String) -> void:
+	_currently_hovered_control = null
+	speak(panel_text, true)
+
+## Konfiguruje dostępność przycisku
+func setup_button(button: Button, text_or_callable = "") -> void:
+	if button == null:
+		return
+		
+	if not button.focus_entered.is_connected(_on_control_hovered.bind(button, text_or_callable)):
+		button.focus_entered.connect(_on_control_hovered.bind(button, text_or_callable))
+	if not button.mouse_entered.is_connected(_on_control_hovered.bind(button, text_or_callable)):
+		button.mouse_entered.connect(_on_control_hovered.bind(button, text_or_callable))
+	if not button.mouse_exited.is_connected(_on_control_unhovered.bind(button)):
+		button.mouse_exited.connect(_on_control_unhovered.bind(button))
+	if not button.focus_exited.is_connected(_on_control_unhovered.bind(button)):
+		button.focus_exited.connect(_on_control_unhovered.bind(button))
+	if not button.pressed.is_connected(_on_button_pressed):
+		button.pressed.connect(_on_button_pressed)
+
+func _on_control_hovered(control: Control, text_or_callable) -> void:
+	if _currently_hovered_control == control:
+		return
+	_currently_hovered_control = control
+	
+	var speech_text = ""
+	if text_or_callable is Callable:
+		speech_text = str(text_or_callable.call())
+	elif text_or_callable is String and not text_or_callable.is_empty():
+		speech_text = text_or_callable
+	elif control is Button:
+		speech_text = control.text
+		
+	speech_text = _clean_symbols(speech_text)
+	
+	# Kolejkujemy z dwell threshold, by nie blokować wątku SAPI przy przesuwaniu lasera
+	_pending_speech_text = speech_text
+	_pending_dwell_time = DWELL_THRESHOLD
+	_trigger_ui_haptic(35.0, 0.25, 0.04)
+
+func _on_control_unhovered(control: Control) -> void:
+	if _currently_hovered_control == control:
+		_currently_hovered_control = null
+		_pending_speech_text = ""
+		_pending_dwell_time = 0.0
+
+func _on_button_pressed() -> void:
+	_pending_speech_text = ""
+	_pending_dwell_time = 0.0
+	_trigger_ui_haptic(100.0, 0.8, 0.1)
+
+func _clean_symbols(text: String) -> String:
+	return text.replace("⟳", "").replace("⌂", "").replace("▶", "").replace("⚙", "").replace("✕", "").replace("🎮", "").replace("⮌", "").replace("•", "").replace("—", "-").strip_edges()
+
+func _trigger_ui_haptic(frequency: float, amplitude: float, duration: float) -> void:
+	var player_root = get_tree().get_first_node_in_group("player")
+	if player_root:
+		var left_hand = player_root.get_node_or_null("XROrigin3D/left_hand")
+		var right_hand = player_root.get_node_or_null("XROrigin3D/right_hand")
+		if left_hand and left_hand is XRController3D:
+			left_hand.trigger_haptic_pulse("haptic", frequency, amplitude, duration, 0.0)
+		if right_hand and right_hand is XRController3D:
+			right_hand.trigger_haptic_pulse("haptic", frequency, amplitude, duration, 0.0)
+````
+
 ## File: scripts/foxy.gd
 ````
 extends CharacterBody3D
@@ -3371,6 +3478,15 @@ enum State { IDLE, LISTENING, PREPARING_CHARGE, CHARGING, JUMPSCARE }
 ## Czas odpoczynku (odnowienia) po wykonaniu szarży
 @export var cooldown_time: float = 4.0
 
+## Czas cyklu stąpnięcia Foxy'ego (krok + pauza na nasłuch)
+@export var step_interval: float = 2.5
+
+## Czas trwania ruchu w ramach jednego kroku
+@export var step_move_duration: float = 0.65
+
+## Prędkość podczas stąpnięcia Foxy'ego
+@export var step_speed: float = 2.4
+
 @onready var jumpscare_sound: AudioStreamPlayer3D = $JumpscareSound
 @onready var run_sound: AudioStreamPlayer3D = $RunSound
 @onready var walk_sound: AudioStreamPlayer3D = $WalkSound
@@ -3383,8 +3499,10 @@ var current_noise: float = 0.0
 var target_position: Vector3 = Vector3.ZERO
 var state_timer: float = 4.0
 var is_jumpscaring: bool = false
+var _step_cycle_timer: float = 0.0
 
 var player_head: Node3D
+
 
 func _ready():
 	if jumpscare_trigger:
@@ -3422,6 +3540,7 @@ func _enter_preparing_charge():
 	current_state = State.PREPARING_CHARGE
 	state_timer = prepare_time
 	current_noise = 0.0
+	_step_cycle_timer = 0.0
 	if run_sound:
 		run_sound.stop()
 	if walk_sound:
@@ -3441,6 +3560,7 @@ func _enter_preparing_charge():
 func _enter_charging():
 	current_state = State.CHARGING
 	state_timer = charge_max_duration
+	_step_cycle_timer = 0.0
 	
 	if player_head == null:
 		_find_player()
@@ -3460,12 +3580,14 @@ func _enter_charging():
 func _enter_idle():
 	current_state = State.IDLE
 	state_timer = cooldown_time
+	_step_cycle_timer = 0.0
 	velocity = Vector3.ZERO
 	if run_sound:
 		run_sound.stop()
 	if walk_sound:
 		walk_sound.stop()
 	print("Foxy: Odpoczynek po szarży. Przestaje nasłuchiwać na ", cooldown_time, "s.")
+
 
 func _physics_process(delta: float):
 	if is_jumpscaring:
@@ -3491,30 +3613,47 @@ func _physics_process(delta: float):
 				var p_pos = player_head.global_position
 				var dir = (p_pos - global_position)
 				dir.y = 0
-				if dir.length() > 2.0:
+				var dist = dir.length()
+				
+				if dist > 2.0:
 					dir = dir.normalized()
-					velocity.x = dir.x * 1.5
-					velocity.z = dir.z * 1.5
+					_step_cycle_timer -= delta
 					
-					if walk_sound and not walk_sound.playing:
-						walk_sound.play()
+					# Nowy krok Foxy'ego co step_interval (2.5s)
+					if _step_cycle_timer <= 0.0:
+						_step_cycle_timer = step_interval
+						if walk_sound:
+							walk_sound.play(0.0)
 					
-					# Powolny obrót w stronę gracza
+					# Faza ruchu stąpnięcia (pierwsze 0.65s cyklu)
+					var time_in_step = step_interval - _step_cycle_timer
+					if time_in_step <= step_move_duration:
+						velocity.x = dir.x * step_speed
+						velocity.z = dir.z * step_speed
+					else:
+						# Faza bezruchu i nasłuchiwania (pozostałe ~1.85s cyklu)
+						velocity.x = 0.0
+						velocity.z = 0.0
+					
+					# Płynny obrót w stronę gracza
 					var look_pos = global_position + dir
 					if look_pos.distance_squared_to(global_position) > 0.01:
 						var current_transform = global_transform
 						var target_transform = current_transform.looking_at(look_pos, Vector3.UP)
-						global_transform = current_transform.interpolate_with(target_transform, 5.0 * delta)
+						global_transform = current_transform.interpolate_with(target_transform, 6.0 * delta)
 				else:
-					velocity.x = 0
-					velocity.z = 0
+					velocity.x = 0.0
+					velocity.z = 0.0
+					_step_cycle_timer = 0.0
 					if walk_sound:
 						walk_sound.stop()
 			else:
-				velocity.x = 0
-				velocity.z = 0
+				velocity.x = 0.0
+				velocity.z = 0.0
+				_step_cycle_timer = 0.0
 				if walk_sound:
 					walk_sound.stop()
+
 			
 		State.PREPARING_CHARGE:
 			state_timer -= delta
@@ -3547,7 +3686,9 @@ func _physics_process(delta: float):
 			velocity.z = 0
 			if state_timer <= 0:
 				current_state = State.LISTENING
+				_step_cycle_timer = 0.0
 				print("Foxy: Znów nasłuchuje.")
+
 				
 	move_and_slide()
 
@@ -3629,12 +3770,13 @@ mesh = SubResource("CapsuleMesh_yfgsf")
 
 [node name="BaloraTheme" type="AudioStreamPlayer3D" parent="." unique_id=1844263034]
 stream = ExtResource("2_yfgsf")
-volume_db = 7.5
-unit_size = 35.0
+volume_db = 2.5
+unit_size = 2.8
 autoplay = true
-max_distance = 65.0
+max_distance = 32.0
 attenuation_model = 0
 bus = &"Enemies"
+
 
 [node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=566194156]
 stream = ExtResource("3_24ggd")
@@ -3971,6 +4113,62 @@ func stop_timer_and_save():
 	SceneLoader.last_survival_time = time_survived
 ````
 
+## File: README.md
+````markdown
+# Lightless VR
+
+**Lightless** to autorski, inżynierski projekt gry w wirtualnej rzeczywistości (VR) utworzony w silniku Godot Engine. Gra jest survival horrorem zaprojektowanym w taki sposób, aby była w pełni dostępna dla osób niewidomych – bodźce wizualne dają minimalną (lub żadną) przewagę rozgrywki.
+
+## Najnowsze zmiany (Version Log)
+- **v0.5.3** - System Poziomów / Nocy (FNaF Style 0-5), Nawigacja Gałką VR w Menu, Trwały Zapis Ustawień i Ciemność z Oświetleniem Stóp:
+  - **System Nocy (Autoload `LevelManager`):** Wdrożenie nocy od Nocy 0 (Test Room / bezpieczny trening) do Nocy 5 (Koszmar: maksymalna prędkość Balory + dwóch niezależnych Foxy szarżujących z różnych kierunków + Marionette + Phantom Grasp). Dynamiczny czas nocy (30s - 150s), dzwon 6:00 AM, zapowiedź lektorska TTS i automatyczne odblokowanie kolejnej nocy.
+  - **Trwały zapis gry i ustawień (`user://save_data.json` i `user://settings.json`):** Postęp odblokowanych nocy oraz ustawienia suwaków głośności (`Master`, `Enemies`, `Footsteps`, `Jumpscare`) i status lektora TTS są trwale zapisywane i wczytywane przy każdym uruchomieniu gry, zapobiegając ich resetowaniu.
+  - **Nawigacja Joystickiem w Menu (`VRUINavigator`):** Zgodnie z wytycznymi dostępności dla graczy niewidomych, menu główne oraz menu pauzy obsługują pełną nawigację pionową gałką kontrolera z automatycznym odczytem lektorskim (TTS) i impulsami haptycznymi. Zatwierdzenie przyciskiem A (`ax_button`) lub pociągnięciem spustu.
+  - **Naturalny obrót ciała 360°:** Usunięcie sztucznego obracania joystickiem (`MovementTurn`) i szyny `Whoosh` na rzecz płynnego obracania się fizycznym ciałem w przestrzeni VR.
+  - **Ciemność otoczenia i FeetLight:** Wyłączenie globalnego światła na mapie na rzecz 100% mroku korytarzy z subtelnym światłem podłogowym (`FeetLight`, 1.6m pod stopami), dającym orientację pozycji ciała bez ujawniania układu labiryntu.
+  - **HoldButton (Blokada kliknięć bez naładowania):** Wyzerowanie `button_mask = 0`, co definitywnie eliminuje przedwczesne kliknięcia i wymaga pełnego przytrzymania triggera przez 0.65s.
+- **v0.5.2** - Kompleksowa realizacja zaleceń audytu technicznego i poprawek stabilności: Naprawa systemu Fade w `SceneLoader.gd` (usunięcie nieskutecznych guardów `ClassDB.class_exists`, podwójny `await process_frame` po zmianie sceny, reset `is_loading` przy błędzie). Prawidłowy tracking gracza z poziomu głowy VR (`XRCamera3D` w grupie `player_head`) dla efektu zniekształcenia dźwięku (Distortion) i namierzania Foxy'ego. Rozdzielenie próbek audio (`danger.wav`, `whoosh2.mp3`, `Broken bell.ogg`, `nice-sfx.mp3`). Akustyka i haptyka kolizji ze ścianami (`EventBus.noise_emitted`). Nowa maszyna stanów Balory (Patrol, Alert z przyspieszającą pozytywką, Pościg, Ucieczka na odległość) i dopasowany NavMesh. Aktywna obrona przed Marionetką poprzez zamach kontrolerem VR z haptyką bliskości ucha. Threat Director (pacing pojawiania się wrogów na osi czasu). Nowy przeciwnik **Phantom Grasp** (chwyt za kontroler, wibracje i mechanika wyszarpywania). System **Echolokacji** (puls dźwiękowo-haptyczny na przycisku A/X sondujący układ ścian kosztem hałasu). Dedykowane **Menu Pauzy VR** (`scenes/pause_menu.tscn`). Naprawa wyłącznika lektora TTS w ustawieniach oraz zabezpieczenia `is_inside_tree()`. Architektura przestrzenna Menu Głównego 3D z industrialnym klimatem Google Stitch i cyfrowym glitchem `RubikGlitch`.
+
+## O projekcie
+Głównym założeniem technologicznym było zbudowanie stabilnego szkieletu scen w VR z wykorzystaniem asynchronicznego menedżera `SceneLoader`, w którym każda scena jest w 100% samowystarczalna (zawiera własne instancje `Player`, `StartXR` i `Fade`). Zapobiega to błędom fizyki i kolizji przy przeładowaniach. Rozgrywka opiera się na dźwiękowej orientacji przestrzennej i odpowiednich interakcjach z przeciwnikami. Interfejs gry zaprojektowano z myślą o pełnej dostępności – obok wskaźnika laserowego VR oferuje kompletną nawigację gałką analogową kontrolera (joystickiem) z odczytem lektorskim (TTS) i haptyką, umożliwiając osobom niewidomym intuicyjną obsługę menu bez konieczności celowania w przestrzeni 3D.
+
+## Stack technologiczny
+- **Godot Engine 4.x** (wersja Godot 4.7 / 4.x, ustawienia Mobile Renderer dla płynności)
+- **OpenXR** (Główna biblioteka do połączenia z goglami VR)
+- **Godot XR Tools** - standardowe pakiety fizyki dłoni i bazowych obiektów, dostosowane na potrzeby projektu.
+
+## Uruchomienie i testowanie
+Projekt przeznaczony jest na gogle VR obsługujące OpenXR (np. Meta Quest podpięty przez Meta Quest Link / SteamVR).
+1. Sklonuj repozytorium.
+2. Otwórz w **Godot 4.x** (wersja z obsługą .NET nie jest wymagana, używamy GDScript).
+3. Projekt uruchamia się bezpośrednio od `scenes/main_menu.tscn` (wbudowany autostart OpenXR). Za przechodzenie między mapami odpowiada asynchroniczny autoload `SceneLoader.gd`.
+
+## Sounds:
+- Sound Effect by <a href="https://pixabay.com/users/freesounds123-49985424/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335600">free sound creator</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335600">Pixabay</a>
+- Sound Effect by <a href="https://pixabay.com/users/freesound_community-46691455/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=102254">freesound_community</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=102254">Pixabay</a>
+- Sound Effect by <a href="https://pixabay.com/users/freesounds123-49985424/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335599">free sound creator</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335599">Pixabay</a>
+- Sound Effect by <a href="https://pixabay.com/users/sound_effects75-54573118/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=485532">Sound_effects75</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=485532">Pixabay</a>
+
+shadow_v3a.aif by thanvannispen -- https://freesound.org/s/79713/ -- License: Attribution 4.0
+Whisper Evil Little Nothings to Me by SoundBiterSFX -- https://freesound.org/s/730965/ -- License: Creative Commons 0
+Whispers.wav by KrystalSounds7 -- https://freesound.org/s/466309/ -- License: Creative Commons 0
+whispers.wav by SophieMezaM -- https://freesound.org/s/446083/ -- License: Attribution 3.0
+Ominous whispers.wav by xtrgamr -- https://freesound.org/s/257784/ -- License: Attribution 4.0
+
+runing.wav - Pasos_Rapid.wav by anez -- https://freesound.org/s/403437/ -- License: Attribution 4.0
+foxy_runing.mp3 Demon Stomping Run.mp3 by Hoshenko -- https://freesound.org/s/697645/ -- License: Attribution 4.0
+
+footstep_slow2.wav by stradie -- https://freesound.org/s/255569/ -- License: Attribution 4.0
+
+WoodWalking.wav by szegvari -- https://freesound.org/s/514146/ -- License: Creative Commons 0
+Sound Effect by <a href="https://pixabay.com/users/freesound_community-46691455/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=101127">freesound_community</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=101127">Pixabay</a>
+
+foxy_walking.mp3 big metallic robot footsteps by gladkiy -- https://freesound.org/s/342235/ -- License: Creative Commons 0
+whoosh2 Whoosh away by jriches1 -- https://freesound.org/s/817959/ -- License: Creative Commons 0
+
+danger Cinematic Alarm Hit by Rizzard -- https://freesound.org/s/560157/ -- License: Creative Commons 0
+````
+
 ## File: scripts/main_menu_ui.gd
 ````
 extends Control
@@ -4002,21 +4200,25 @@ signal exit_pressed
 # Kontrolki ustawień
 @onready var tts_toggle_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/TTSCard/Margin/HBox/TTSToggleBtn
 
+@onready var master_row_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/MasterRowBtn
 @onready var master_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterMinusBtn
 @onready var master_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterPlusBtn
 @onready var master_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterValueLabel
 @onready var master_progress_bar: ProgressBar = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterProgressBar
 
+@onready var enemies_row_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/EnemiesRowBtn
 @onready var enemies_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesMinusBtn
 @onready var enemies_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesPlusBtn
 @onready var enemies_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesValueLabel
 @onready var enemies_progress_bar: ProgressBar = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesProgressBar
 
+@onready var footsteps_row_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/FootstepsRowBtn
 @onready var footsteps_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsMinusBtn
 @onready var footsteps_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsPlusBtn
 @onready var footsteps_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsValueLabel
 @onready var footsteps_progress_bar: ProgressBar = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsProgressBar
 
+@onready var jumpscare_row_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/JumpscareRowBtn
 @onready var jumpscare_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscareMinusBtn
 @onready var jumpscare_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscarePlusBtn
 @onready var jumpscare_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscareValueLabel
@@ -4042,7 +4244,9 @@ func _ready() -> void:
 	_vr_navigator = VRUINavigator.new()
 	_vr_navigator.name = "VRUINavigator"
 	_vr_navigator.root_control = self
+	_vr_navigator.horizontal_navigated.connect(_on_navigator_horizontal)
 	add_child(_vr_navigator)
+
 
 	_load_saved_settings()
 	_update_telemetry()
@@ -4200,21 +4404,27 @@ func _setup_accessibility() -> void:
 	TTSManager.setup_button(back_from_nights_btn, "Back to Main Menu")
 
 	# Settings controls with dynamic speech
+	TTSManager.setup_button(tts_toggle_btn, func(): return "TTS Voice: " + ("enabled" if (TTSManager and TTSManager.tts_enabled) else "disabled") + ". Press A or tilt stick left or right to toggle.")
+
+	TTSManager.setup_button(master_row_btn, func(): return "Master volume: %d percent. Tilt stick left or right to adjust." % _master_volume_percent)
 	TTSManager.setup_button(master_minus_btn, func(): return "Decrease master volume. Currently %d percent" % _master_volume_percent)
 	TTSManager.setup_button(master_plus_btn, func(): return "Increase master volume. Currently %d percent" % _master_volume_percent)
 	
+	TTSManager.setup_button(enemies_row_btn, func(): return "Enemy sounds volume: %d percent. Tilt stick left or right to adjust." % _enemies_volume_percent)
 	TTSManager.setup_button(enemies_minus_btn, func(): return "Decrease enemy sounds volume. Currently %d percent" % _enemies_volume_percent)
 	TTSManager.setup_button(enemies_plus_btn, func(): return "Increase enemy sounds volume. Currently %d percent" % _enemies_volume_percent)
 	
+	TTSManager.setup_button(footsteps_row_btn, func(): return "Footsteps volume: %d percent. Tilt stick left or right to adjust." % _footsteps_volume_percent)
 	TTSManager.setup_button(footsteps_minus_btn, func(): return "Decrease footstep volume. Currently %d percent" % _footsteps_volume_percent)
 	TTSManager.setup_button(footsteps_plus_btn, func(): return "Increase footstep volume. Currently %d percent" % _footsteps_volume_percent)
 
+	TTSManager.setup_button(jumpscare_row_btn, func(): return "Jumpscare volume: %d percent. Tilt stick left or right to adjust." % _jumpscare_volume_percent)
 	TTSManager.setup_button(jumpscare_minus_btn, func(): return "Decrease jumpscare volume. Currently %d percent" % _jumpscare_volume_percent)
 	TTSManager.setup_button(jumpscare_plus_btn, func(): return "Increase jumpscare volume. Currently %d percent" % _jumpscare_volume_percent)
 
-	TTSManager.setup_button(tts_toggle_btn, func(): return "TTS Voice. Currently " + ("enabled" if (TTSManager and TTSManager.tts_enabled) else "disabled"))
 	TTSManager.setup_button(back_from_settings_btn, "Back to Main Menu")
 	TTSManager.setup_button(back_from_guide_btn, "Back to Main Menu")
+
 
 func _show_panel(panel_name: String) -> void:
 	print("[MainMenuUI] Switching to panel: ", panel_name)
@@ -4275,12 +4485,14 @@ func _select_night_idx(night_idx: int) -> void:
 	if LevelManager:
 		if LevelManager.select_night(night_idx):
 			_update_nights_ui()
+			var title = LevelManager.nights[night_idx]["title"]
 			if TTSManager:
-				var title = LevelManager.nights[night_idx]["title"]
-				TTSManager.speak("%s selected." % title, true)
+				TTSManager.speak("Starting %s" % title, true)
+			print("[MainMenuUI] Night %d selected. Loading game map immediately..." % night_idx)
+			SceneLoader.load_scene("res://scenes/game_map.tscn")
 		else:
 			if TTSManager:
-				TTSManager.speak("Night %d is locked." % night_idx, true)
+				TTSManager.speak("Night %d is locked. Complete previous night to unlock." % night_idx, true)
 
 func _on_night_0_btn_pressed() -> void: _select_night_idx(0)
 func _on_night_1_btn_pressed() -> void: _select_night_idx(1)
@@ -4288,6 +4500,39 @@ func _on_night_2_btn_pressed() -> void: _select_night_idx(2)
 func _on_night_3_btn_pressed() -> void: _select_night_idx(3)
 func _on_night_4_btn_pressed() -> void: _select_night_idx(4)
 func _on_night_5_btn_pressed() -> void: _select_night_idx(5)
+
+# Nawigacja pozioma joystickiem (regulacja suwaków lewo/prawo w ustawieniach)
+func _on_navigator_horizontal(dir: int) -> void:
+	if settings_panel == null or not settings_panel.visible:
+		return
+	if master_row_btn and master_row_btn.has_focus():
+		if dir < 0: _on_master_minus_pressed()
+		else: _on_master_plus_pressed()
+	elif enemies_row_btn and enemies_row_btn.has_focus():
+		if dir < 0: _on_enemies_minus_pressed()
+		else: _on_enemies_plus_pressed()
+	elif footsteps_row_btn and footsteps_row_btn.has_focus():
+		if dir < 0: _on_footsteps_minus_pressed()
+		else: _on_footsteps_plus_pressed()
+	elif jumpscare_row_btn and jumpscare_row_btn.has_focus():
+		if dir < 0: _on_jumpscare_minus_pressed()
+		else: _on_jumpscare_plus_pressed()
+	elif tts_toggle_btn and tts_toggle_btn.has_focus():
+		_on_tts_toggle_pressed()
+
+# Kliknięcie / zatwierdzenie wierszy ustawień
+func _on_master_row_pressed() -> void:
+	if TTSManager: TTSManager.speak("Master volume is %d percent. Tilt stick left to decrease, right to increase." % _master_volume_percent, true)
+
+func _on_enemies_row_pressed() -> void:
+	if TTSManager: TTSManager.speak("Enemy sounds volume is %d percent. Tilt stick left to decrease, right to increase." % _enemies_volume_percent, true)
+
+func _on_footsteps_row_pressed() -> void:
+	if TTSManager: TTSManager.speak("Footsteps volume is %d percent. Tilt stick left to decrease, right to increase." % _footsteps_volume_percent, true)
+
+func _on_jumpscare_row_pressed() -> void:
+	if TTSManager: TTSManager.speak("Jumpscare volume is %d percent. Tilt stick left to decrease, right to increase." % _jumpscare_volume_percent, true)
+
 
 # Master volume
 func _on_master_minus_pressed() -> void:
@@ -4357,233 +4602,6 @@ func _on_tts_toggle_pressed() -> void:
 		_update_settings_ui()
 		if TTSManager.tts_enabled:
 			TTSManager.speak("TTS voice enabled", true)
-````
-
-## File: README.md
-````markdown
-# Lightless VR
-
-**Lightless** to autorski, inżynierski projekt gry w wirtualnej rzeczywistości (VR) utworzony w silniku Godot Engine. Gra jest survival horrorem zaprojektowanym w taki sposób, aby była w pełni dostępna dla osób niewidomych – bodźce wizualne dają minimalną (lub żadną) przewagę rozgrywki.
-
-## Najnowsze zmiany (Version Log)
-- **v0.5.3** - System Poziomów / Nocy (FNaF Style 0-5), Nawigacja Gałką VR w Menu, Trwały Zapis Ustawień i Ciemność z Oświetleniem Stóp:
-  - **System Nocy (Autoload `LevelManager`):** Wdrożenie nocy od Nocy 0 (Test Room / bezpieczny trening) do Nocy 5 (Koszmar: maksymalna prędkość Balory + dwóch niezależnych Foxy szarżujących z różnych kierunków + Marionette + Phantom Grasp). Dynamiczny czas nocy (30s - 150s), dzwon 6:00 AM, zapowiedź lektorska TTS i automatyczne odblokowanie kolejnej nocy.
-  - **Trwały zapis gry i ustawień (`user://save_data.json` i `user://settings.json`):** Postęp odblokowanych nocy oraz ustawienia suwaków głośności (`Master`, `Enemies`, `Footsteps`, `Jumpscare`) i status lektora TTS są trwale zapisywane i wczytywane przy każdym uruchomieniu gry, zapobiegając ich resetowaniu.
-  - **Nawigacja Joystickiem w Menu (`VRUINavigator`):** Zgodnie z wytycznymi dostępności dla graczy niewidomych, menu główne oraz menu pauzy obsługują pełną nawigację pionową gałką kontrolera z automatycznym odczytem lektorskim (TTS) i impulsami haptycznymi. Zatwierdzenie przyciskiem A (`ax_button`) lub pociągnięciem spustu.
-  - **Naturalny obrót ciała 360°:** Usunięcie sztucznego obracania joystickiem (`MovementTurn`) i szyny `Whoosh` na rzecz płynnego obracania się fizycznym ciałem w przestrzeni VR.
-  - **Ciemność otoczenia i FeetLight:** Wyłączenie globalnego światła na mapie na rzecz 100% mroku korytarzy z subtelnym światłem podłogowym (`FeetLight`, 1.6m pod stopami), dającym orientację pozycji ciała bez ujawniania układu labiryntu.
-  - **HoldButton (Blokada kliknięć bez naładowania):** Wyzerowanie `button_mask = 0`, co definitywnie eliminuje przedwczesne kliknięcia i wymaga pełnego przytrzymania triggera przez 0.65s.
-- **v0.5.2** - Kompleksowa realizacja zaleceń audytu technicznego i poprawek stabilności: Naprawa systemu Fade w `SceneLoader.gd` (usunięcie nieskutecznych guardów `ClassDB.class_exists`, podwójny `await process_frame` po zmianie sceny, reset `is_loading` przy błędzie). Prawidłowy tracking gracza z poziomu głowy VR (`XRCamera3D` w grupie `player_head`) dla efektu zniekształcenia dźwięku (Distortion) i namierzania Foxy'ego. Rozdzielenie próbek audio (`danger.wav`, `whoosh2.mp3`, `Broken bell.ogg`, `nice-sfx.mp3`). Akustyka i haptyka kolizji ze ścianami (`EventBus.noise_emitted`). Nowa maszyna stanów Balory (Patrol, Alert z przyspieszającą pozytywką, Pościg, Ucieczka na odległość) i dopasowany NavMesh. Aktywna obrona przed Marionetką poprzez zamach kontrolerem VR z haptyką bliskości ucha. Threat Director (pacing pojawiania się wrogów na osi czasu). Nowy przeciwnik **Phantom Grasp** (chwyt za kontroler, wibracje i mechanika wyszarpywania). System **Echolokacji** (puls dźwiękowo-haptyczny na przycisku A/X sondujący układ ścian kosztem hałasu). Dedykowane **Menu Pauzy VR** (`scenes/pause_menu.tscn`). Naprawa wyłącznika lektora TTS w ustawieniach oraz zabezpieczenia `is_inside_tree()`. Architektura przestrzenna Menu Głównego 3D z industrialnym klimatem Google Stitch i cyfrowym glitchem `RubikGlitch`.
-
-## O projekcie
-Głównym założeniem technologicznym było zbudowanie stabilnego szkieletu scen w VR z wykorzystaniem asynchronicznego menedżera `SceneLoader`, w którym każda scena jest w 100% samowystarczalna (zawiera własne instancje `Player`, `StartXR` i `Fade`). Zapobiega to błędom fizyki i kolizji przy przeładowaniach. Rozgrywka opiera się na dźwiękowej orientacji przestrzennej i odpowiednich interakcjach z przeciwnikami. Interfejs gry zaprojektowano z myślą o pełnej dostępności – obok wskaźnika laserowego VR oferuje kompletną nawigację gałką analogową kontrolera (joystickiem) z odczytem lektorskim (TTS) i haptyką, umożliwiając osobom niewidomym intuicyjną obsługę menu bez konieczności celowania w przestrzeni 3D.
-
-## Stack technologiczny
-- **Godot Engine 4.x** (wersja Godot 4.7 / 4.x, ustawienia Mobile Renderer dla płynności)
-- **OpenXR** (Główna biblioteka do połączenia z goglami VR)
-- **Godot XR Tools** - standardowe pakiety fizyki dłoni i bazowych obiektów, dostosowane na potrzeby projektu.
-
-## Uruchomienie i testowanie
-Projekt przeznaczony jest na gogle VR obsługujące OpenXR (np. Meta Quest podpięty przez Meta Quest Link / SteamVR).
-1. Sklonuj repozytorium.
-2. Otwórz w **Godot 4.x** (wersja z obsługą .NET nie jest wymagana, używamy GDScript).
-3. Projekt uruchamia się bezpośrednio od `scenes/main_menu.tscn` (wbudowany autostart OpenXR). Za przechodzenie między mapami odpowiada asynchroniczny autoload `SceneLoader.gd`.
-
-## Sounds:
-- Sound Effect by <a href="https://pixabay.com/users/freesounds123-49985424/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335600">free sound creator</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335600">Pixabay</a>
-- Sound Effect by <a href="https://pixabay.com/users/freesound_community-46691455/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=102254">freesound_community</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=102254">Pixabay</a>
-- Sound Effect by <a href="https://pixabay.com/users/freesounds123-49985424/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335599">free sound creator</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335599">Pixabay</a>
-- Sound Effect by <a href="https://pixabay.com/users/sound_effects75-54573118/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=485532">Sound_effects75</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=485532">Pixabay</a>
-
-shadow_v3a.aif by thanvannispen -- https://freesound.org/s/79713/ -- License: Attribution 4.0
-Whisper Evil Little Nothings to Me by SoundBiterSFX -- https://freesound.org/s/730965/ -- License: Creative Commons 0
-Whispers.wav by KrystalSounds7 -- https://freesound.org/s/466309/ -- License: Creative Commons 0
-whispers.wav by SophieMezaM -- https://freesound.org/s/446083/ -- License: Attribution 3.0
-Ominous whispers.wav by xtrgamr -- https://freesound.org/s/257784/ -- License: Attribution 4.0
-
-runing.wav - Pasos_Rapid.wav by anez -- https://freesound.org/s/403437/ -- License: Attribution 4.0
-foxy_runing.mp3 Demon Stomping Run.mp3 by Hoshenko -- https://freesound.org/s/697645/ -- License: Attribution 4.0
-
-footstep_slow2.wav by stradie -- https://freesound.org/s/255569/ -- License: Attribution 4.0
-
-WoodWalking.wav by szegvari -- https://freesound.org/s/514146/ -- License: Creative Commons 0
-Sound Effect by <a href="https://pixabay.com/users/freesound_community-46691455/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=101127">freesound_community</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=101127">Pixabay</a>
-
-foxy_walking.mp3 big metallic robot footsteps by gladkiy -- https://freesound.org/s/342235/ -- License: Creative Commons 0
-whoosh2 Whoosh away by jriches1 -- https://freesound.org/s/817959/ -- License: Creative Commons 0
-
-danger Cinematic Alarm Hit by Rizzard -- https://freesound.org/s/560157/ -- License: Creative Commons 0
-````
-
-## File: scripts/player_audio_manager.gd
-````
-extends Node
-class_name PlayerAudioManager
-
-@export var walk_noise_level: float = 1.0
-@export var sprint_noise_level: float = 2.8
-@export var wall_noise_level: float = 3.5
-@export var wall_cooldown: float = 0.4
-@export var echolocation_noise_level: float = 4.5
-@export var echolocation_cooldown: float = 2.0
-
-@onready var origin: XROrigin3D = get_node_or_null("../XROrigin3D")
-@onready var footstep_provider = get_node_or_null("../XROrigin3D/MovementFootstep")
-@onready var sprint_provider = get_node_or_null("../XROrigin3D/MovementSprint")
-@onready var player_body: CharacterBody3D = get_node_or_null("../XROrigin3D/PlayerBody")
-
-var left_ctrl: XRController3D
-var right_ctrl: XRController3D
-
-var _wall_hit_timer: float = 0.0
-var _echolocation_timer: float = 0.0
-
-func _ready():
-	if origin == null and get_parent():
-		origin = get_parent().get_node_or_null("XROrigin3D")
-		
-	if origin:
-		if footstep_provider == null:
-			footstep_provider = origin.get_node_or_null("MovementFootstep")
-		if sprint_provider == null:
-			sprint_provider = origin.get_node_or_null("MovementSprint")
-		if player_body == null:
-			player_body = origin.get_node_or_null("PlayerBody")
-		left_ctrl = origin.get_node_or_null("left_hand") as XRController3D
-		right_ctrl = origin.get_node_or_null("right_hand") as XRController3D
-		
-	if footstep_provider and not footstep_provider.footstep.is_connected(_on_footstep):
-		footstep_provider.footstep.connect(_on_footstep)
-
-func _physics_process(delta: float):
-	if _wall_hit_timer > 0.0:
-		_wall_hit_timer -= delta
-	if _echolocation_timer > 0.0:
-		_echolocation_timer -= delta
-
-	# 1. Wykrywanie kolizji ze ścianami (hałas, dźwięk uderzenia, haptyka)
-	if player_body and player_body.is_on_wall() and _wall_hit_timer <= 0.0:
-		var moving := false
-		if "ground_control_velocity" in player_body:
-			var gcv = player_body.ground_control_velocity
-			if gcv is Vector2 or gcv is Vector3:
-				moving = gcv.length() > 0.4
-		elif "velocity" in player_body and player_body.velocity is Vector3:
-			moving = player_body.velocity.length() > 0.4
-			
-		if moving:
-			_wall_hit_timer = wall_cooldown
-			_trigger_wall_collision()
-
-	# 2. Obsługa pulsu echolokacji (przycisk ax_button na kontrolerze VR)
-	var ax_pressed := false
-	if left_ctrl and left_ctrl.is_button_pressed("ax_button"):
-		ax_pressed = true
-	elif right_ctrl and right_ctrl.is_button_pressed("ax_button"):
-		ax_pressed = true
-		
-	if ax_pressed and _echolocation_timer <= 0.0:
-		_echolocation_timer = echolocation_cooldown
-		_trigger_echolocation()
-
-
-func _trigger_wall_collision():
-	# Dźwięk głuchego uderzenia w ścianę
-	var wall_sfx = AudioStreamPlayer.new()
-	wall_sfx.stream = preload("res://assets/sounds/footstep_slow2.wav")
-	wall_sfx.volume_db = 4.0
-	wall_sfx.pitch_scale = 0.6
-	add_child(wall_sfx)
-	wall_sfx.play()
-	wall_sfx.finished.connect(wall_sfx.queue_free)
-	
-	# Hałas uderzenia ostrzegający wrogów (np. Foxy)
-	var hit_pos = player_body.global_position if player_body else (origin.global_position if origin else Vector3.ZERO)
-	if EventBus:
-		EventBus.noise_emitted.emit(hit_pos, wall_noise_level)
-		
-	# Fizyczna haptyka uderzenia na obu kontrolerach
-	_trigger_collision_rumble()
-
-func _trigger_collision_rumble():
-	if origin:
-		if left_ctrl == null:
-			left_ctrl = origin.get_node_or_null("left_hand") as XRController3D
-		if right_ctrl == null:
-			right_ctrl = origin.get_node_or_null("right_hand") as XRController3D
-		if left_ctrl:
-			left_ctrl.trigger_haptic_pulse("haptic", 120.0, 0.7, 0.2, 0.0)
-		if right_ctrl:
-			right_ctrl.trigger_haptic_pulse("haptic", 120.0, 0.7, 0.2, 0.0)
-
-func _on_footstep(_surface_name: String):
-	# Zarejestrowano krok. Zliczamy statystykę w SceneLoader.
-	SceneLoader.steps_taken += 1
-	
-	var is_sprinting := false
-	if sprint_provider and "is_active" in sprint_provider:
-		is_sprinting = sprint_provider.is_active
-	elif player_body and "ground_control_velocity" in player_body:
-		is_sprinting = player_body.ground_control_velocity.length() > 2.0
-	
-	var current_noise = sprint_noise_level if is_sprinting else walk_noise_level
-	
-	if EventBus:
-		EventBus.noise_emitted.emit(origin.global_position if origin else Vector3.ZERO, current_noise)
-
-func _trigger_echolocation():
-	if origin == null:
-		return
-		
-	var space_state = origin.get_world_3d().direct_space_state
-	var start_pos = origin.global_position + Vector3(0, 1.2, 0)
-	
-	# Startowy impuls dźwiękowy
-	var pulse_player = AudioStreamPlayer.new()
-	pulse_player.stream = preload("res://assets/sounds/Broken bell.ogg")
-	pulse_player.volume_db = -4.0
-	pulse_player.pitch_scale = 1.65
-	add_child(pulse_player)
-	pulse_player.play()
-	pulse_player.finished.connect(pulse_player.queue_free)
-	
-	# Hałas sonaru ostrzegający wrogów (ryzyko ściągnięcia Foxy'ego!)
-	if EventBus:
-		EventBus.noise_emitted.emit(origin.global_position, echolocation_noise_level)
-		
-	# Haptyka impulsu na kontrolerach
-	if left_ctrl:
-		left_ctrl.trigger_haptic_pulse("haptic", 160.0, 0.7, 0.12, 0.0)
-	if right_ctrl:
-		right_ctrl.trigger_haptic_pulse("haptic", 160.0, 0.7, 0.12, 0.0)
-		
-	# Wypuszczenie 8 promieni echolokacyjnych (równomiernie w 8 stron świata)
-	for i in range(8):
-		var angle = (float(i) / 8.0) * TAU
-		var dir = Vector3(cos(angle), 0, sin(angle))
-		var end_pos = start_pos + dir * 35.0
-		var query = PhysicsRayQueryParameters3D.create(start_pos, end_pos, 1)
-		var result = space_state.intersect_ray(query)
-		if result:
-			var hit_pos: Vector3 = result.position
-			var dist = start_pos.distance_to(hit_pos)
-			var delay = clamp(dist / 28.0, 0.06, 1.1)
-			_spawn_delayed_echo(hit_pos, dist, delay)
-
-func _spawn_delayed_echo(hit_pos: Vector3, dist: float, delay: float):
-	await get_tree().create_timer(delay).timeout
-	if not is_inside_tree():
-		return
-	var echo = AudioStreamPlayer3D.new()
-	echo.stream = preload("res://assets/sounds/Broken bell.ogg")
-	echo.unit_size = 10.0
-	echo.max_distance = 40.0
-	echo.volume_db = clamp(remap(dist, 2.0, 30.0, 0.0, -16.0), -16.0, 0.0)
-	echo.pitch_scale = clamp(remap(dist, 2.0, 30.0, 1.1, 0.55), 0.55, 1.1)
-	add_child(echo)
-	echo.global_position = hit_pos
-	echo.play()
-	echo.finished.connect(echo.queue_free)
 ````
 
 ## File: project.godot
@@ -4851,6 +4869,245 @@ func _trigger_jumpscare():
 		audio_player.stop()
 	
 	await JumpscareHelper.execute(self, jumpscare_sound, [mesh_instance, audio_player], "Balora — Złapanie w strefie krytycznej")
+````
+
+## File: scripts/player_audio_manager.gd
+````
+extends Node
+class_name PlayerAudioManager
+
+@export var walk_noise_level: float = 1.0
+@export var sprint_noise_level: float = 2.8
+@export var wall_noise_level: float = 3.5
+@export var wall_cooldown: float = 0.4
+
+@onready var origin: XROrigin3D = get_node_or_null("../XROrigin3D")
+@onready var footstep_provider = get_node_or_null("../XROrigin3D/MovementFootstep")
+@onready var sprint_provider = get_node_or_null("../XROrigin3D/MovementSprint")
+@onready var player_body: CharacterBody3D = get_node_or_null("../XROrigin3D/PlayerBody")
+
+var left_ctrl: XRController3D
+var right_ctrl: XRController3D
+
+var _wall_hit_timer: float = 0.0
+
+func _ready():
+	if origin == null and get_parent():
+		origin = get_parent().get_node_or_null("XROrigin3D")
+		
+	if origin:
+		if footstep_provider == null:
+			footstep_provider = origin.get_node_or_null("MovementFootstep")
+		if sprint_provider == null:
+			sprint_provider = origin.get_node_or_null("MovementSprint")
+		if player_body == null:
+			player_body = origin.get_node_or_null("PlayerBody")
+		left_ctrl = origin.get_node_or_null("left_hand") as XRController3D
+		right_ctrl = origin.get_node_or_null("right_hand") as XRController3D
+		
+	if footstep_provider and not footstep_provider.footstep.is_connected(_on_footstep):
+		footstep_provider.footstep.connect(_on_footstep)
+
+func _physics_process(delta: float):
+	if _wall_hit_timer > 0.0:
+		_wall_hit_timer -= delta
+
+	# 1. Wykrywanie kolizji ze ścianami (hałas, dźwięk uderzenia, haptyka)
+	if player_body and player_body.is_on_wall() and _wall_hit_timer <= 0.0:
+		var moving := false
+		if "ground_control_velocity" in player_body:
+			var gcv = player_body.ground_control_velocity
+			if gcv is Vector2 or gcv is Vector3:
+				moving = gcv.length() > 0.4
+		elif "velocity" in player_body and player_body.velocity is Vector3:
+			moving = player_body.velocity.length() > 0.4
+			
+		if moving:
+			_wall_hit_timer = wall_cooldown
+			_trigger_wall_collision()
+
+
+func _trigger_wall_collision():
+	var col_count: int = player_body.get_slide_collision_count() if player_body else 0
+	var normals: Array[Vector3] = []
+	var hit_points: Array[Vector3] = []
+	for i in range(col_count):
+		var col = player_body.get_slide_collision(i)
+		var n = col.get_normal()
+		if abs(n.y) < 0.7:
+			normals.append(Vector3(n.x, 0.0, n.z).normalized())
+			hit_points.append(col.get_position())
+
+	# Detekcja uderzenia w róg (kąt między co najmniej dwoma ścianami)
+	var is_corner := false
+	if normals.size() >= 2:
+		for i in range(normals.size()):
+			for j in range(i + 1, normals.size()):
+				var angle = normals[i].angle_to(normals[j])
+				if angle > deg_to_rad(35.0) and angle < deg_to_rad(150.0):
+					is_corner = true
+					break
+			if is_corner:
+				break
+
+	# Określanie kierunku względem głowy gracza
+	var head = origin.get_node_or_null("XRCamera3D") if origin else null
+	var head_basis = head.global_transform.basis if head else (origin.global_transform.basis if origin else Basis.IDENTITY)
+	var fwd = -head_basis.z
+	fwd.y = 0.0
+	fwd = fwd.normalized()
+	var right_vec = head_basis.x
+	right_vec.y = 0.0
+	right_vec = right_vec.normalized()
+
+	var avg_normal := Vector3.ZERO
+	if not normals.is_empty():
+		for n in normals:
+			avg_normal += n
+		avg_normal = avg_normal.normalized()
+	else:
+		avg_normal = -fwd
+
+	var into_wall = -avg_normal
+	var dot_fwd = fwd.dot(into_wall)
+	var dot_right = right_vec.dot(into_wall)
+
+	var hit_kind := "FRONT"
+	if is_corner:
+		hit_kind = "CORNER"
+	elif dot_right > 0.38:
+		hit_kind = "RIGHT"
+	elif dot_right < -0.38:
+		hit_kind = "LEFT"
+	elif dot_fwd > 0.3:
+		hit_kind = "FRONT"
+	else:
+		hit_kind = "BACK"
+
+	var player_pos = origin.global_position if origin else Vector3.ZERO
+	var sound_offset := Vector3.ZERO
+	match hit_kind:
+		"FRONT":
+			sound_offset = fwd * 0.9 + Vector3(0, 1.2, 0)
+		"BACK":
+			sound_offset = -fwd * 0.9 + Vector3(0, 1.2, 0)
+		"LEFT":
+			sound_offset = -right_vec * 0.9 + fwd * 0.2 + Vector3(0, 1.2, 0)
+		"RIGHT":
+			sound_offset = right_vec * 0.9 + fwd * 0.2 + Vector3(0, 1.2, 0)
+		"CORNER":
+			var corner_side = 1.0 if dot_right >= 0 else -1.0
+			sound_offset = (fwd + right_vec * corner_side * 0.7).normalized() * 0.9 + Vector3(0, 1.2, 0)
+
+	var hit_pos_3d = player_pos + sound_offset
+
+	# Odtworzenie kierunkowego dźwięku 3D o podwyższonej donośności
+	_play_wall_sound_3d(hit_pos_3d, hit_kind)
+	if hit_kind == "CORNER":
+		_play_secondary_corner_sound(hit_pos_3d)
+
+	# Hałas uderzenia ostrzegający wrogów
+	var noise_val = wall_noise_level * (1.35 if hit_kind == "CORNER" else 1.0)
+	if EventBus:
+		EventBus.noise_emitted.emit(hit_pos_3d, noise_val)
+
+	# Kierunkowa haptyka na kontrolerach VR
+	_trigger_directional_collision_rumble(hit_kind)
+
+func _play_wall_sound_3d(pos: Vector3, hit_kind: String):
+	var wall_sfx = AudioStreamPlayer3D.new()
+	wall_sfx.stream = preload("res://assets/sounds/footstep_slow2.wav")
+	wall_sfx.bus = &"Footsteps"
+	wall_sfx.unit_size = 4.0
+	wall_sfx.max_distance = 20.0
+	wall_sfx.volume_db = 9.5
+	
+	match hit_kind:
+		"FRONT":
+			wall_sfx.pitch_scale = 0.72
+		"BACK":
+			wall_sfx.pitch_scale = 0.68
+		"LEFT", "RIGHT":
+			wall_sfx.pitch_scale = 0.88
+		"CORNER":
+			wall_sfx.pitch_scale = 0.62
+
+	add_child(wall_sfx)
+	wall_sfx.global_position = pos
+	wall_sfx.play()
+	wall_sfx.finished.connect(wall_sfx.queue_free)
+
+func _play_secondary_corner_sound(pos: Vector3):
+	await get_tree().create_timer(0.08).timeout
+	if not is_inside_tree():
+		return
+	var echo_sfx = AudioStreamPlayer3D.new()
+	echo_sfx.stream = preload("res://assets/sounds/footstep_slow2.wav")
+	echo_sfx.bus = &"Footsteps"
+	echo_sfx.unit_size = 3.5
+	echo_sfx.max_distance = 18.0
+	echo_sfx.volume_db = 7.5
+	echo_sfx.pitch_scale = 0.78
+	add_child(echo_sfx)
+	echo_sfx.global_position = pos + Vector3(0.15, 0, 0.15)
+	echo_sfx.play()
+	echo_sfx.finished.connect(echo_sfx.queue_free)
+
+func _trigger_directional_collision_rumble(hit_kind: String):
+	if origin == null:
+		return
+	if left_ctrl == null:
+		left_ctrl = origin.get_node_or_null("left_hand") as XRController3D
+	if right_ctrl == null:
+		right_ctrl = origin.get_node_or_null("right_hand") as XRController3D
+
+	match hit_kind:
+		"LEFT":
+			if left_ctrl:
+				left_ctrl.trigger_haptic_pulse("haptic", 150.0, 0.95, 0.25, 0.0)
+			if right_ctrl:
+				right_ctrl.trigger_haptic_pulse("haptic", 60.0, 0.2, 0.08, 0.0)
+		"RIGHT":
+			if right_ctrl:
+				right_ctrl.trigger_haptic_pulse("haptic", 150.0, 0.95, 0.25, 0.0)
+			if left_ctrl:
+				left_ctrl.trigger_haptic_pulse("haptic", 60.0, 0.2, 0.08, 0.0)
+		"FRONT", "BACK":
+			if left_ctrl:
+				left_ctrl.trigger_haptic_pulse("haptic", 170.0, 1.0, 0.28, 0.0)
+			if right_ctrl:
+				right_ctrl.trigger_haptic_pulse("haptic", 170.0, 1.0, 0.28, 0.0)
+		"CORNER":
+			if left_ctrl:
+				left_ctrl.trigger_haptic_pulse("haptic", 180.0, 1.0, 0.32, 0.0)
+			if right_ctrl:
+				right_ctrl.trigger_haptic_pulse("haptic", 180.0, 1.0, 0.32, 0.0)
+			_trigger_delayed_corner_rumble()
+
+func _trigger_delayed_corner_rumble():
+	await get_tree().create_timer(0.09).timeout
+	if not is_inside_tree():
+		return
+	if left_ctrl:
+		left_ctrl.trigger_haptic_pulse("haptic", 160.0, 0.8, 0.15, 0.0)
+	if right_ctrl:
+		right_ctrl.trigger_haptic_pulse("haptic", 160.0, 0.8, 0.15, 0.0)
+
+
+func _on_footstep(_surface_name: String):
+	# Zarejestrowano krok. Zliczamy statystykę w SceneLoader.
+	SceneLoader.steps_taken += 1
+	
+	var is_sprinting := false
+	if sprint_provider and "is_active" in sprint_provider:
+		is_sprinting = sprint_provider.is_active
+	elif player_body and "ground_control_velocity" in player_body:
+		is_sprinting = player_body.ground_control_velocity.length() > 2.0
+	
+	var current_noise = sprint_noise_level if is_sprinting else walk_noise_level
+	
+	if EventBus:
+		EventBus.noise_emitted.emit(origin.global_position if origin else Vector3.ZERO, current_noise)
 ````
 
 ## File: scripts/hold_button.gd
@@ -6118,12 +6375,19 @@ theme_override_constants/margin_right = 20
 layout_mode = 2
 alignment = 1
 
-[node name="MasterLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox"]
+[node name="MasterRowBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox"]
+custom_minimum_size = Vector2(240, 42)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
+theme_override_colors/font_hover_color = Color(0, 1, 0.64, 1)
+theme_override_colors/font_focus_color = Color(0, 1, 0.64, 1)
 theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_pill_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_pill_hover")
 text = "MASTER VOLUME"
+alignment = 0
 
 [node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox"]
 layout_mode = 2
@@ -6132,6 +6396,7 @@ theme_override_constants/separation = 12
 [node name="MasterMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -6160,6 +6425,7 @@ horizontal_alignment = 2
 [node name="MasterPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -6182,12 +6448,19 @@ theme_override_constants/margin_right = 20
 layout_mode = 2
 alignment = 1
 
-[node name="EnemiesLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox"]
+[node name="EnemiesRowBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox"]
+custom_minimum_size = Vector2(240, 42)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
+theme_override_colors/font_hover_color = Color(0, 1, 0.64, 1)
+theme_override_colors/font_focus_color = Color(0, 1, 0.64, 1)
 theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_pill_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_pill_hover")
 text = "ENEMY SOUNDS"
+alignment = 0
 
 [node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox"]
 layout_mode = 2
@@ -6196,6 +6469,7 @@ theme_override_constants/separation = 12
 [node name="EnemiesMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -6224,6 +6498,7 @@ horizontal_alignment = 2
 [node name="EnemiesPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -6246,12 +6521,19 @@ theme_override_constants/margin_right = 20
 layout_mode = 2
 alignment = 1
 
-[node name="FootstepsLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox"]
+[node name="FootstepsRowBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox"]
+custom_minimum_size = Vector2(240, 42)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
+theme_override_colors/font_hover_color = Color(0, 1, 0.64, 1)
+theme_override_colors/font_focus_color = Color(0, 1, 0.64, 1)
 theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_pill_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_pill_hover")
 text = "PLAYER FOOTSTEPS"
+alignment = 0
 
 [node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox"]
 layout_mode = 2
@@ -6260,6 +6542,7 @@ theme_override_constants/separation = 12
 [node name="FootstepsMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -6288,6 +6571,7 @@ horizontal_alignment = 2
 [node name="FootstepsPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -6310,12 +6594,19 @@ theme_override_constants/margin_right = 20
 layout_mode = 2
 alignment = 1
 
-[node name="JumpscareLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox"]
+[node name="JumpscareRowBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox"]
+custom_minimum_size = Vector2(240, 42)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
+theme_override_colors/font_hover_color = Color(0, 1, 0.64, 1)
+theme_override_colors/font_focus_color = Color(0, 1, 0.64, 1)
 theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_pill_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_pill_hover")
 text = "JUMPSCARE VOLUME"
+alignment = 0
 
 [node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox"]
 layout_mode = 2
@@ -6324,6 +6615,7 @@ theme_override_constants/separation = 12
 [node name="JumpscareMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -6352,6 +6644,7 @@ horizontal_alignment = 2
 [node name="JumpscarePlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -6359,6 +6652,7 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
 text = "+"
 script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
+
 
 [node name="HSeparator2" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
 layout_mode = 2
@@ -6590,7 +6884,13 @@ script = ExtResource("2_hold_btn")
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsPlusBtn" to="." method="_on_footsteps_plus_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscareMinusBtn" to="." method="_on_jumpscare_minus_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscarePlusBtn" to="." method="_on_jumpscare_plus_pressed"]
+
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/MasterRowBtn" to="." method="_on_master_row_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/EnemiesRowBtn" to="." method="_on_enemies_row_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/FootstepsRowBtn" to="." method="_on_footsteps_row_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/JumpscareRowBtn" to="." method="_on_jumpscare_row_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/BackFromSettingsButton" to="." method="_on_back_pressed"]
+
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid/Night0Btn" to="." method="_on_night_0_btn_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid/Night1Btn" to="." method="_on_night_1_btn_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid/Night2Btn" to="." method="_on_night_2_btn_pressed"]

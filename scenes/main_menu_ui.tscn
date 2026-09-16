@@ -774,6 +774,17 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_pill_hover")
 text = "NIGHT 5 - NIGHTMARE FINALE"
 script = ExtResource("2_hold_btn")
 
+[node name="Night6Btn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid"]
+custom_minimum_size = Vector2(480, 54)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_font_cinzel")
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_pill_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_pill_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_pill_hover")
+text = "NIGHT 6 (ENDLESS) - THE VOID"
+script = ExtResource("2_hold_btn")
+
 [node name="HSeparator2" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content"]
 layout_mode = 2
 
@@ -898,6 +909,7 @@ script = ExtResource("2_hold_btn")
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid/Night3Btn" to="." method="_on_night_3_btn_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid/Night4Btn" to="." method="_on_night_4_btn_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid/Night5Btn" to="." method="_on_night_5_btn_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid/Night6Btn" to="." method="_on_night_6_btn_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/BackFromNightsButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/BackFromGuideButton" to="." method="_on_back_pressed"]
 

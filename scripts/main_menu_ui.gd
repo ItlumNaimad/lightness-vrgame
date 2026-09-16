@@ -22,6 +22,7 @@ signal exit_pressed
 @onready var night_3_btn: Button = $CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid/Night3Btn
 @onready var night_4_btn: Button = $CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid/Night4Btn
 @onready var night_5_btn: Button = $CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid/Night5Btn
+@onready var night_6_btn: Button = $CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid/Night6Btn
 @onready var back_from_nights_btn: Button = $CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/BackFromNightsButton
 
 # Kontrolki ustawień
@@ -74,6 +75,11 @@ func _ready() -> void:
 	_vr_navigator.horizontal_navigated.connect(_on_navigator_horizontal)
 	add_child(_vr_navigator)
 
+	if LevelManager:
+		if not LevelManager.night_selected.is_connected(_on_night_changed):
+			LevelManager.night_selected.connect(_on_night_changed)
+		if not LevelManager.night_unlocked.is_connected(_on_night_changed):
+			LevelManager.night_unlocked.connect(_on_night_changed)
 
 	_load_saved_settings()
 	_update_telemetry()
@@ -81,6 +87,9 @@ func _ready() -> void:
 	_update_settings_ui()
 	_setup_accessibility()
 	_show_panel("main")
+
+func _on_night_changed(_idx: int) -> void:
+	_update_nights_ui()
 
 func _load_saved_settings() -> void:
 	if LevelManager:
@@ -156,19 +165,13 @@ func _update_nights_ui() -> void:
 	if start_button:
 		if sel_night == 0:
 			start_button.text = "START TUTORIAL (NIGHT 0)"
+		elif sel_night == 6:
+			start_button.text = "START ENDLESS NIGHT"
 		else:
 			start_button.text = "START NIGHT %d" % sel_night
 
 	# Konfiguracja przycisków nocy
-	var btns: Array[Button] = [night_0_btn, night_1_btn, night_2_btn, night_3_btn, night_4_btn, night_5_btn]
-	var titles: Array[String] = [
-		"NIGHT 0: TUTORIAL",
-		"NIGHT 1 (30s) - BALORA",
-		"NIGHT 2 (60s) - BALORA & MARIONETTE",
-		"NIGHT 3 (90s) - FOXY AWAKENS",
-		"NIGHT 4 (120s) - PHANTOM GRASP",
-		"NIGHT 5 (150s) - NIGHTMARE FINALE"
-	]
+	var btns: Array[Button] = [night_0_btn, night_1_btn, night_2_btn, night_3_btn, night_4_btn, night_5_btn, night_6_btn]
 
 	for i in range(btns.size()):
 		var btn: Button = btns[i]
@@ -177,12 +180,13 @@ func _update_nights_ui() -> void:
 		var is_unlocked: bool = (i <= unl_night)
 		btn.disabled = not is_unlocked
 		
+		var title: String = LevelManager.get_night_title(i) if LevelManager else ("Night %d" % i)
 		if not is_unlocked:
-			btn.text = "🔒 NIGHT %d (LOCKED)" % i
+			btn.text = "🔒 %s (LOCKED)" % title
 			btn.modulate = Color(0.6, 0.6, 0.6, 0.5)
 		else:
 			var prefix: String = "▶ " if (i == sel_night) else ""
-			btn.text = prefix + titles[i]
+			btn.text = prefix + title
 			if i == sel_night:
 				btn.modulate = Color(0, 1, 0.64, 1.0)
 			else:
@@ -194,27 +198,23 @@ func _setup_accessibility() -> void:
 		
 	TTSManager.setup_button(start_button, func():
 		var sel_night: int = LevelManager.selected_night if LevelManager else 1
-		return "Start Night %d" % sel_night if sel_night > 0 else "Start Tutorial"
+		if sel_night == 0:
+			return "Start Tutorial"
+		elif sel_night == 6:
+			return "Start Endless Night"
+		return "Start Night %d" % sel_night
 	)
 	TTSManager.setup_button(select_night_button, func():
 		var sel_night: int = LevelManager.selected_night if LevelManager else 1
-		return "Select Night. Currently Night %d is selected" % sel_night
+		var title = LevelManager.get_night_title(sel_night) if LevelManager else ("Night %d" % sel_night)
+		return "Select Night. Currently %s is selected" % title
 	)
 	TTSManager.setup_button(settings_button, "Settings")
 	TTSManager.setup_button(guide_button, "Controls and Survival Guide")
 	TTSManager.setup_button(exit_button, "Exit Game")
 	
 	# Przyciski nocy
-	var night_descriptions := [
-		"Night 0: Tutorial test room. Practice movement, collisions and spatial audio with no enemies.",
-		"Night 1: Balora. Survive 30 seconds. Balora patrols slowly, accelerating near the end.",
-		"Night 2: Balora and Marionette. Survive 60 seconds. Marionette whispers from the dark.",
-		"Night 3: Foxy awakens. Survive 90 seconds. Foxy charges when you make excessive noise.",
-		"Night 4: Phantom Grasp. Survive 120 seconds. Shadow tentacles grab your controllers.",
-		"Night 5: Nightmare Finale. Survive 150 seconds. Maximum speed Balora and two hunters."
-	]
-
-	var btns: Array[Button] = [night_0_btn, night_1_btn, night_2_btn, night_3_btn, night_4_btn, night_5_btn]
+	var btns: Array[Button] = [night_0_btn, night_1_btn, night_2_btn, night_3_btn, night_4_btn, night_5_btn, night_6_btn]
 	for i in range(btns.size()):
 		var idx = i
 		var btn = btns[idx]
@@ -225,7 +225,9 @@ func _setup_accessibility() -> void:
 					return "Night %d is locked. Complete previous night to unlock." % idx
 				var is_selected = (idx == LevelManager.selected_night) if LevelManager else false
 				var sel_str = " Currently selected. " if is_selected else " "
-				return night_descriptions[idx] + sel_str
+				var night_data = LevelManager.get_night_data(idx) if LevelManager else null
+				var desc = night_data.description if (night_data and not night_data.description.is_empty()) else ("Night %d" % idx)
+				return desc + sel_str
 			)
 
 	TTSManager.setup_button(back_from_nights_btn, "Back to Main Menu")
@@ -312,7 +314,7 @@ func _select_night_idx(night_idx: int) -> void:
 	if LevelManager:
 		if LevelManager.select_night(night_idx):
 			_update_nights_ui()
-			var title = LevelManager.nights[night_idx]["title"]
+			var title = LevelManager.get_night_title(night_idx)
 			if TTSManager:
 				TTSManager.speak("Starting %s" % title, true)
 			print("[MainMenuUI] Night %d selected. Loading game map immediately..." % night_idx)
@@ -327,6 +329,7 @@ func _on_night_2_btn_pressed() -> void: _select_night_idx(2)
 func _on_night_3_btn_pressed() -> void: _select_night_idx(3)
 func _on_night_4_btn_pressed() -> void: _select_night_idx(4)
 func _on_night_5_btn_pressed() -> void: _select_night_idx(5)
+func _on_night_6_btn_pressed() -> void: _select_night_idx(6)
 
 # Nawigacja pozioma joystickiem (regulacja suwaków lewo/prawo w ustawieniach)
 func _on_navigator_horizontal(dir: int) -> void:

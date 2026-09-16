@@ -4,6 +4,7 @@ enum State { DORMANT, STALKING, GRABBED }
 
 @export var min_dormant_time: float = 25.0
 @export var max_dormant_time: float = 45.0
+@export var interval_step: float = 1.5
 @export var stalk_duration: float = 3.0
 @export var escape_time_limit: float = 3.5
 @export var required_shakes: int = 2
@@ -32,7 +33,18 @@ var _movement_direct: XRToolsMovementDirect
 
 func _ready():
 	_find_player()
+	if EventBus:
+		if not EventBus.milestone_reached.is_connected(_on_milestone_reached):
+			EventBus.milestone_reached.connect(_on_milestone_reached)
 	_enter_dormant()
+
+func _on_milestone_reached(milestone: int) -> void:
+	if current_state == State.GRABBED:
+		return
+	min_dormant_time = maxf(12.0, min_dormant_time - interval_step)
+	max_dormant_time = maxf(20.0, max_dormant_time - interval_step)
+	escape_time_limit = maxf(2.4, escape_time_limit - 0.1)
+	print("[PhantomGrasp] Eskalacja (milestone %ds): dormant=%.1f-%.1fs, escape_limit=%.1fs" % [milestone, min_dormant_time, max_dormant_time, escape_time_limit])
 
 func _exit_tree():
 	_restore_player_speed()

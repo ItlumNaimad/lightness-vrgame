@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="NightData" format=3]
+
+[ext_resource type="Script" path="res://scripts/night_data.gd" id="1_night_data"]
+
+[resource]
+script = ExtResource("1_night_data")
+night_index = 4
+title = "NIGHT 4 (90s) - PHANTOM GRASP"
+description = "Survive 90 seconds. Aggressive Foxy, frequent Marionette whispers, and shadow tentacles grabbing your controllers."
+duration = 90.0
+is_endless = false
+has_balora = true
+balora_base_speed = 1.6
+balora_speed_step = 0.10
+balora_max_speed = 2.8
+balora_alert_distance = 7.8
+balora_critical_distance = 3.6
+balora_detection_step = 0.4
+has_marionette = true
+marionette_interval_min = 12.0
+marionette_interval_max = 20.0
+marionette_interval_step = 1.2
+allow_sequential_whispers = true
+has_foxy = true
+foxy_count = 1
+foxy_initial_threshold = 16.0
+foxy_threshold_step = 1.5
+foxy_min_threshold = 8.0
+foxy_charge_speed = 12.5
+has_phantom_grasp = true
+phantom_grasp_interval_min = 20.0
+phantom_grasp_interval_max = 35.0
+phantom_grasp_interval_step = 2.0

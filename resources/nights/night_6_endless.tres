@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="NightData" format=3]
+
+[ext_resource type="Script" path="res://scripts/night_data.gd" id="1_night_data"]
+
+[resource]
+script = ExtResource("1_night_data")
+night_index = 6
+title = "NIGHT 6 (ENDLESS) - THE VOID"
+description = "Survive as long as possible. Full darkness, all threats active, constant aggression scaling every 10 seconds."
+duration = 0.0
+is_endless = true
+has_balora = true
+balora_base_speed = 1.8
+balora_speed_step = 0.08
+balora_max_speed = 3.2
+balora_alert_distance = 8.5
+balora_critical_distance = 4.0
+balora_detection_step = 0.4
+has_marionette = true
+marionette_interval_min = 10.0
+marionette_interval_max = 18.0
+marionette_interval_step = 1.0
+allow_sequential_whispers = true
+has_foxy = true
+foxy_count = 2
+foxy_initial_threshold = 12.0
+foxy_threshold_step = 1.0
+foxy_min_threshold = 6.0
+foxy_charge_speed = 13.5
+has_phantom_grasp = true
+phantom_grasp_interval_min = 18.0
+phantom_grasp_interval_max = 28.0
+phantom_grasp_interval_step = 1.5

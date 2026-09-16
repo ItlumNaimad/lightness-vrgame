@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="NightData" format=3]
+
+[ext_resource type="Script" path="res://scripts/night_data.gd" id="1_night_data"]
+
+[resource]
+script = ExtResource("1_night_data")
+night_index = 3
+title = "NIGHT 3 (90s) - FOXY AWAKENS"
+description = "Survive 90 seconds. Foxy joins the hunt, reacting to accumulated movement and collision noise."
+duration = 90.0
+is_endless = false
+has_balora = true
+balora_base_speed = 1.4
+balora_speed_step = 0.10
+balora_max_speed = 2.6
+balora_alert_distance = 7.5
+balora_critical_distance = 3.5
+balora_detection_step = 0.35
+has_marionette = true
+marionette_interval_min = 15.0
+marionette_interval_max = 24.0
+marionette_interval_step = 1.0
+allow_sequential_whispers = true
+has_foxy = true
+foxy_count = 1
+foxy_initial_threshold = 24.0
+foxy_threshold_step = 1.5
+foxy_min_threshold = 10.0
+foxy_charge_speed = 12.0
+has_phantom_grasp = false
+phantom_grasp_interval_min = 25.0
+phantom_grasp_interval_max = 40.0
+phantom_grasp_interval_step = 0.0

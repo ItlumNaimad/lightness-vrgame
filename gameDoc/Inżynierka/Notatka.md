@@ -406,5 +406,52 @@ Ręczne celowanie wskaźnikiem laserowym VR (`FunctionPointer`) w trójwymiarow�
 - [x] **Natychmiastowy start wybranej nocy (Select Night):**
   - W `main_menu_ui.gd` po kliknięciu odblokowanej nocy w panelu `NightsPanel`, funkcja `_select_night_idx()` natychmiast zapowiada start przez TTS ("Starting Night X") i wywołuje `SceneLoader.load_scene("res://scenes/game_map.tscn")`, bez wymuszania ręcznego powrotu do menu głównego i klikania Start Game.
 
+### Percepcja Przestrzenna & Rytm Wrogów — 16.09.2026 (Sesja Wieczorna)
+- [x] **Kierunkowe i donośne stuknięcie w ścianę (`scripts/player_audio_manager.gd`):**
+  - Analiza wektorów normalnych z `player_body.get_slide_collision()` pod kątem kierunku głowy gracza (`XRCamera3D`).
+  - Rozróżnienie 4 stanów zderzenia:
+    1. **PRZÓD (FRONT):** Uderzenie czołowe, twardy dźwięk 3D z przodu (`pitch = 0.72`, `volume_db = 9.5`), wibracja obu kontrolerów.
+    2. **LEWY BOK (LEFT):** Dźwięk otarcia/stuknięcia z lewej słuchawki (`pitch = 0.88`), wibracja lewego kontrolera.
+    3. **PRAWY BOK (RIGHT):** Dźwięk z prawej słuchawki (`pitch = 0.88`), wibracja prawego kontrolera.
+    4. **RÓG (CORNER):** Wykrycie co najmniej dwóch ścian tworzących kąt narożny (35°-150°). Wyzwolenie **podwójnego tąpnięcia** ("puk-puk" z odstępem 80ms i przesunięciem przestrzennym) oraz podwójnego impulsu wstrząsowego na obu kontrolerach VR.
+  - Przeniesienie odgłosu uderzenia na szynę `Footsteps` z pozycjonowaniem przestrzennym `AudioStreamPlayer3D`.
+- [x] **Skokowy rytm kroków Foxy'ego co 2.5s (`scripts/foxy.gd`):**
+  - W stanie `State.LISTENING` zastąpiono ciągły, monotonny ślizg miarowym cyklem stąpnięć animatronika trwającym 2.5s (`step_interval = 2.5`).
+  - Przez pierwsze 0.65s cyklu Foxy wykonuje krok w kierunku gracza (`step_speed = 2.4`) i odtwarza `walk_sound.play(0.0)`.
+  - Przez pozostałe 1.85s Foxy stoi nieruchomo i nasłuchuje.
+  - Dzięki temu gracz bezbłędnie namierza położenie Foxy'ego na słuch po regularnych, wyrazistych uderzeniach stóp o podłoże.
+- [x] **Płynne tłumienie pozytywki Ballory z odległością (`scenes/balora.tscn`):**
+  - Poprawiono błędny parametr `unit_size = 35.0m` (który powodował, że na całej 30-metrowej mapie Balora grała z pełną głośnością +7.5 dB) na `unit_size = 2.8m`.
+  - Ustawiono `max_distance = 32.0m` oraz bazową głośność `volume_db = 2.5 dB`.
+  - Dźwięk pozytywki płynnie i wyraźnie cichnie w miarę oddalania się, umożliwiając natychmiastową intuicyjną ocenę dystansu.
+
+### Modularne Noce (NightData), Optymalizacja TTS & Eskalacja co 10s — 16.09.2026
+- [x] **Modularna architektura nocy (`scripts/night_data.gd` & `resources/nights/*.tres`):**
+  - Stworzono klasę zasobu `NightData extends Resource`, która enkapsuluje wszystkie parametry nocy, zachowań wrogów, czasów i progów.
+  - Skonfigurowano pliki zasobów dla nocy 0-5 oraz **nowej Nocy 6 (Endless Void)**:
+    - `night_0.tres`: 60s, Pokój testowy / Tutorial (brak wrogów).
+    - `night_1.tres`: 30s, Balora (powolny patrol z przyspieszeniem).
+    - `night_2.tres`: 60s, Balora + Marionette.
+    - `night_3.tres`: 90s, Balora + Marionette + Foxy (cierpliwy łowca hałasu).
+    - `night_4.tres`: 90s, Balora + Marionette + aktywny Foxy + Phantom Grasp (macki).
+    - `night_5.tres`: 120s, Finał Koszmaru (Balora, 2x niezależny Foxy, Marionette, Phantom Grasp).
+    - `night_6_endless.tres`: 0.0s (Endless), nielimitowany czas przetrwania, wszyscy wrogowie aktywni z nieustanną eskalacją co 10s.
+  - Zaktualizowano `LevelManager`: ładowanie zasobów `NightData`, obsługa nocy 0-6 oraz automatyczna podmiana wybranej nocy po wygranej (`selected_night = unlocked_night`).
+- [x] **Rozbudowa UI Menu Głównego (`scenes/main_menu_ui.tscn` & `scripts/main_menu_ui.gd`):**
+  - Dodano przycisk `Night6Btn` (NIGHT 6 ENDLESS - THE VOID) z dynamicznym odczytem lektorskim.
+  - Podłączono sygnały `LevelManager.night_selected` i `night_unlocked` – po ukończeniu nocy etykieta głównego przycisku natychmiast przełącza się na kolejną odblokowaną noc (np. "START NIGHT 2").
+  - Teksty i opisy nocy w menu pobierane są dynamicznie z instancji `NightData`.
+- [x] **Optymalizacja TTS (`scripts/tts_manager.gd`):**
+  - Wyeliminowano mikroprzycięcia obrazu w goglach VR powodowane synchronicznym wywołaniem biblioteki SAPI Windows w wątku głównym.
+  - Zastosowano `call_deferred("_deferred_tts_speak", text, interrupt)`, delegując syntezę mowy do fazy *idle time* silnika Godot.
+- [x] **Rzeczywista eskalacja agresji wrogów co 10 sekund (`EventBus.milestone_reached`):**
+  - Wycięto przestarzały zhardkodowany blok przyspieszania Balory z `game_map.gd`.
+  - **Balora (`scripts/ballora.gd`):** Co 10 sekund gongu zwiększa prędkość patrolu i alertu (`speed_step = 0.08`) oraz **delikatnie poszerza obszary wykrywania gracza** (`alert_distance += 0.4`, `critical_distance += 0.2`).
+  - **Foxy (`scripts/foxy.gd`):** Co 10 sekund obniża próg tolerancji hałasu (`noise_threshold -= threshold_step`) oraz skraca cooldown po szarży.
+  - **Marionette (`scripts/marionette.gd`):** Skraca czas dozwolonej reakcji, skraca pauzy między szeptami i adaptacyjnie odpala serie wielokrotnych szeptów pod rząd w późniejszych etapach nocy.
+  - **Phantom Grasp (`scripts/phantom_grasp.gd`):** Skraca czas uśpienia między kolejnymi atakami macek na kontroler gracza.
+
+
+
 
 

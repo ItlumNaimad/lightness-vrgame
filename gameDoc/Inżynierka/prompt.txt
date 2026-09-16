@@ -1,0 +1,14 @@
+Coo level managera można spróbować ogarnąć resource'y by noce były modularne i można było łatwo zmieniać parametry nocy, dodawać nowe i np. dodać endless noc. 
+A do odtwarzania TTS (bo są lagi przez to)
+można użyć call_deferred:
+```
+[Variant](https://docs.godotengine.org/en/stable/classes/class_variant.html#class-variant) call_deferred(method: [StringName](https://docs.godotengine.org/en/stable/classes/class_stringname.html#class-stringname), ...) vararg
+Calls the method on the object during idle time. Always returns null, not the method's result.
+Idle time happens mainly at the end of process and physics frames. In it, deferred calls will be run until there are none left, which means you can defer calls from other deferred calls and they'll still be run in the current idle time cycle. This means you should not call a method deferred from itself (or from a method called by it), as this causes infinite recursion the same way as if you had called the method directly.
+This method supports a variable number of arguments, so parameters can be passed as a comma separated list.
+GDScriptC#
+var node = Node3D.new() node.call_deferred("rotate", Vector3(1.0, 0.0, 0.0), 1.571)
+For methods that are deferred from the same thread, the order of execution at idle time is identical to the order in which call_deferred was called.
+```
+
+Dodatkowo jeszcze trzeba zrobić mechanikę że co 10 sekund (co mamy sygnał ustawiony) przeciwnicy robią się agresywniejsi (a nie zhardkodowałeś w game_map.gd że balora na koniec robi się silniejsza)

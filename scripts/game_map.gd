@@ -7,6 +7,7 @@ var next_milestone: int = 10
 var target_night_duration: float = 60.0
 var current_night: int = 1
 var is_night_survived: bool = false
+var is_endless: bool = false
 
 @onready var timer_label: Label3D = $"Player/XROrigin3D/XRCamera3D/TimerLabel"
 @onready var milestone_audio: AudioStreamPlayer3D = $"Player/XROrigin3D/XRCamera3D/MilestoneAudio"
@@ -19,8 +20,6 @@ var is_night_survived: bool = false
 @onready var foxy2: Node3D = get_node_or_null("Foxy2")
 @onready var phantom_grasp: Node3D = get_node_or_null("PhantomGrasp")
 
-var _balora_boosted: bool = false
-var _balora_boost_time: float = 0.0
 var _player_head: Node3D
 var _cached_enemies: Array[Node] = []
 var _enemy_refresh_timer: float = 0.0
@@ -48,27 +47,46 @@ func _ready():
 	_refresh_nodes()
 
 func _setup_night_from_level_manager():
-	var cfg = LevelManager.get_current_night_config()
-	current_night = LevelManager.selected_night
-	target_night_duration = cfg.get("duration", 60.0)
-	_balora_boost_time = cfg.get("balora_boost_time", 0.0)
+	var night_data: NightData = LevelManager.get_current_night_data() if LevelManager else null
+	current_night = LevelManager.selected_night if LevelManager else 1
 	
-	var night_title = cfg.get("title", "Night 1")
-	var has_balora = cfg.get("has_balora", false)
-	var has_marionette = cfg.get("has_marionette", false)
-	var foxy_count = cfg.get("foxy_count", 0)
-	var foxy_threshold = cfg.get("foxy_threshold", 24.0)
-	var has_phantom_grasp = cfg.get("has_phantom_grasp", false)
+	var night_title = "Night %d" % current_night
+	var has_balora = true
+	var has_marionette = false
+	var foxy_count = 0
+	var has_phantom_grasp = false
 	
-	print("[GameMap] Konfiguracja Nocy %d: %s | Czas: %.0fs" % [current_night, night_title, target_night_duration])
+	if night_data:
+		night_title = night_data.title
+		target_night_duration = night_data.duration
+		is_endless = night_data.is_endless
+		has_balora = night_data.has_balora
+		has_marionette = night_data.has_marionette
+		foxy_count = night_data.foxy_count
+		has_phantom_grasp = night_data.has_phantom_grasp
+	else:
+		var cfg = LevelManager.get_current_night_config() if LevelManager else {}
+		target_night_duration = cfg.get("duration", 60.0)
+		is_endless = cfg.get("is_endless", false)
+		has_balora = cfg.get("has_balora", true)
+		has_marionette = cfg.get("has_marionette", false)
+		foxy_count = cfg.get("foxy_count", 0)
+		has_phantom_grasp = cfg.get("has_phantom_grasp", false)
+
+	print("[GameMap] Konfiguracja Nocy %d: %s | Czas: %.0fs | Endless: %s" % [current_night, night_title, target_night_duration, str(is_endless)])
 	
 	# 1. Balora
 	if balora:
 		if has_balora:
 			balora.process_mode = Node.PROCESS_MODE_INHERIT
-			var b_speed = cfg.get("balora_speed", 1.2)
-			if "patrol_speed" in balora:
-				balora.patrol_speed = b_speed
+			if night_data:
+				if "patrol_speed" in balora: balora.patrol_speed = night_data.balora_base_speed
+				if "alert_speed" in balora: balora.alert_speed = night_data.balora_base_speed + 0.3
+				if "speed_step" in balora: balora.speed_step = night_data.balora_speed_step
+				if "max_speed" in balora: balora.max_speed = night_data.balora_max_speed
+				if "alert_distance" in balora: balora.alert_distance = night_data.balora_alert_distance
+				if "critical_distance" in balora: balora.critical_distance = night_data.balora_critical_distance
+				if "detection_step" in balora: balora.detection_step = night_data.balora_detection_step
 			if balora.has_node("BaloraTheme"):
 				(balora.get_node("BaloraTheme") as AudioStreamPlayer3D).play()
 		else:
@@ -78,6 +96,11 @@ func _setup_night_from_level_manager():
 	if marionette:
 		if has_marionette:
 			marionette.process_mode = Node.PROCESS_MODE_INHERIT
+			if night_data:
+				if "long_pause_min" in marionette: marionette.long_pause_min = night_data.marionette_interval_min
+				if "long_pause_max" in marionette: marionette.long_pause_max = night_data.marionette_interval_max
+				if "interval_step" in marionette: marionette.interval_step = night_data.marionette_interval_step
+				if "allow_sequential_whispers" in marionette: marionette.allow_sequential_whispers = night_data.allow_sequential_whispers
 		else:
 			marionette.queue_free()
 			
@@ -85,17 +108,23 @@ func _setup_night_from_level_manager():
 	if foxy:
 		if foxy_count >= 1:
 			foxy.process_mode = Node.PROCESS_MODE_INHERIT
-			if "noise_threshold" in foxy:
-				foxy.noise_threshold = foxy_threshold
+			if night_data:
+				if "noise_threshold" in foxy: foxy.noise_threshold = night_data.foxy_initial_threshold
+				if "threshold_step" in foxy: foxy.threshold_step = night_data.foxy_threshold_step
+				if "min_threshold" in foxy: foxy.min_threshold = night_data.foxy_min_threshold
+				if "charge_speed" in foxy: foxy.charge_speed = night_data.foxy_charge_speed
 		else:
 			foxy.queue_free()
 			
-	# 4. Foxy 2 (Finał Noc 5)
+	# 4. Foxy 2 (Finał Noc 5 / Endless)
 	if foxy2:
 		if foxy_count >= 2:
 			foxy2.process_mode = Node.PROCESS_MODE_INHERIT
-			if "noise_threshold" in foxy2:
-				foxy2.noise_threshold = foxy_threshold
+			if night_data:
+				if "noise_threshold" in foxy2: foxy2.noise_threshold = night_data.foxy_initial_threshold
+				if "threshold_step" in foxy2: foxy2.threshold_step = night_data.foxy_threshold_step
+				if "min_threshold" in foxy2: foxy2.min_threshold = night_data.foxy_min_threshold
+				if "charge_speed" in foxy2: foxy2.charge_speed = night_data.foxy_charge_speed
 		else:
 			foxy2.queue_free()
 			
@@ -103,6 +132,10 @@ func _setup_night_from_level_manager():
 	if phantom_grasp:
 		if has_phantom_grasp:
 			phantom_grasp.process_mode = Node.PROCESS_MODE_INHERIT
+			if night_data:
+				if "min_dormant_time" in phantom_grasp: phantom_grasp.min_dormant_time = night_data.phantom_grasp_interval_min
+				if "max_dormant_time" in phantom_grasp: phantom_grasp.max_dormant_time = night_data.phantom_grasp_interval_max
+				if "interval_step" in phantom_grasp: phantom_grasp.interval_step = night_data.phantom_grasp_interval_step
 		else:
 			phantom_grasp.queue_free()
 			
@@ -110,6 +143,8 @@ func _setup_night_from_level_manager():
 	if TTSManager:
 		if current_night == 0:
 			TTSManager.speak("Night zero: Test Room. Safe exploration. Practice walking and sound localization.", true)
+		elif is_endless:
+			TTSManager.speak("%s. Survive as long as you can." % night_title, true)
 		else:
 			TTSManager.speak("%s. Survive %d seconds." % [night_title, int(target_night_duration)], true)
 
@@ -145,19 +180,8 @@ func _process(delta: float):
 	if timer_label:
 		timer_label.text = "%02d:%02d" % [minutes, seconds]
 
-	# Balora boost pod koniec nocy (Noc 1)
-	if _balora_boost_time > 0.0 and not _balora_boosted:
-		if (target_night_duration - time_survived) <= _balora_boost_time:
-			_balora_boosted = true
-			if is_instance_valid(balora) and "patrol_speed" in balora:
-				balora.patrol_speed = 2.4
-				if balora.has_node("BaloraTheme"):
-					var th = balora.get_node("BaloraTheme") as AudioStreamPlayer3D
-					th.pitch_scale = 1.35
-				print("[GameMap] Balora przyspiesza na koniec nocy!")
-
-	# Warunek przetrwania nocy (6:00 AM)
-	if target_night_duration > 0.0 and time_survived >= target_night_duration:
+	# Warunek przetrwania nocy (6:00 AM) - tylko dla trybów ze skończonym czasem
+	if not is_endless and target_night_duration > 0.0 and time_survived >= target_night_duration:
 		_on_night_survived()
 		return
 

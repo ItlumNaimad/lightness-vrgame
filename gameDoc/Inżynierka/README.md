@@ -90,30 +90,38 @@
 ---
 
 ## 🌙 Struktura Poziomów (System Nocy / FNaF Style)
-Gra zorganizowana jest w 6 zróżnicowanych nocy, wprowadzających gracza krok po kroku w mechaniki sensoryczne:
-1. **Noc 0 (Test Room)**: Bezpieczna eksploracja, test echolokacji, kolizji ze ścianą i lokalizacji dźwięków w przestrzeni 3D.
+Gra zorganizowana jest w 7 zróżnicowanych nocy (w tym tryb nieskończony), wprowadzających gracza krok po kroku w mechaniki sensoryczne:
+1. **Noc 0 (Test Room - 60s)**: Bezpieczna eksploracja, trening fizyki chodu, uderzeń w ściany (kierunkowe stuknięcie 3D i haptyka L/R) i lokalizacji dźwięków w przestrzeni 3D bez wrogów.
 2. **Noc 1 (30s)**: Powolna Balora, nauka oceny odległości na słuch, finisz z przyspieszoną pozytywką.
-3. **Noc 2 (60s)**: Balora przyspieszająca co 10s + Marionette atakująca co 20s (zwieńczona podwójnym szeptem).
-4. **Noc 3**: Wprowadzenie Foxy'ego o wysokiej tolerancji na hałas. Nauka mechaniki ciszy i bloku.
-5. **Noc 4**: Eskalacja agresji Foxy'ego, serie szeptów Marionetki i uściski Phantom Grasp.
-6. **Noc 5 (Finał)**: Podwójny Foxy, superszybka Balora i pełna presja sensoryczna.
-
+3. **Noc 2 (60s)**: Balora przyspieszająca co 10s + Marionette atakująca szeptami z mroku.
+4. **Noc 3 (90s)**: Dołącza Foxy reagujący na kumulatywny hałas biegu i kolizji. Nauka mechaniki ciszy i bloku kontrolerem.
+5. **Noc 4 (90s)**: Aktywniejszy Foxy (niższy próg hałasu), częstsza Marionette i ataki macek Phantom Grasp chwytających kontroler.
+6. **Noc 5 (Finał Koszmaru - 120s)**: Maksymalna prędkość Balory + **2x niezależny Foxy** (dwóch łowców szarżujących z różnych stron) + Marionette + Phantom Grasp.
+7. **Noc 6 (The Void - Endless)**: Tryb bez limitu czasu. Wszyscy przeciwnicy aktywni na mapie, nieustanny wzrost prędkości i agresji co każde 10 sekund gongu, aż do śmierci gracza.
 
 ---
 
 ## 🎧 Aktualizacja sensoryczna i gameplayowa (16.09.2026)
 Wdrożono kluczowe poprawki na podstawie testów VR z dnia 16.09.2026:
 - **Niezależne szyny audio (`default_bus_layout.tres`):** Pełna kontrola suwakami w UI nad głośnością szyn: Master, Enemies (dźwięki przeciwników), Footsteps (kroki gracza), Whoosh (odgłos obrotu) oraz Jumpscare.
-- **Usunięcie kompasu:** Skasowano dezorientujący dźwięk dzwonka kompasu (`Broken bell.ogg`); nawigacja obrotowa opiera się wyłącznie na czystym Whooshu.
+- **Usunięcie kompasu i sztucznego obrotu:** Skasowano dezorientujący dźwięk dzwonka kompasu (`Broken bell.ogg`) oraz sztuczny snap-turn joystickiem – gracz obraca się w 100% naturalnie całym ciałem w 360°.
 - **Marionette (Dystans, Odpędzanie):** Zwiększono dystans spawnu do 1.5m-2.4m, dodano wymóg uniesienia i wyciągnięcia dłoni w kierunku szeptu (obrót z rękami przy pasie nie odpędza wroga). Zrezygnowano z mechaniki Whisper Freeze, zapewniając stabilny czas na orientację w przestrzeni.
 - **Phantom Grasp (Wyszarpywanie, Spowolnienie i Blokada Sprintu):** Zastąpiono podwójne całkowanie prostą detekcją 2 gwałtownych potrząśnięć kontrolerem z feedbackiem haptycznym. Podczas chwytu macek gracz zostaje natychmiast spowolniony (`max_speed = 1.0`), a sprint zostaje zablokowany aż do oswobodzenia.
-- **Ballora (Donośność pozytywki):** Zwiększono zasięg do 65m, `unit_size` do 35.0 i `volume_db` do 7.5 dB z modelem liniowym, przywracając orientację słuchową z oddali.
+- **Ballora (Donośność i tłumienie pozytywki):** Zbalansowano model tłumienia (`unit_size = 2.8m`, `max_distance = 32.0m`, `volume_db = 2.5 dB`), dzięki czemu pozytywka płynnie cichnie z odległością, umożliwiając intuicyjne namierzanie wroga.
 - **Kroki:** Wstrzymywanie poprzednich instancji przed nowym stąpnięciem, eliminując nakładanie się 12-sekundowych próbek.
-- **Interfejs VR (Hold Button & Pauza):** Zwiększono rozmiary przycisków w menu, skonsumowano zdarzenia `InputEventScreenTouch` z viewportu VR, wymuszając aktywację **wyłącznie po przytrzymaniu triggera przez 0.65s** (brak przypadkowych kliknięć). Dodano alternatywne mapowanie pauzy (`by_button` Y/B oraz Escape/P).
+- **Interfejs VR (Hold Button & Pauza):** Zwiększono rozmiary przycisków w menu, wyzerowano `button_mask = 0`, wymuszając aktywację **wyłącznie po przytrzymaniu triggera przez 0.65s** (brak przypadkowych kliknięć). Dodano alternatywne mapowanie pauzy (`by_button` Y/B oraz Escape/P).
 - **Poprawki UX & Dostępności (Nawigacja i Dźwięk):**
   - Wycięto sound beam (dzwonek echolokacji) z przycisku A, eliminując kolizje z zatwierdzaniem UI.
   - Zablokowano odczytywanie menu pauzy przez TTS podczas poruszania się gracza joystickiem na mapie gry.
   - Wdrożono dwuosiową nawigację w menu Ustawień: gałka góra/dół wybiera wiersz (podświetlany neonem), gałka lewo/prawo płynnie zmienia głośność o ±10% z odczytem TTS i haptyką.
   - Wybór nocy w Select Night natychmiast rozpoczyna rozgrywkę bez zbędnych kroków.
+- **Percepcja Przestrzenna & Rytm Wrogów:**
+  - **Kierunkowe uderzenia w ściany:** Dźwięk 3D zlokalizowany po stronie zderzenia (lewa/prawa/przód/róg), podwyższona donośność (9.5 dB) i kierunkowa haptyka na kontrolerach L/R z podwójnym tąpnięciem w narożnikach.
+  - **Rytm kroków Foxy'ego:** Poruszanie się skokowe w cyklu 2.5s (0.65s krok naprzód z dźwiękiem stąpnięcia, 1.85s bezruch i nasłuch), co ułatwia precyzyjne lokalizowanie łowcy na słuch.
+- **Modularne Noce (NightData), Optymalizacja TTS i Eskalacja Agresji:**
+  - Architektura oparta na zasobach `NightData` (`resources/nights/night_*.tres`) – łatwa modyfikacja i dodawanie nocy oraz Noc 6 Endless.
+  - Auto-podmiana odblokowanej nocy w Menu Głównym (przycisk Start natychmiast wskazuje nową noc).
+  - Eliminacja mikroprzycięć VR poprzez asynchroniczną delegację mowy TTS do idle time (`call_deferred`).
+  - Prawdziwa eskalacja trudności co 10s gongu (`EventBus.milestone_reached`) we wszystkich przeciwnikach, w tym stopniowe poszerzanie pola wykrywania gracza przez Balorę.
 
-*Ostatnia aktualizacja:* v0.5.2 (16.09.2026) — Wdrożenie szyn audio, nawigacja joystickiem VR w menu, bezpieczny Hold Button, natychmiastowy Select Night i eliminacja konfliktów audio.
+*Ostatnia aktualizacja:* v0.6.0 (16.09.2026) — Modularny system nocy (NightData), Noc Endless, asynchroniczny TTS, automatyczna progresja w menu, eskalacja agresji co 10s i kierunkowe stuknięcia w ściany.

@@ -5,12 +5,17 @@ enum State { PATROL, ALERT, CHASE, COOLDOWN }
 @export var patrol_speed: float = 0.9
 @export var alert_speed: float = 1.2
 @export var chase_speed: float = 2.4
+@export var speed_step: float = 0.08
+@export var max_speed: float = 2.8
 
 ## Zasięg strefy Alertu (Balora zauważa obecność gracza)
 @export var alert_distance: float = 7.5
 
 ## Zasięg strefy Krytycznej (natychmiastowy pościg)
 @export var critical_distance: float = 3.5
+
+## Stopniowe poszerzanie obszaru wykrywania gracza co 10s
+@export var detection_step: float = 0.4
 
 ## Czas obecności w strefie alertu wywołujący pościg (sekundy)
 @export var max_alert_duration: float = 3.5
@@ -50,6 +55,10 @@ func _ready():
 	if jumpscare_trigger:
 		jumpscare_trigger.body_entered.connect(_on_body_entered)
 	
+	if EventBus:
+		if not EventBus.milestone_reached.is_connected(_on_milestone_reached):
+			EventBus.milestone_reached.connect(_on_milestone_reached)
+
 	_find_player()
 	
 	if nav_agent:
@@ -57,6 +66,16 @@ func _ready():
 		nav_agent.target_desired_distance = 1.5
 
 	_enter_patrol()
+
+func _on_milestone_reached(milestone: int) -> void:
+	if current_state == State.CHASE or is_jumpscaring:
+		return
+	patrol_speed = minf(patrol_speed + speed_step, max_speed)
+	alert_speed = minf(alert_speed + speed_step, max_speed + 0.3)
+	# Delikatne poszerzenie obszaru wykrywania gracza
+	alert_distance = minf(alert_distance + detection_step, 12.0)
+	critical_distance = minf(critical_distance + (detection_step * 0.5), 5.5)
+	print("[Balora] Eskalacja (milestone %ds): patrol_speed=%.2f, alert_dist=%.1f, crit_dist=%.1f" % [milestone, patrol_speed, alert_distance, critical_distance])
 
 func _find_player():
 	var head = get_tree().get_first_node_in_group("player_head")

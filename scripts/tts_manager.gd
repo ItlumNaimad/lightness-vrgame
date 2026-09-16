@@ -64,6 +64,14 @@ func speak(text: String, interrupt: bool = true) -> void:
 func _execute_speak(text: String, interrupt: bool = true) -> void:
 	if not tts_enabled or text.is_empty():
 		return
+	# Delegacja do fazy idle time, aby wywołanie SAPI nie blokowało bieżącej klatki VR
+	call_deferred("_deferred_tts_speak", text, interrupt)
+
+func _deferred_tts_speak(text: String, interrupt: bool) -> void:
+	if not tts_enabled or text.is_empty():
+		return
+	if not DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH):
+		return
 		
 	var now = Time.get_ticks_msec() / 1000.0
 	if text == _last_spoken_text and (now - _last_spoken_time) < 0.35:
@@ -82,6 +90,7 @@ func _execute_speak(text: String, interrupt: bool = true) -> void:
 		if voices.size() > 0:
 			current_voice_id = voices[0]["id"]
 			DisplayServer.tts_speak(text, current_voice_id, voice_volume, 1.0, voice_rate)
+
 
 ## Zatrzymuje aktualną mowę
 func stop() -> void:

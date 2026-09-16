@@ -30,6 +30,12 @@ var current_state: State = State.HIDDEN
 @export var min_whisper_rounds: int = 1
 @export var max_whisper_rounds: int = 3
 
+## Krok skracania przerw między seriami szeptów co 10s
+@export var interval_step: float = 1.0
+
+## Czy dozwolone są serie wielu szeptów pod rząd
+@export var allow_sequential_whispers: bool = false
+
 ## Przerwa między szeptami w serii (sekundy)
 @export var series_pause_min: float = 1.0
 @export var series_pause_max: float = 2.5
@@ -103,14 +109,21 @@ func _find_player():
 
 func _on_milestone_reached(milestone: int):
 	# Eskalacja trudności Marionetki wraz z czasem przetrwania
-	attack_duration_limit = max(3.0, 5.5 - float(milestone) / 60.0 * 1.5)
-	if milestone >= 30:
-		min_whisper_rounds = 2
-		max_whisper_rounds = 4
-	if milestone >= 60:
-		min_whisper_rounds = 3
-		max_whisper_rounds = 5
-	print("Marionette eskalacja! Czas reakcji: ", attack_duration_limit, "s, serie: ", min_whisper_rounds, "-", max_whisper_rounds)
+	attack_duration_limit = maxf(3.2, attack_duration_limit - 0.2)
+	long_pause_min = maxf(6.0, long_pause_min - interval_step)
+	long_pause_max = maxf(11.0, long_pause_max - interval_step)
+	
+	if allow_sequential_whispers:
+		if milestone >= 30:
+			min_whisper_rounds = 2
+			max_whisper_rounds = 3
+		if milestone >= 60:
+			min_whisper_rounds = 2
+			max_whisper_rounds = 4
+	else:
+		min_whisper_rounds = 1
+		max_whisper_rounds = 1
+	print("[Marionette] Eskalacja (milestone %ds)! Czas reakcji: %.1fs, pauzy: %.1f-%.1fs, serie: %d-%d" % [milestone, attack_duration_limit, long_pause_min, long_pause_max, min_whisper_rounds, max_whisper_rounds])
 
 func _process(delta: float):
 	if camera == null:
