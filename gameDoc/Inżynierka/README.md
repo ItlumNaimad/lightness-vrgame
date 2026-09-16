@@ -98,4 +98,4 @@ Gra zorganizowana jest w 6 zróżnicowanych nocy, wprowadzających gracza krok p
 5. **Noc 4**: Eskalacja agresji Foxy'ego, serie szeptów Marionetki i uściski Phantom Grasp.
 6. **Noc 5 (Finał)**: Podwójny Foxy, superszybka Balora i pełna presja sensoryczna.
 
-*Ostatnia aktualizacja:* v0.5.2 — Realizacja audytu technicznego i poprawek stabilności (Fade, tracking kamery gracza, semantyka audio, kolizje ze ścianami, stany Balory, odpędzanie Marionetki, Phantom Grasp, Echolokacja, Menu Pauzy VR, wyłącznik TTS, failsafe pauzy).
+*Ostatnia aktualizacja:* v0.5.2 — Realizacja audytu technicznego i poprawek stabilności (eliminacja crasha wejścia w ścianę w PlayerAudioManager, optymalizacja runtime NavMesh na CPU, pełna eliminacja ostrzeżeń tool/footstep pool, failsafe pauzy i zabezpieczenia coroutines).

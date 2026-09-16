@@ -1005,6 +1005,28 @@ Ręczne celowanie wskaźnikiem laserowym VR (`FunctionPointer`) w trójwymiarow�
    - Wciśnięcie przycisku **A** (lub spustu kontrolera / `ui_accept`) natychmiast wykonuje akcję przycisku (`pressed`), bez konieczności celowania ręką.
 4. **Pointer jako Opcja Pomocnicza:**
    - Wskaźnik laserowy pozostaje dostępny dla osób widzących lub słabowidzących, jednak pętla sterowania joystickiem jest w pełni samowystarczalna.
+## 27. Stabilizacja fizyki kolizji ze ścianami i optymalizacja NavMesh (v0.5.2)
+
+1. **Eliminacja crasha przy uderzeniu w ścianę (`Invalid cast to Vector3`):**
+   - **Przyczyna**: W `scripts/player_audio_manager.gd` weryfikacja ruchu gracza przy ścianie rzutowała `player_body.ground_control_velocity` za pomocą `as Vector3`. W Godot XR Tools właściwość ta jest typu `Vector2` (płaszczyzna wejścia gałki analogowej). Próba rzutowania na niezgodny typ rzucała wyjątek wykonania i natychmiast crashowała grę przy zetknięciu ze ścianą.
+   - **Rozwiązanie**: Wprowadzono bezpieczne rozróżnienie typów `if gcv is Vector2 or gcv is Vector3` i bezpośredni odczyt długości wektora `.length() > 0.4`.
+
+2. **Likwidacja ostrzeżenia `MISSING_TOOL` w `game_map.gd`:**
+   - Klasa bazowa `XRToolsSceneBase` posiada adnotację `@tool`. Dodano `@tool` na początku `scripts/game_map.gd` wraz ze strażnikiem `if Engine.is_editor_hint(): return` w metodach `_ready()` i `_process()`, izolując logikę gry przed przypadkowym wykonaniem w edytorze.
+
+3. **Optymalizacja pieczenia NavMesh w runtime (CPU vs GPU):**
+   - W `scenes/game_map.tscn` w zasobie `NavigationMesh_new` włączono `geometry_parsed_geometry_type = 1` (`PARSED_GEOMETRY_STATIC_COLLIDERS`), dzięki czemu NavMesh parsuje kształty kolizyjne `StaticBody3D` bezpośrednio na CPU zamiast wyciągać wizualne siatki z pamięci GPU w runtime (co blokowało renderowanie klatek VR).
+   - Skorygowano `cell_size` i `cell_height` do wartości standardowej `0.25`, likwidując ostrzeżenia o niedopasowaniu siatek i utracie precyzji promienia agenta.
+
+4. **Płynna pula kroków audio (`XRToolsMovementFootstep`):**
+   - Zwiększono rozmiar puli odtwarzaczy kroków w `addons/godot-xr-tools/functions/movement_footstep.gd` z 3 do 8 oraz wdrożono mechanizm recyklingu najstarszego grającego odtwarzacza w razie chwilowego wyczerpania puli. Zapobiega to gubieniu odgłosów kroków podczas szybkiego marszu lub sprintu.
+   
+## Ustalenia 16.09.2026 po przetestowaniu zmian po Audycie
+- Do wywalenia dźwięk kompas. Nie pomaga
+- Dodać oddzielne ustawienia dźwięku kroków, dźwięków przeciwników, efektu woosh po obrocie i jumpscare'u
+- Marionette powinna być trochę wyżej bo bywa, że sam obrót gracza gdy ręce ma na dole pozbywa się jej.
+- Przemyśleć jakąś mechanikę przeciwnika, która albo zatrzymuje gracza albo zmusza go do zatrzymania (tak jak poprzednia marionette) bo to stresowało gracza i budowało napięcie.
+-
 ````
 
 ## File: gameDoc/Inżynierka/README.md
@@ -1109,161 +1131,7 @@ Gra zorganizowana jest w 6 zróżnicowanych nocy, wprowadzających gracza krok p
 5. **Noc 4**: Eskalacja agresji Foxy'ego, serie szeptów Marionetki i uściski Phantom Grasp.
 6. **Noc 5 (Finał)**: Podwójny Foxy, superszybka Balora i pełna presja sensoryczna.
 
-*Ostatnia aktualizacja:* v0.5.2 — Realizacja audytu technicznego i poprawek stabilności (Fade, tracking kamery gracza, semantyka audio, kolizje ze ścianami, stany Balory, odpędzanie Marionetki, Phantom Grasp, Echolokacja, Menu Pauzy VR, wyłącznik TTS, failsafe pauzy).
-````
-
-## File: scenes/pause_menu_ui.tscn
-````
-[gd_scene load_steps=5 format=3]
-
-[ext_resource type="Script" uid="uid://dnxve3m5i3n4j" path="res://scripts/pause_menu_ui.gd" id="1_script"]
-[ext_resource type="Script" uid="uid://csj733r2xrc37" path="res://scripts/hold_button.gd" id="2_hold"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
-bg_color = Color(0.06, 0.07, 0.08, 0.95)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.3, 0.35, 0.4, 0.8)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
-bg_color = Color(0.12, 0.14, 0.16, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.25, 0.3, 0.35, 0.7)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
-[node name="PauseMenuUI" type="Control"]
-process_mode = 3
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("1_script")
-
-[node name="CenterContainer" type="CenterContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
-custom_minimum_size = Vector2(480, 420)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
-
-[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer"]
-layout_mode = 2
-theme_override_constants/margin_left = 32
-theme_override_constants/margin_top = 32
-theme_override_constants/margin_right = 32
-theme_override_constants/margin_bottom = 32
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
-layout_mode = 2
-theme_override_constants/separation = 20
-
-[node name="TitleLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 36
-text = "GAME PAUSED"
-horizontal_alignment = 1
-
-[node name="HSeparator" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="ResumeBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 56)
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
-text = "RESUME"
-script = ExtResource("2_hold")
-
-[node name="RestartBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 56)
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
-text = "RESTART MAP"
-script = ExtResource("2_hold")
-
-[node name="MenuBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 56)
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
-text = "MAIN MENU"
-script = ExtResource("2_hold")
-
-[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ResumeBtn" to="." method="_on_resume_pressed"]
-[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/RestartBtn" to="." method="_on_restart_pressed"]
-[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/MenuBtn" to="." method="_on_menu_pressed"]
-````
-
-## File: scenes/pause_menu.tscn
-````
-[gd_scene load_steps=4 format=3]
-
-[ext_resource type="Script" uid="uid://bcr15wxo5bwsm" path="res://scripts/pause_menu.gd" id="1_pause"]
-[ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="2_vp"]
-[ext_resource type="PackedScene" path="res://scenes/pause_menu_ui.tscn" id="3_ui"]
-
-[node name="PauseMenu" type="Node3D"]
-process_mode = 3
-script = ExtResource("1_pause")
-
-[node name="Viewport2Din3D" parent="." instance=ExtResource("2_vp")]
-screen_size = Vector2(1.2, 0.9)
-scene = ExtResource("3_ui")
-viewport_size = Vector2(600, 480)
-input_gamepad = true
-unshaded = true
-````
-
-## File: scenes/phantom_grasp.tscn
-````
-[gd_scene format=3]
-
-[ext_resource type="Script" uid="uid://ck2hvdc2sbygk" path="res://scripts/phantom_grasp.gd" id="1_grasp"]
-[ext_resource type="AudioStream" uid="uid://dn1d2v8onqbl" path="res://assets/sounds/marionette/257784__xtrgamr__ominous-whispers.wav" id="2_crawl"]
-[ext_resource type="AudioStream" uid="uid://c7yasims5j5dg" path="res://assets/sounds/danger.wav" id="3_grab"]
-[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="4_jump"]
-
-[node name="PhantomGrasp" type="Node3D" groups=["enemy"]]
-script = ExtResource("1_grasp")
-
-[node name="CrawlSound" type="AudioStreamPlayer3D" parent="."]
-stream = ExtResource("2_crawl")
-volume_db = 2.0
-unit_size = 8.0
-max_distance = 15.0
-pitch_scale = 0.65
-
-[node name="GrabSound" type="AudioStreamPlayer3D" parent="."]
-stream = ExtResource("3_grab")
-volume_db = 8.0
-unit_size = 10.0
-max_distance = 20.0
-pitch_scale = 1.3
-
-[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="."]
-stream = ExtResource("4_jump")
-volume_db = 10.0
+*Ostatnia aktualizacja:* v0.5.2 — Realizacja audytu technicznego i poprawek stabilności (eliminacja crasha wejścia w ścianę w PlayerAudioManager, optymalizacja runtime NavMesh na CPU, pełna eliminacja ostrzeżeń tool/footstep pool, failsafe pauzy i zabezpieczenia coroutines).
 ````
 
 ## File: scripts/ballora.gd.uid
@@ -1762,6 +1630,160 @@ Dzięki temu po ponownym otwarciu projektu będzie możliwe odtworzenie pełnego
 - Jeżeli zauważysz, że jakaś funkcjonalność jest zbędna, niepotrzebnie skomplikowana lub sprawia problemy - zaproponuj zmianę i opisz w dokumentacji dlaczego jest to uzasadnione
 - W przypadku zmian, które mogą wpłynąć na stabilność projektu (np. zmiana architektury, dodawanie nowych, złożonych mechanizmów) - konieczne jest opisanie i uzasadnienie tej zmiany w dokumentacji
 - Rzeczy, które warto praktykować w przyszłych implementacjach/to czego można się nauczyć na bazie konwersacji/internetu możesz zaproponować do zrobienia własnego SKILL.md
+````
+
+## File: scenes/pause_menu_ui.tscn
+````
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" uid="uid://dnxve3m5i3n4j" path="res://scripts/pause_menu_ui.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://csj733r2xrc37" path="res://scripts/hold_button.gd" id="2_hold"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.06, 0.07, 0.08, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.3, 0.35, 0.4, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
+bg_color = Color(0.12, 0.14, 0.16, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.3, 0.35, 0.7)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="PauseMenuUI" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(480, 420)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "GAME PAUSED"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ResumeBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "RESUME"
+script = ExtResource("2_hold")
+
+[node name="RestartBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "RESTART MAP"
+script = ExtResource("2_hold")
+
+[node name="MenuBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "MAIN MENU"
+script = ExtResource("2_hold")
+
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/ResumeBtn" to="." method="_on_resume_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/RestartBtn" to="." method="_on_restart_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/MenuBtn" to="." method="_on_menu_pressed"]
+````
+
+## File: scenes/pause_menu.tscn
+````
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" uid="uid://bcr15wxo5bwsm" path="res://scripts/pause_menu.gd" id="1_pause"]
+[ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="2_vp"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu_ui.tscn" id="3_ui"]
+
+[node name="PauseMenu" type="Node3D"]
+process_mode = 3
+script = ExtResource("1_pause")
+
+[node name="Viewport2Din3D" parent="." instance=ExtResource("2_vp")]
+screen_size = Vector2(1.2, 0.9)
+scene = ExtResource("3_ui")
+viewport_size = Vector2(600, 480)
+input_gamepad = true
+unshaded = true
+````
+
+## File: scenes/phantom_grasp.tscn
+````
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://ck2hvdc2sbygk" path="res://scripts/phantom_grasp.gd" id="1_grasp"]
+[ext_resource type="AudioStream" uid="uid://dn1d2v8onqbl" path="res://assets/sounds/marionette/257784__xtrgamr__ominous-whispers.wav" id="2_crawl"]
+[ext_resource type="AudioStream" uid="uid://c7yasims5j5dg" path="res://assets/sounds/danger.wav" id="3_grab"]
+[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="4_jump"]
+
+[node name="PhantomGrasp" type="Node3D" groups=["enemy"]]
+script = ExtResource("1_grasp")
+
+[node name="CrawlSound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("2_crawl")
+volume_db = 2.0
+unit_size = 8.0
+max_distance = 15.0
+pitch_scale = 0.65
+
+[node name="GrabSound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("3_grab")
+volume_db = 8.0
+unit_size = 10.0
+max_distance = 20.0
+pitch_scale = 1.3
+
+[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("4_jump")
+volume_db = 10.0
 ````
 
 ## File: scripts/event_bus.gd
@@ -3073,8 +3095,63 @@ func _on_block_entered(body: Node3D):
 		_enter_idle()
 ````
 
+## File: scenes/balora.tscn
+````
+[gd_scene format=3 uid="uid://b4ml2o2jh5ooc"]
+
+[ext_resource type="Script" uid="uid://40tyohs7i6dm" path="res://scripts/ballora.gd" id="1_2mo37"]
+[ext_resource type="AudioStream" uid="uid://digrgt0cu802o" path="res://assets/sounds/ballora.mp3" id="2_yfgsf"]
+[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="3_24ggd"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_balora"]
+radius = 0.761
+height = 2.778
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2mo37"]
+diffuse_mode = 1
+albedo_color = Color(0.35782948, 0.00011021942, 0.36967972, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_yfgsf"]
+material = SubResource("StandardMaterial3D_2mo37")
+radius = 0.761
+height = 2.778
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_jumpscare"]
+radius = 1.3971037
+
+[node name="Balora" type="CharacterBody3D" unique_id=1656694762 groups=["enemy"]]
+collision_layer = 2
+script = ExtResource("1_2mo37")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=237287144]
+shape = SubResource("CapsuleShape3D_balora")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1056769905]
+mesh = SubResource("CapsuleMesh_yfgsf")
+
+[node name="BaloraTheme" type="AudioStreamPlayer3D" parent="." unique_id=1844263034]
+stream = ExtResource("2_yfgsf")
+volume_db = 4.009
+unit_size = 23.5
+autoplay = true
+max_distance = 20.11
+
+[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=566194156]
+stream = ExtResource("3_24ggd")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=854780239]
+
+[node name="JumpscareTrigger" type="Area3D" parent="." unique_id=24209624]
+collision_layer = 0
+collision_mask = 524289
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpscareTrigger" unique_id=131938276]
+shape = SubResource("SphereShape3D_jumpscare")
+````
+
 ## File: scripts/game_map.gd
 ````
+@tool
 extends XRToolsSceneBase
 
 var time_survived: float = 0.0
@@ -3106,6 +3183,9 @@ var _cached_enemies: Array[Node] = []
 var _enemy_refresh_timer: float = 0.0
 
 func _ready():
+	if Engine.is_editor_hint():
+		return
+		
 	if timer_label == null:
 		push_warning("TimerLabel niedostępny — HUD wyłączony (gra działa dalej).")
 	if milestone_audio == null:
@@ -3154,6 +3234,9 @@ func _deferred_bake_navmesh():
 	nav_region.bake_navigation_mesh()
 	
 func _process(delta: float):
+	if Engine.is_editor_hint():
+		return
+		
 	if not is_timer_running:
 		return
 	
@@ -3255,281 +3338,6 @@ func stop_timer_and_save():
 	is_timer_running = false
 	# Zapisanie wyniku do pamięci
 	SceneLoader.last_survival_time = time_survived
-````
-
-## File: scripts/player_audio_manager.gd
-````
-extends Node
-class_name PlayerAudioManager
-
-@export var rotation_threshold_degrees: float = 8.0
-@export var walk_noise_level: float = 1.0
-@export var sprint_noise_level: float = 2.8
-@export var wall_noise_level: float = 3.5
-@export var wall_cooldown: float = 0.4
-@export var echolocation_noise_level: float = 4.5
-@export var echolocation_cooldown: float = 2.0
-
-@onready var origin: XROrigin3D = get_node_or_null("../XROrigin3D")
-@onready var turn_audio_player: AudioStreamPlayer = $TurnAudioPlayer
-@onready var footstep_provider = get_node_or_null("../XROrigin3D/MovementFootstep")
-@onready var sprint_provider = get_node_or_null("../XROrigin3D/MovementSprint")
-@onready var player_body: CharacterBody3D = get_node_or_null("../XROrigin3D/PlayerBody")
-
-var left_ctrl: XRController3D
-var right_ctrl: XRController3D
-
-var _last_rotation_y: float = 0.0
-var _accumulated_turn: float = 0.0
-var _wall_hit_timer: float = 0.0
-var _compass_cooldown_timer: float = 0.0
-var _echolocation_timer: float = 0.0
-
-func _ready():
-	if origin == null and get_parent():
-		origin = get_parent().get_node_or_null("XROrigin3D")
-		
-	if origin:
-		if footstep_provider == null:
-			footstep_provider = origin.get_node_or_null("MovementFootstep")
-		if sprint_provider == null:
-			sprint_provider = origin.get_node_or_null("MovementSprint")
-		if player_body == null:
-			player_body = origin.get_node_or_null("PlayerBody")
-		left_ctrl = origin.get_node_or_null("left_hand") as XRController3D
-		right_ctrl = origin.get_node_or_null("right_hand") as XRController3D
-		_last_rotation_y = origin.global_transform.basis.get_euler().y
-		
-	if footstep_provider and not footstep_provider.footstep.is_connected(_on_footstep):
-		footstep_provider.footstep.connect(_on_footstep)
-
-func _physics_process(delta: float):
-	if _wall_hit_timer > 0.0:
-		_wall_hit_timer -= delta
-	if _compass_cooldown_timer > 0.0:
-		_compass_cooldown_timer -= delta
-	if _echolocation_timer > 0.0:
-		_echolocation_timer -= delta
-
-	# 1. Wykrywanie kolizji ze ścianami (hałas, dźwięk uderzenia, haptyka)
-	if player_body and player_body.is_on_wall() and _wall_hit_timer <= 0.0:
-		var moving := false
-		if "ground_control_velocity" in player_body:
-			moving = (player_body.ground_control_velocity as Vector3).length() > 0.4
-		elif player_body.velocity.length() > 0.4:
-			moving = true
-			
-		if moving:
-			_wall_hit_timer = wall_cooldown
-			_trigger_wall_collision()
-
-	# 2. Obsługa pulsu echolokacji (przycisk ax_button na kontrolerze VR)
-	var ax_pressed := false
-	if left_ctrl and left_ctrl.is_button_pressed("ax_button"):
-		ax_pressed = true
-	elif right_ctrl and right_ctrl.is_button_pressed("ax_button"):
-		ax_pressed = true
-		
-	if ax_pressed and _echolocation_timer <= 0.0:
-		_echolocation_timer = echolocation_cooldown
-		_trigger_echolocation()
-
-	# 2. Wykrywanie obrotu i dźwięk Whoosh / Kompas
-	if origin:
-		var current_rotation_y = origin.global_transform.basis.get_euler().y
-		var angle_diff = angle_difference(_last_rotation_y, current_rotation_y)
-		var diff = abs(rad_to_deg(angle_diff))
-		
-		_accumulated_turn += diff
-		
-		# Wykrywanie obrotu skokowego (duży skok w 1 klatce) lub płynnego (nagromadzony obrót)
-		if diff >= rotation_threshold_degrees or _accumulated_turn >= 20.0:
-			_accumulated_turn = 0.0
-			if turn_audio_player:
-				if TTSManager:
-					turn_audio_player.volume_db = TTSManager.whoosh_volume_db
-				else:
-					turn_audio_player.volume_db = 3.0
-					
-				if angle_diff > 0:
-					turn_audio_player.pitch_scale = 0.85 # Obrót w lewo (niższy ton)
-				else:
-					turn_audio_player.pitch_scale = 1.15 # Obrót w prawo (wyższy ton)
-				
-				turn_audio_player.play()
-				
-				# Kompas dźwiękowy: Północ (0) -> wysoki ton, Południe (+/- PI) -> niski ton
-				if (TTSManager == null or TTSManager.sound_compass_enabled) and _compass_cooldown_timer <= 0.0:
-					_compass_cooldown_timer = 0.25
-					var compass_pitch = remap(abs(current_rotation_y), 0.0, PI, 1.4, 0.6)
-					_trigger_compass_ping(compass_pitch)
-				
-		_last_rotation_y = current_rotation_y
-
-func _trigger_wall_collision():
-	# Dźwięk głuchego uderzenia w ścianę
-	var wall_sfx = AudioStreamPlayer.new()
-	wall_sfx.stream = preload("res://assets/sounds/footstep_slow2.wav")
-	wall_sfx.volume_db = 4.0
-	wall_sfx.pitch_scale = 0.6
-	add_child(wall_sfx)
-	wall_sfx.play()
-	wall_sfx.finished.connect(wall_sfx.queue_free)
-	
-	# Hałas uderzenia ostrzegający wrogów (np. Foxy)
-	var hit_pos = player_body.global_position if player_body else (origin.global_position if origin else Vector3.ZERO)
-	if EventBus:
-		EventBus.noise_emitted.emit(hit_pos, wall_noise_level)
-		
-	# Fizyczna haptyka uderzenia na obu kontrolerach
-	_trigger_collision_rumble()
-
-func _trigger_collision_rumble():
-	if origin:
-		if left_ctrl == null:
-			left_ctrl = origin.get_node_or_null("left_hand") as XRController3D
-		if right_ctrl == null:
-			right_ctrl = origin.get_node_or_null("right_hand") as XRController3D
-		if left_ctrl:
-			left_ctrl.trigger_haptic_pulse("haptic", 120.0, 0.7, 0.2, 0.0)
-		if right_ctrl:
-			right_ctrl.trigger_haptic_pulse("haptic", 120.0, 0.7, 0.2, 0.0)
-
-func _trigger_compass_ping(pitch: float):
-	await get_tree().create_timer(0.18).timeout
-	if not is_inside_tree():
-		return
-	var compass_player = AudioStreamPlayer.new()
-	# Dedykowany dzwon kompasu zamiast wieloznacznego nice-sfx
-	compass_player.stream = preload("res://assets/sounds/Broken bell.ogg")
-	compass_player.volume_db = -12.0
-	compass_player.pitch_scale = pitch
-	add_child(compass_player)
-	compass_player.play()
-	compass_player.finished.connect(compass_player.queue_free)
-
-func _on_footstep(_surface_name: String):
-	# Zarejestrowano krok. Zliczamy statystykę w SceneLoader.
-	SceneLoader.steps_taken += 1
-	
-	var is_sprinting := false
-	if sprint_provider and "is_active" in sprint_provider:
-		is_sprinting = sprint_provider.is_active
-	elif player_body and "ground_control_velocity" in player_body:
-		is_sprinting = player_body.ground_control_velocity.length() > 2.0
-	
-	var current_noise = sprint_noise_level if is_sprinting else walk_noise_level
-	
-	if EventBus:
-		EventBus.noise_emitted.emit(origin.global_position if origin else Vector3.ZERO, current_noise)
-
-func _trigger_echolocation():
-	if origin == null:
-		return
-		
-	var space_state = origin.get_world_3d().direct_space_state
-	var start_pos = origin.global_position + Vector3(0, 1.2, 0)
-	
-	# Startowy impuls dźwiękowy
-	var pulse_player = AudioStreamPlayer.new()
-	pulse_player.stream = preload("res://assets/sounds/Broken bell.ogg")
-	pulse_player.volume_db = -4.0
-	pulse_player.pitch_scale = 1.65
-	add_child(pulse_player)
-	pulse_player.play()
-	pulse_player.finished.connect(pulse_player.queue_free)
-	
-	# Hałas sonaru ostrzegający wrogów (ryzyko ściągnięcia Foxy'ego!)
-	if EventBus:
-		EventBus.noise_emitted.emit(origin.global_position, echolocation_noise_level)
-		
-	# Haptyka impulsu na kontrolerach
-	if left_ctrl:
-		left_ctrl.trigger_haptic_pulse("haptic", 160.0, 0.7, 0.12, 0.0)
-	if right_ctrl:
-		right_ctrl.trigger_haptic_pulse("haptic", 160.0, 0.7, 0.12, 0.0)
-		
-	# Wypuszczenie 8 promieni echolokacyjnych (równomiernie w 8 stron świata)
-	for i in range(8):
-		var angle = (float(i) / 8.0) * TAU
-		var dir = Vector3(cos(angle), 0, sin(angle))
-		var end_pos = start_pos + dir * 35.0
-		var query = PhysicsRayQueryParameters3D.create(start_pos, end_pos, 1)
-		var result = space_state.intersect_ray(query)
-		if result:
-			var hit_pos: Vector3 = result.position
-			var dist = start_pos.distance_to(hit_pos)
-			var delay = clamp(dist / 28.0, 0.06, 1.1)
-			_spawn_delayed_echo(hit_pos, dist, delay)
-
-func _spawn_delayed_echo(hit_pos: Vector3, dist: float, delay: float):
-	await get_tree().create_timer(delay).timeout
-	if not is_inside_tree():
-		return
-	var echo = AudioStreamPlayer3D.new()
-	echo.stream = preload("res://assets/sounds/Broken bell.ogg")
-	echo.unit_size = 10.0
-	echo.max_distance = 40.0
-	echo.volume_db = clamp(remap(dist, 2.0, 30.0, 0.0, -16.0), -16.0, 0.0)
-	echo.pitch_scale = clamp(remap(dist, 2.0, 30.0, 1.1, 0.55), 0.55, 1.1)
-	add_child(echo)
-	echo.global_position = hit_pos
-	echo.play()
-	echo.finished.connect(echo.queue_free)
-````
-
-## File: scenes/balora.tscn
-````
-[gd_scene format=3 uid="uid://b4ml2o2jh5ooc"]
-
-[ext_resource type="Script" uid="uid://40tyohs7i6dm" path="res://scripts/ballora.gd" id="1_2mo37"]
-[ext_resource type="AudioStream" uid="uid://digrgt0cu802o" path="res://assets/sounds/ballora.mp3" id="2_yfgsf"]
-[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="3_24ggd"]
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_balora"]
-radius = 0.761
-height = 2.778
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2mo37"]
-diffuse_mode = 1
-albedo_color = Color(0.35782948, 0.00011021942, 0.36967972, 1)
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_yfgsf"]
-material = SubResource("StandardMaterial3D_2mo37")
-radius = 0.761
-height = 2.778
-
-[sub_resource type="SphereShape3D" id="SphereShape3D_jumpscare"]
-radius = 1.3971037
-
-[node name="Balora" type="CharacterBody3D" unique_id=1656694762 groups=["enemy"]]
-collision_layer = 2
-script = ExtResource("1_2mo37")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=237287144]
-shape = SubResource("CapsuleShape3D_balora")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1056769905]
-mesh = SubResource("CapsuleMesh_yfgsf")
-
-[node name="BaloraTheme" type="AudioStreamPlayer3D" parent="." unique_id=1844263034]
-stream = ExtResource("2_yfgsf")
-volume_db = 4.009
-unit_size = 23.5
-autoplay = true
-max_distance = 20.11
-
-[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=566194156]
-stream = ExtResource("3_24ggd")
-
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=854780239]
-
-[node name="JumpscareTrigger" type="Area3D" parent="." unique_id=24209624]
-collision_layer = 0
-collision_mask = 524289
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpscareTrigger" unique_id=131938276]
-shape = SubResource("SphereShape3D_jumpscare")
 ````
 
 ## File: scripts/main_menu_ui.gd
@@ -3712,6 +3520,229 @@ func _on_tts_toggle_pressed() -> void:
 		_update_settings_ui()
 		if TTSManager.tts_enabled:
 			TTSManager.speak("TTS voice enabled", true)
+````
+
+## File: scripts/player_audio_manager.gd
+````
+extends Node
+class_name PlayerAudioManager
+
+@export var rotation_threshold_degrees: float = 8.0
+@export var walk_noise_level: float = 1.0
+@export var sprint_noise_level: float = 2.8
+@export var wall_noise_level: float = 3.5
+@export var wall_cooldown: float = 0.4
+@export var echolocation_noise_level: float = 4.5
+@export var echolocation_cooldown: float = 2.0
+
+@onready var origin: XROrigin3D = get_node_or_null("../XROrigin3D")
+@onready var turn_audio_player: AudioStreamPlayer = $TurnAudioPlayer
+@onready var footstep_provider = get_node_or_null("../XROrigin3D/MovementFootstep")
+@onready var sprint_provider = get_node_or_null("../XROrigin3D/MovementSprint")
+@onready var player_body: CharacterBody3D = get_node_or_null("../XROrigin3D/PlayerBody")
+
+var left_ctrl: XRController3D
+var right_ctrl: XRController3D
+
+var _last_rotation_y: float = 0.0
+var _accumulated_turn: float = 0.0
+var _wall_hit_timer: float = 0.0
+var _compass_cooldown_timer: float = 0.0
+var _echolocation_timer: float = 0.0
+
+func _ready():
+	if origin == null and get_parent():
+		origin = get_parent().get_node_or_null("XROrigin3D")
+		
+	if origin:
+		if footstep_provider == null:
+			footstep_provider = origin.get_node_or_null("MovementFootstep")
+		if sprint_provider == null:
+			sprint_provider = origin.get_node_or_null("MovementSprint")
+		if player_body == null:
+			player_body = origin.get_node_or_null("PlayerBody")
+		left_ctrl = origin.get_node_or_null("left_hand") as XRController3D
+		right_ctrl = origin.get_node_or_null("right_hand") as XRController3D
+		_last_rotation_y = origin.global_transform.basis.get_euler().y
+		
+	if footstep_provider and not footstep_provider.footstep.is_connected(_on_footstep):
+		footstep_provider.footstep.connect(_on_footstep)
+
+func _physics_process(delta: float):
+	if _wall_hit_timer > 0.0:
+		_wall_hit_timer -= delta
+	if _compass_cooldown_timer > 0.0:
+		_compass_cooldown_timer -= delta
+	if _echolocation_timer > 0.0:
+		_echolocation_timer -= delta
+
+	# 1. Wykrywanie kolizji ze ścianami (hałas, dźwięk uderzenia, haptyka)
+	if player_body and player_body.is_on_wall() and _wall_hit_timer <= 0.0:
+		var moving := false
+		if "ground_control_velocity" in player_body:
+			var gcv = player_body.ground_control_velocity
+			if gcv is Vector2 or gcv is Vector3:
+				moving = gcv.length() > 0.4
+		elif "velocity" in player_body and player_body.velocity is Vector3:
+			moving = player_body.velocity.length() > 0.4
+			
+		if moving:
+			_wall_hit_timer = wall_cooldown
+			_trigger_wall_collision()
+
+	# 2. Obsługa pulsu echolokacji (przycisk ax_button na kontrolerze VR)
+	var ax_pressed := false
+	if left_ctrl and left_ctrl.is_button_pressed("ax_button"):
+		ax_pressed = true
+	elif right_ctrl and right_ctrl.is_button_pressed("ax_button"):
+		ax_pressed = true
+		
+	if ax_pressed and _echolocation_timer <= 0.0:
+		_echolocation_timer = echolocation_cooldown
+		_trigger_echolocation()
+
+	# 2. Wykrywanie obrotu i dźwięk Whoosh / Kompas
+	if origin:
+		var current_rotation_y = origin.global_transform.basis.get_euler().y
+		var angle_diff = angle_difference(_last_rotation_y, current_rotation_y)
+		var diff = abs(rad_to_deg(angle_diff))
+		
+		_accumulated_turn += diff
+		
+		# Wykrywanie obrotu skokowego (duży skok w 1 klatce) lub płynnego (nagromadzony obrót)
+		if diff >= rotation_threshold_degrees or _accumulated_turn >= 20.0:
+			_accumulated_turn = 0.0
+			if turn_audio_player:
+				if TTSManager:
+					turn_audio_player.volume_db = TTSManager.whoosh_volume_db
+				else:
+					turn_audio_player.volume_db = 3.0
+					
+				if angle_diff > 0:
+					turn_audio_player.pitch_scale = 0.85 # Obrót w lewo (niższy ton)
+				else:
+					turn_audio_player.pitch_scale = 1.15 # Obrót w prawo (wyższy ton)
+				
+				turn_audio_player.play()
+				
+				# Kompas dźwiękowy: Północ (0) -> wysoki ton, Południe (+/- PI) -> niski ton
+				if (TTSManager == null or TTSManager.sound_compass_enabled) and _compass_cooldown_timer <= 0.0:
+					_compass_cooldown_timer = 0.25
+					var compass_pitch = remap(abs(current_rotation_y), 0.0, PI, 1.4, 0.6)
+					_trigger_compass_ping(compass_pitch)
+				
+		_last_rotation_y = current_rotation_y
+
+func _trigger_wall_collision():
+	# Dźwięk głuchego uderzenia w ścianę
+	var wall_sfx = AudioStreamPlayer.new()
+	wall_sfx.stream = preload("res://assets/sounds/footstep_slow2.wav")
+	wall_sfx.volume_db = 4.0
+	wall_sfx.pitch_scale = 0.6
+	add_child(wall_sfx)
+	wall_sfx.play()
+	wall_sfx.finished.connect(wall_sfx.queue_free)
+	
+	# Hałas uderzenia ostrzegający wrogów (np. Foxy)
+	var hit_pos = player_body.global_position if player_body else (origin.global_position if origin else Vector3.ZERO)
+	if EventBus:
+		EventBus.noise_emitted.emit(hit_pos, wall_noise_level)
+		
+	# Fizyczna haptyka uderzenia na obu kontrolerach
+	_trigger_collision_rumble()
+
+func _trigger_collision_rumble():
+	if origin:
+		if left_ctrl == null:
+			left_ctrl = origin.get_node_or_null("left_hand") as XRController3D
+		if right_ctrl == null:
+			right_ctrl = origin.get_node_or_null("right_hand") as XRController3D
+		if left_ctrl:
+			left_ctrl.trigger_haptic_pulse("haptic", 120.0, 0.7, 0.2, 0.0)
+		if right_ctrl:
+			right_ctrl.trigger_haptic_pulse("haptic", 120.0, 0.7, 0.2, 0.0)
+
+func _trigger_compass_ping(pitch: float):
+	await get_tree().create_timer(0.18).timeout
+	if not is_inside_tree():
+		return
+	var compass_player = AudioStreamPlayer.new()
+	# Dedykowany dzwon kompasu zamiast wieloznacznego nice-sfx
+	compass_player.stream = preload("res://assets/sounds/Broken bell.ogg")
+	compass_player.volume_db = -12.0
+	compass_player.pitch_scale = pitch
+	add_child(compass_player)
+	compass_player.play()
+	compass_player.finished.connect(compass_player.queue_free)
+
+func _on_footstep(_surface_name: String):
+	# Zarejestrowano krok. Zliczamy statystykę w SceneLoader.
+	SceneLoader.steps_taken += 1
+	
+	var is_sprinting := false
+	if sprint_provider and "is_active" in sprint_provider:
+		is_sprinting = sprint_provider.is_active
+	elif player_body and "ground_control_velocity" in player_body:
+		is_sprinting = player_body.ground_control_velocity.length() > 2.0
+	
+	var current_noise = sprint_noise_level if is_sprinting else walk_noise_level
+	
+	if EventBus:
+		EventBus.noise_emitted.emit(origin.global_position if origin else Vector3.ZERO, current_noise)
+
+func _trigger_echolocation():
+	if origin == null:
+		return
+		
+	var space_state = origin.get_world_3d().direct_space_state
+	var start_pos = origin.global_position + Vector3(0, 1.2, 0)
+	
+	# Startowy impuls dźwiękowy
+	var pulse_player = AudioStreamPlayer.new()
+	pulse_player.stream = preload("res://assets/sounds/Broken bell.ogg")
+	pulse_player.volume_db = -4.0
+	pulse_player.pitch_scale = 1.65
+	add_child(pulse_player)
+	pulse_player.play()
+	pulse_player.finished.connect(pulse_player.queue_free)
+	
+	# Hałas sonaru ostrzegający wrogów (ryzyko ściągnięcia Foxy'ego!)
+	if EventBus:
+		EventBus.noise_emitted.emit(origin.global_position, echolocation_noise_level)
+		
+	# Haptyka impulsu na kontrolerach
+	if left_ctrl:
+		left_ctrl.trigger_haptic_pulse("haptic", 160.0, 0.7, 0.12, 0.0)
+	if right_ctrl:
+		right_ctrl.trigger_haptic_pulse("haptic", 160.0, 0.7, 0.12, 0.0)
+		
+	# Wypuszczenie 8 promieni echolokacyjnych (równomiernie w 8 stron świata)
+	for i in range(8):
+		var angle = (float(i) / 8.0) * TAU
+		var dir = Vector3(cos(angle), 0, sin(angle))
+		var end_pos = start_pos + dir * 35.0
+		var query = PhysicsRayQueryParameters3D.create(start_pos, end_pos, 1)
+		var result = space_state.intersect_ray(query)
+		if result:
+			var hit_pos: Vector3 = result.position
+			var dist = start_pos.distance_to(hit_pos)
+			var delay = clamp(dist / 28.0, 0.06, 1.1)
+			_spawn_delayed_echo(hit_pos, dist, delay)
+
+func _spawn_delayed_echo(hit_pos: Vector3, dist: float, delay: float):
+	await get_tree().create_timer(delay).timeout
+	if not is_inside_tree():
+		return
+	var echo = AudioStreamPlayer3D.new()
+	echo.stream = preload("res://assets/sounds/Broken bell.ogg")
+	echo.unit_size = 10.0
+	echo.max_distance = 40.0
+	echo.volume_db = clamp(remap(dist, 2.0, 30.0, 0.0, -16.0), -16.0, 0.0)
+	echo.pitch_scale = clamp(remap(dist, 2.0, 30.0, 1.1, 0.55), 0.55, 1.1)
+	add_child(echo)
+	echo.global_position = hit_pos
+	echo.play()
+	echo.finished.connect(echo.queue_free)
 ````
 
 ## File: scenes/foxy.tscn
@@ -4611,10 +4642,11 @@ ambient_light_source = 2
 ambient_light_color = Color(0.2, 0.2, 0.2, 1)
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_new"]
-agent_height = 2.8
-agent_radius = 0.85
-cell_size = 0.15
-cell_height = 0.15
+geometry_parsed_geometry_type = 1
+agent_height = 2.75
+agent_radius = 0.75
+cell_size = 0.25
+cell_height = 0.25
 
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_test"]

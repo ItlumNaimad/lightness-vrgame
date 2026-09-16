@@ -1,3 +1,4 @@
+@tool
 extends XRToolsSceneBase
 
 var time_survived: float = 0.0
@@ -29,6 +30,9 @@ var _cached_enemies: Array[Node] = []
 var _enemy_refresh_timer: float = 0.0
 
 func _ready():
+	if Engine.is_editor_hint():
+		return
+		
 	if timer_label == null:
 		push_warning("TimerLabel niedostępny — HUD wyłączony (gra działa dalej).")
 	if milestone_audio == null:
@@ -77,6 +81,9 @@ func _deferred_bake_navmesh():
 	nav_region.bake_navigation_mesh()
 	
 func _process(delta: float):
+	if Engine.is_editor_hint():
+		return
+		
 	if not is_timer_running:
 		return
 	

@@ -312,3 +312,25 @@ Ręczne celowanie wskaźnikiem laserowym VR (`FunctionPointer`) w trójwymiarow�
    - Wciśnięcie przycisku **A** (lub spustu kontrolera / `ui_accept`) natychmiast wykonuje akcję przycisku (`pressed`), bez konieczności celowania ręką.
 4. **Pointer jako Opcja Pomocnicza:**
    - Wskaźnik laserowy pozostaje dostępny dla osób widzących lub słabowidzących, jednak pętla sterowania joystickiem jest w pełni samowystarczalna.
+## 27. Stabilizacja fizyki kolizji ze ścianami i optymalizacja NavMesh (v0.5.2)
+
+1. **Eliminacja crasha przy uderzeniu w ścianę (`Invalid cast to Vector3`):**
+   - **Przyczyna**: W `scripts/player_audio_manager.gd` weryfikacja ruchu gracza przy ścianie rzutowała `player_body.ground_control_velocity` za pomocą `as Vector3`. W Godot XR Tools właściwość ta jest typu `Vector2` (płaszczyzna wejścia gałki analogowej). Próba rzutowania na niezgodny typ rzucała wyjątek wykonania i natychmiast crashowała grę przy zetknięciu ze ścianą.
+   - **Rozwiązanie**: Wprowadzono bezpieczne rozróżnienie typów `if gcv is Vector2 or gcv is Vector3` i bezpośredni odczyt długości wektora `.length() > 0.4`.
+
+2. **Likwidacja ostrzeżenia `MISSING_TOOL` w `game_map.gd`:**
+   - Klasa bazowa `XRToolsSceneBase` posiada adnotację `@tool`. Dodano `@tool` na początku `scripts/game_map.gd` wraz ze strażnikiem `if Engine.is_editor_hint(): return` w metodach `_ready()` i `_process()`, izolując logikę gry przed przypadkowym wykonaniem w edytorze.
+
+3. **Optymalizacja pieczenia NavMesh w runtime (CPU vs GPU):**
+   - W `scenes/game_map.tscn` w zasobie `NavigationMesh_new` włączono `geometry_parsed_geometry_type = 1` (`PARSED_GEOMETRY_STATIC_COLLIDERS`), dzięki czemu NavMesh parsuje kształty kolizyjne `StaticBody3D` bezpośrednio na CPU zamiast wyciągać wizualne siatki z pamięci GPU w runtime (co blokowało renderowanie klatek VR).
+   - Skorygowano `cell_size` i `cell_height` do wartości standardowej `0.25`, likwidując ostrzeżenia o niedopasowaniu siatek i utracie precyzji promienia agenta.
+
+4. **Płynna pula kroków audio (`XRToolsMovementFootstep`):**
+   - Zwiększono rozmiar puli odtwarzaczy kroków w `addons/godot-xr-tools/functions/movement_footstep.gd` z 3 do 8 oraz wdrożono mechanizm recyklingu najstarszego grającego odtwarzacza w razie chwilowego wyczerpania puli. Zapobiega to gubieniu odgłosów kroków podczas szybkiego marszu lub sprintu.
+   
+## Ustalenia 16.09.2026 po przetestowaniu zmian po Audycie
+- Do wywalenia dźwięk kompas. Nie pomaga
+- Dodać oddzielne ustawienia dźwięku kroków, dźwięków przeciwników, efektu woosh po obrocie i jumpscare'u
+- Marionette powinna być trochę wyżej bo bywa, że sam obrót gracza gdy ręce ma na dole pozbywa się jej.
+- Przemyśleć jakąś mechanikę przeciwnika, która albo zatrzymuje gracza albo zmusza go do zatrzymania (tak jak poprzednia marionette) bo to stresowało gracza i budowało napięcie.
+- 

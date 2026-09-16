@@ -54,9 +54,11 @@ func _physics_process(delta: float):
 	if player_body and player_body.is_on_wall() and _wall_hit_timer <= 0.0:
 		var moving := false
 		if "ground_control_velocity" in player_body:
-			moving = (player_body.ground_control_velocity as Vector3).length() > 0.4
-		elif player_body.velocity.length() > 0.4:
-			moving = true
+			var gcv = player_body.ground_control_velocity
+			if gcv is Vector2 or gcv is Vector3:
+				moving = gcv.length() > 0.4
+		elif "velocity" in player_body and player_body.velocity is Vector3:
+			moving = player_body.velocity.length() > 0.4
 			
 		if moving:
 			_wall_hit_timer = wall_cooldown

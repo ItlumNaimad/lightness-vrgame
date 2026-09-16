@@ -131,3 +131,23 @@ W 0:00:29:253   game_map.gd:77 @ _deferred_bake_navmesh(): Source geometry parsi
 W 0:00:28:970   GDScript::reload: The base class script has the "@tool" annotation, but this script does not have it.
   <Błąd GDScript>MISSING_TOOL
   <Źródło GDScript>game_map.gd:1 @ GDScript::reload()
+
+---
+
+## Rozwiązanie (Status: Naprawione 2026-09-16 - Sesja 2)
+
+1. **Crash przy kontakcie ze ścianą (`Invalid cast: could not convert value to 'Vector3'` w `player_audio_manager.gd:57`):**
+   - **Przyczyna:** W skrypcie `XRToolsPlayerBody` (`addons/godot-xr-tools/player/player_body.gd`) właściwość `ground_control_velocity` jest wektorem dwuwymiarowym (`Vector2`), reprezentującym wejście gałki/ruchu w płaszczyźnie poziomej. W `player_audio_manager.gd:57` zastosowano jawne rzutowanie `(player_body.ground_control_velocity as Vector3)`, co przy kontakcie ze ścianą rzucało wyjątek silnika i natychmiast crashowało grę.
+   - **Rozwiązanie:** Zastąpiono sztywne rzutowanie bezpiecznym sprawdzeniem typu wektora (`if gcv is Vector2 or gcv is Vector3`) i bezpośrednim odczytem `.length() > 0.4`, co całkowicie zapobiega rzucaniu wyjątków typowania.
+
+2. **Ostrzeżenie `MISSING_TOOL` w `game_map.gd:1`:**
+   - **Przyczyna:** Klasa bazowa `XRToolsSceneBase` posiada adnotację `@tool`. W Godot 4 dziedziczenie ze skryptu tool wymaga, aby klasa potomna również posiadała adnotację `@tool`.
+   - **Rozwiązanie:** Dodano `@tool` na początku `scripts/game_map.gd` wraz ze strażnikiem `if Engine.is_editor_hint(): return` w metodach `_ready()` oraz `_process()`, co zabezpiecza przed przypadkowym wykonywaniem logiki gry w widoku edytora.
+
+3. **Ostrzeżenia NavMesh (`cell_size`/`cell_height` mismatch, precision loss i parsowanie siatek GPU):**
+   - **Przyczyna:** `NavigationMesh` w `scenes/game_map.tscn` miało `cell_size = 0.15` i `cell_height = 0.15` (niezgodne z domyślną mapą `0.25`), nieoptymalne wymiary agenta oraz domyślne parsowanie siatek renderera (`PARSED_GEOMETRY_MESH_INSTANCES`), co przy pieczeniu w runtime (`bake_navigation_mesh()`) blokowało transfer danych z GPU na CPU.
+   - **Rozwiązanie:** W `scenes/game_map.tscn` zmieniono `cell_size` i `cell_height` na `0.25`, wymiary agenta na wielokrotności siatki (`agent_radius = 0.75`, `agent_height = 2.75`) oraz włączono `geometry_parsed_geometry_type = 1` (`PARSED_GEOMETRY_STATIC_COLLIDERS`), dzięki czemu NavMesh parsuje kształty kolizyjne `StaticBody3D` bezpośrednio na CPU bez angażowania GPU.
+
+4. **Ostrzeżenie `XRToolsMovementFootstep idle audio pool empty`:**
+   - **Przyczyna:** Pula odtwarzaczy kroków w `movement_footstep.gd` miała rozmiar zaledwie 3 (`AUDIO_POOL_SIZE = 3`). Przy szybszym marszu lub biegu wszystkie 3 instancje wciąż odtwarzały próbkę, wyczerpując pulę i pomijając odtwarzanie kolejnych kroków.
+   - **Rozwiązanie:** Zwiększono `AUDIO_POOL_SIZE` do 8 oraz dodano płynny recykling najstarszego grającego odtwarzacza w razie chwilowego wyczerpania puli, co gwarantuje ciągłość kroków audio.

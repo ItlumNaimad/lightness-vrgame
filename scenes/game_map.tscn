@@ -21,10 +21,11 @@ ambient_light_source = 2
 ambient_light_color = Color(0.2, 0.2, 0.2, 1)
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_new"]
-agent_height = 2.8
-agent_radius = 0.85
-cell_size = 0.15
-cell_height = 0.15
+geometry_parsed_geometry_type = 1
+agent_height = 2.75
+agent_radius = 0.75
+cell_size = 0.25
+cell_height = 0.25
 
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_test"]
