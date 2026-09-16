@@ -27,21 +27,25 @@ signal exit_pressed
 # Kontrolki ustawień
 @onready var tts_toggle_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/TTSCard/Margin/HBox/TTSToggleBtn
 
+@onready var master_row_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/MasterRowBtn
 @onready var master_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterMinusBtn
 @onready var master_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterPlusBtn
 @onready var master_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterValueLabel
 @onready var master_progress_bar: ProgressBar = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterProgressBar
 
+@onready var enemies_row_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/EnemiesRowBtn
 @onready var enemies_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesMinusBtn
 @onready var enemies_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesPlusBtn
 @onready var enemies_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesValueLabel
 @onready var enemies_progress_bar: ProgressBar = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesProgressBar
 
+@onready var footsteps_row_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/FootstepsRowBtn
 @onready var footsteps_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsMinusBtn
 @onready var footsteps_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsPlusBtn
 @onready var footsteps_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsValueLabel
 @onready var footsteps_progress_bar: ProgressBar = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsProgressBar
 
+@onready var jumpscare_row_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/JumpscareRowBtn
 @onready var jumpscare_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscareMinusBtn
 @onready var jumpscare_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscarePlusBtn
 @onready var jumpscare_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscareValueLabel
@@ -67,7 +71,9 @@ func _ready() -> void:
 	_vr_navigator = VRUINavigator.new()
 	_vr_navigator.name = "VRUINavigator"
 	_vr_navigator.root_control = self
+	_vr_navigator.horizontal_navigated.connect(_on_navigator_horizontal)
 	add_child(_vr_navigator)
+
 
 	_load_saved_settings()
 	_update_telemetry()
@@ -225,21 +231,27 @@ func _setup_accessibility() -> void:
 	TTSManager.setup_button(back_from_nights_btn, "Back to Main Menu")
 
 	# Settings controls with dynamic speech
+	TTSManager.setup_button(tts_toggle_btn, func(): return "TTS Voice: " + ("enabled" if (TTSManager and TTSManager.tts_enabled) else "disabled") + ". Press A or tilt stick left or right to toggle.")
+
+	TTSManager.setup_button(master_row_btn, func(): return "Master volume: %d percent. Tilt stick left or right to adjust." % _master_volume_percent)
 	TTSManager.setup_button(master_minus_btn, func(): return "Decrease master volume. Currently %d percent" % _master_volume_percent)
 	TTSManager.setup_button(master_plus_btn, func(): return "Increase master volume. Currently %d percent" % _master_volume_percent)
 	
+	TTSManager.setup_button(enemies_row_btn, func(): return "Enemy sounds volume: %d percent. Tilt stick left or right to adjust." % _enemies_volume_percent)
 	TTSManager.setup_button(enemies_minus_btn, func(): return "Decrease enemy sounds volume. Currently %d percent" % _enemies_volume_percent)
 	TTSManager.setup_button(enemies_plus_btn, func(): return "Increase enemy sounds volume. Currently %d percent" % _enemies_volume_percent)
 	
+	TTSManager.setup_button(footsteps_row_btn, func(): return "Footsteps volume: %d percent. Tilt stick left or right to adjust." % _footsteps_volume_percent)
 	TTSManager.setup_button(footsteps_minus_btn, func(): return "Decrease footstep volume. Currently %d percent" % _footsteps_volume_percent)
 	TTSManager.setup_button(footsteps_plus_btn, func(): return "Increase footstep volume. Currently %d percent" % _footsteps_volume_percent)
 
+	TTSManager.setup_button(jumpscare_row_btn, func(): return "Jumpscare volume: %d percent. Tilt stick left or right to adjust." % _jumpscare_volume_percent)
 	TTSManager.setup_button(jumpscare_minus_btn, func(): return "Decrease jumpscare volume. Currently %d percent" % _jumpscare_volume_percent)
 	TTSManager.setup_button(jumpscare_plus_btn, func(): return "Increase jumpscare volume. Currently %d percent" % _jumpscare_volume_percent)
 
-	TTSManager.setup_button(tts_toggle_btn, func(): return "TTS Voice. Currently " + ("enabled" if (TTSManager and TTSManager.tts_enabled) else "disabled"))
 	TTSManager.setup_button(back_from_settings_btn, "Back to Main Menu")
 	TTSManager.setup_button(back_from_guide_btn, "Back to Main Menu")
+
 
 func _show_panel(panel_name: String) -> void:
 	print("[MainMenuUI] Switching to panel: ", panel_name)
@@ -300,12 +312,14 @@ func _select_night_idx(night_idx: int) -> void:
 	if LevelManager:
 		if LevelManager.select_night(night_idx):
 			_update_nights_ui()
+			var title = LevelManager.nights[night_idx]["title"]
 			if TTSManager:
-				var title = LevelManager.nights[night_idx]["title"]
-				TTSManager.speak("%s selected." % title, true)
+				TTSManager.speak("Starting %s" % title, true)
+			print("[MainMenuUI] Night %d selected. Loading game map immediately..." % night_idx)
+			SceneLoader.load_scene("res://scenes/game_map.tscn")
 		else:
 			if TTSManager:
-				TTSManager.speak("Night %d is locked." % night_idx, true)
+				TTSManager.speak("Night %d is locked. Complete previous night to unlock." % night_idx, true)
 
 func _on_night_0_btn_pressed() -> void: _select_night_idx(0)
 func _on_night_1_btn_pressed() -> void: _select_night_idx(1)
@@ -313,6 +327,39 @@ func _on_night_2_btn_pressed() -> void: _select_night_idx(2)
 func _on_night_3_btn_pressed() -> void: _select_night_idx(3)
 func _on_night_4_btn_pressed() -> void: _select_night_idx(4)
 func _on_night_5_btn_pressed() -> void: _select_night_idx(5)
+
+# Nawigacja pozioma joystickiem (regulacja suwaków lewo/prawo w ustawieniach)
+func _on_navigator_horizontal(dir: int) -> void:
+	if settings_panel == null or not settings_panel.visible:
+		return
+	if master_row_btn and master_row_btn.has_focus():
+		if dir < 0: _on_master_minus_pressed()
+		else: _on_master_plus_pressed()
+	elif enemies_row_btn and enemies_row_btn.has_focus():
+		if dir < 0: _on_enemies_minus_pressed()
+		else: _on_enemies_plus_pressed()
+	elif footsteps_row_btn and footsteps_row_btn.has_focus():
+		if dir < 0: _on_footsteps_minus_pressed()
+		else: _on_footsteps_plus_pressed()
+	elif jumpscare_row_btn and jumpscare_row_btn.has_focus():
+		if dir < 0: _on_jumpscare_minus_pressed()
+		else: _on_jumpscare_plus_pressed()
+	elif tts_toggle_btn and tts_toggle_btn.has_focus():
+		_on_tts_toggle_pressed()
+
+# Kliknięcie / zatwierdzenie wierszy ustawień
+func _on_master_row_pressed() -> void:
+	if TTSManager: TTSManager.speak("Master volume is %d percent. Tilt stick left to decrease, right to increase." % _master_volume_percent, true)
+
+func _on_enemies_row_pressed() -> void:
+	if TTSManager: TTSManager.speak("Enemy sounds volume is %d percent. Tilt stick left to decrease, right to increase." % _enemies_volume_percent, true)
+
+func _on_footsteps_row_pressed() -> void:
+	if TTSManager: TTSManager.speak("Footsteps volume is %d percent. Tilt stick left to decrease, right to increase." % _footsteps_volume_percent, true)
+
+func _on_jumpscare_row_pressed() -> void:
+	if TTSManager: TTSManager.speak("Jumpscare volume is %d percent. Tilt stick left to decrease, right to increase." % _jumpscare_volume_percent, true)
+
 
 # Master volume
 func _on_master_minus_pressed() -> void:

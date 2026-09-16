@@ -8,8 +8,11 @@ class_name VRUINavigator
 ## - Impuls haptyczny w kontrolerze przy każdej zmianie focusu
 ## - Wciśnięcie przycisku A (ax_button) lub pociągnięcie spustu zatwierdza wybór
 
+signal horizontal_navigated(direction: int)
+
 @export var root_control: Control
 @export var debounce_time: float = 0.28
+@export var enabled: bool = true
 
 var _cooldown: float = 0.0
 var _current_buttons: Array[Button] = []
@@ -58,12 +61,25 @@ func _gather_buttons(node: Node, out_list: Array[Button]) -> void:
 		if not (node as Node3D).is_visible_in_tree():
 			return
 
-	if node is Button and not node.disabled and (node as CanvasItem).is_visible_in_tree():
+	if node is Button and not node.disabled and node.focus_mode != Control.FOCUS_NONE and (node as CanvasItem).is_visible_in_tree():
 		out_list.append(node)
 	for child in node.get_children():
 		_gather_buttons(child, out_list)
 
 func _process(delta: float) -> void:
+	if not enabled:
+		return
+	if root_control == null or not is_instance_valid(root_control):
+		return
+	if not root_control.is_visible_in_tree():
+		return
+		
+	# Sprawdzamy czy nadrzędny węzeł 3D (np. Viewport2Din3D) nie jest ukryty w świecie gry
+	var vp = root_control.get_viewport()
+	if vp and vp.get_parent() is Node3D:
+		if not (vp.get_parent() as Node3D).is_visible_in_tree():
+			return
+
 	if _cooldown > 0.0:
 		_cooldown -= delta
 		return
@@ -73,6 +89,7 @@ func _process(delta: float) -> void:
 
 	# Odczyt gałki z kontrolerów VR
 	var stick_y := 0.0
+	var stick_x := 0.0
 	var active_ctrl: XRController3D = null
 	
 	if _left_ctrl and _left_ctrl.get_is_active():
@@ -80,11 +97,17 @@ func _process(delta: float) -> void:
 		if abs(v.y) > 0.45:
 			stick_y = v.y
 			active_ctrl = _left_ctrl
+		if abs(v.x) > 0.45:
+			stick_x = v.x
+			active_ctrl = _left_ctrl
 			
 	if active_ctrl == null and _right_ctrl and _right_ctrl.get_is_active():
 		var v = _right_ctrl.get_vector2("primary")
 		if abs(v.y) > 0.45:
 			stick_y = v.y
+			active_ctrl = _right_ctrl
+		if abs(v.x) > 0.45:
+			stick_x = v.x
 			active_ctrl = _right_ctrl
 
 	# Fallback dla klawiatury PC podczas testów
@@ -94,16 +117,29 @@ func _process(delta: float) -> void:
 		elif Input.is_action_just_pressed("ui_up") or Input.is_key_pressed(KEY_UP) or Input.is_key_pressed(KEY_W):
 			stick_y = 1.0
 
+	if stick_x == 0.0:
+		if Input.is_action_just_pressed("ui_left") or Input.is_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_A):
+			stick_x = -1.0
+		elif Input.is_action_just_pressed("ui_right") or Input.is_key_pressed(KEY_RIGHT) or Input.is_key_pressed(KEY_D):
+			stick_x = 1.0
+
+	# Nawigacja pozioma lewo / prawo (np. suwaki w settings)
+	if stick_x != 0.0:
+		_cooldown = debounce_time
+		var dir = -1 if stick_x < 0.0 else 1
+		if active_ctrl:
+			active_ctrl.trigger_haptic_pulse("haptic", 100.0, 0.4, 0.05, 0.0)
+		horizontal_navigated.emit(dir)
+		return
+
 	# Nawigacja góra / dół
 	if stick_y != 0.0 and not _current_buttons.is_empty():
 		_cooldown = debounce_time
 		
-		# W OpenXR / Godot: zazwyczaj wychylenie gałki w dół ma wartość ujemną (lub dodatnią zależnie od mapowania)
+		# W OpenXR / Godot: wychylenie gałki w dół ma wartość ujemną
 		if stick_y < 0.0:
-			# Następny przycisk w dół
 			_current_index = (_current_index + 1) % _current_buttons.size()
 		else:
-			# Poprzedni przycisk w górę
 			_current_index = (_current_index - 1 + _current_buttons.size()) % _current_buttons.size()
 			
 		_apply_focus_to_current(active_ctrl)
@@ -144,10 +180,14 @@ func _apply_focus_to_current(ctrl: XRController3D) -> void:
 	if ctrl:
 		ctrl.trigger_haptic_pulse("haptic", 120.0, 0.5, 0.06, 0.0)
 		
-	# Odczyt lektora TTS
+	# Odczyt lektora TTS (z pierwszeństwem dla zarejestrowanych funkcji TTSManager.setup_button)
 	if TTSManager:
-		var txt = target_btn.text.strip_edges()
-		if txt.is_empty() and target_btn.tooltip_text:
-			txt = target_btn.tooltip_text
-		if not txt.is_empty():
-			TTSManager.speak(txt, true)
+		if TTSManager.has_method("flush_pending_speech") and not TTSManager._pending_speech_text.is_empty():
+			TTSManager.flush_pending_speech()
+		else:
+			var txt = target_btn.text.strip_edges()
+			if txt.is_empty() and target_btn.tooltip_text:
+				txt = target_btn.tooltip_text
+			if not txt.is_empty():
+				TTSManager.speak(txt, true)
+

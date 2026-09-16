@@ -376,12 +376,19 @@ theme_override_constants/margin_right = 20
 layout_mode = 2
 alignment = 1
 
-[node name="MasterLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox"]
+[node name="MasterRowBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox"]
+custom_minimum_size = Vector2(240, 42)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
+theme_override_colors/font_hover_color = Color(0, 1, 0.64, 1)
+theme_override_colors/font_focus_color = Color(0, 1, 0.64, 1)
 theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_pill_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_pill_hover")
 text = "MASTER VOLUME"
+alignment = 0
 
 [node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox"]
 layout_mode = 2
@@ -390,6 +397,7 @@ theme_override_constants/separation = 12
 [node name="MasterMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -418,6 +426,7 @@ horizontal_alignment = 2
 [node name="MasterPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -440,12 +449,19 @@ theme_override_constants/margin_right = 20
 layout_mode = 2
 alignment = 1
 
-[node name="EnemiesLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox"]
+[node name="EnemiesRowBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox"]
+custom_minimum_size = Vector2(240, 42)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
+theme_override_colors/font_hover_color = Color(0, 1, 0.64, 1)
+theme_override_colors/font_focus_color = Color(0, 1, 0.64, 1)
 theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_pill_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_pill_hover")
 text = "ENEMY SOUNDS"
+alignment = 0
 
 [node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox"]
 layout_mode = 2
@@ -454,6 +470,7 @@ theme_override_constants/separation = 12
 [node name="EnemiesMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -482,6 +499,7 @@ horizontal_alignment = 2
 [node name="EnemiesPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -504,12 +522,19 @@ theme_override_constants/margin_right = 20
 layout_mode = 2
 alignment = 1
 
-[node name="FootstepsLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox"]
+[node name="FootstepsRowBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox"]
+custom_minimum_size = Vector2(240, 42)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
+theme_override_colors/font_hover_color = Color(0, 1, 0.64, 1)
+theme_override_colors/font_focus_color = Color(0, 1, 0.64, 1)
 theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_pill_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_pill_hover")
 text = "PLAYER FOOTSTEPS"
+alignment = 0
 
 [node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox"]
 layout_mode = 2
@@ -518,6 +543,7 @@ theme_override_constants/separation = 12
 [node name="FootstepsMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -546,6 +572,7 @@ horizontal_alignment = 2
 [node name="FootstepsPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -568,12 +595,19 @@ theme_override_constants/margin_right = 20
 layout_mode = 2
 alignment = 1
 
-[node name="JumpscareLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox"]
+[node name="JumpscareRowBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox"]
+custom_minimum_size = Vector2(240, 42)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
+theme_override_colors/font_hover_color = Color(0, 1, 0.64, 1)
+theme_override_colors/font_focus_color = Color(0, 1, 0.64, 1)
 theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_pill_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_pill_hover")
 text = "JUMPSCARE VOLUME"
+alignment = 0
 
 [node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox"]
 layout_mode = 2
@@ -582,6 +616,7 @@ theme_override_constants/separation = 12
 [node name="JumpscareMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -610,6 +645,7 @@ horizontal_alignment = 2
 [node name="JumpscarePlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls"]
 custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
+focus_mode = 0
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
@@ -617,6 +653,7 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
 text = "+"
 script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
+
 
 [node name="HSeparator2" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
 layout_mode = 2
@@ -848,7 +885,13 @@ script = ExtResource("2_hold_btn")
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsPlusBtn" to="." method="_on_footsteps_plus_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscareMinusBtn" to="." method="_on_jumpscare_minus_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscarePlusBtn" to="." method="_on_jumpscare_plus_pressed"]
+
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/MasterRowBtn" to="." method="_on_master_row_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/EnemiesRowBtn" to="." method="_on_enemies_row_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/FootstepsRowBtn" to="." method="_on_footsteps_row_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/JumpscareRowBtn" to="." method="_on_jumpscare_row_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/BackFromSettingsButton" to="." method="_on_back_pressed"]
+
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid/Night0Btn" to="." method="_on_night_0_btn_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid/Night1Btn" to="." method="_on_night_1_btn_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid/Night2Btn" to="." method="_on_night_2_btn_pressed"]

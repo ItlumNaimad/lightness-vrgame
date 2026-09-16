@@ -388,4 +388,23 @@ Ręczne celowanie wskaźnikiem laserowym VR (`FunctionPointer`) w trójwymiarow�
   - Aby zapobiec samowolnemu emitowaniu zdarzenia `pressed` przez silnik C++ przy krótkim kliknięciu triggera, wyzerowano maskę przycisków myszy `button_mask = 0` w `scripts/hold_button.gd`.
   - Sygnał `pressed` emitowany jest wyłącznie po przytrzymaniu triggera przez 0.65s i naładowaniu paska.
 
+### Ustalenia i Poprawki UX & Dostępności — 16.09.2026 (Sesja Popołudniowa)
+- [x] **Usunięcie Sound Beam (Echolokacji) z przycisku A:**
+  - Przycisk A na kontrolerze VR służy do zatwierdzania opcji w menu. Poprzednia eksperymentalna mechanika echolokacji na przycisku A (`Broken bell.ogg`) kolidowała z obsługą interfejsu i powodowała niepożądane dźwięki.
+  - Usunięto nasłuchiwanie `ax_button` w `player_audio_manager.gd` oraz metody `_trigger_echolocation()` i `_spawn_delayed_echo()`.
+- [x] **Blokada odczytu TTS menu pauzy podczas ruchu gracza na mapie:**
+  - W trakcie chodzenia gracza gałką analogową w `game_map.tscn`, `VRUINavigator` z ukrytego menu pauzy interpretował ruchy gałki i wyzwalał odczyty lektora ("Resume", "Restart", "Menu").
+  - Rozwiązanie wielopoziomowe:
+    1. W `vr_ui_navigator.gd` dodano flagę `enabled` oraz weryfikację widoczności nadrzędnego węzła 3D (`Viewport2Din3D.is_visible_in_tree()`) – w Godot węzły `Control` wewnątrz `SubViewport` raportują `is_visible_in_tree() == true`, nawet gdy nadrzędny obiekt 3D jest niewidoczny w świecie gry.
+    2. W `pause_menu_ui.gd` domyślnie dezaktywowano navigator (`_navigator.enabled = false`) i wystawiono metodę `set_active(bool)`.
+    3. W `pause_menu.gd` w `toggle_pause()` zintegrowano wywołanie `set_active(is_paused)`.
+- [x] **Wygodna nawigacja w Settings (Góra-Dół wybiera opcję, Lewo-Prawo reguluje głośność):**
+  - Etykiety wierszy głośności w `scenes/main_menu_ui.tscn` zastąpiono przyciskami wierszy: `MasterRowBtn`, `EnemiesRowBtn`, `FootstepsRowBtn`, `JumpscareRowBtn` ze stylowym neonowym podświetleniem focusu (`StyleBoxFlat_pill_hover`).
+  - Na przyciskach krokowych `MinusBtn` i `PlusBtn` ustawiono `focus_mode = FOCUS_NONE` (0), dzięki czemu gałka góra/dół przeskakuje wyłącznie pomiędzy wierszami (TTS Voice, Master, Enemies, Footsteps, Jumpscare, Back), a wskaźnik laserowy nadal może klikać w `−` i `+`.
+  - W `vr_ui_navigator.gd` zaimplementowano sygnał `horizontal_navigated(direction)`, a w `main_menu_ui.gd` podłączono go do zmiany głośności aktywnego suwaka o ±10% z natychmiastowym odczytem lektorskim nowej wartości i impulsem haptycznym.
+  - W `tts_manager.gd` dodano metodę `flush_pending_speech()`, zapobiegającą nadpisywaniu dynamicznych komunikatów wierszy przez surowy tekst przycisku.
+- [x] **Natychmiastowy start wybranej nocy (Select Night):**
+  - W `main_menu_ui.gd` po kliknięciu odblokowanej nocy w panelu `NightsPanel`, funkcja `_select_night_idx()` natychmiast zapowiada start przez TTS ("Starting Night X") i wywołuje `SceneLoader.load_scene("res://scenes/game_map.tscn")`, bez wymuszania ręcznego powrotu do menu głównego i klikania Start Game.
+
+
 

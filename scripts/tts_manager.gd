@@ -90,6 +90,15 @@ func stop() -> void:
 	if DisplayServer.has_feature(DisplayServer.FEATURE_TEXT_TO_SPEECH) and DisplayServer.tts_is_speaking():
 		DisplayServer.tts_stop()
 
+## Natychmiast wypowiada zakolejkowany tekst dwell debounce (np. przy nawigacji gałką)
+func flush_pending_speech() -> void:
+	if not _pending_speech_text.is_empty():
+		var text_to_speak = _pending_speech_text
+		_pending_speech_text = ""
+		_pending_dwell_time = 0.0
+		_execute_speak(text_to_speak, true)
+
+
 ## Zapowiedź otwartego panelu
 func announce_panel(panel_text: String) -> void:
 	_currently_hovered_control = null

@@ -110,5 +110,10 @@ Wdrożono kluczowe poprawki na podstawie testów VR z dnia 16.09.2026:
 - **Ballora (Donośność pozytywki):** Zwiększono zasięg do 65m, `unit_size` do 35.0 i `volume_db` do 7.5 dB z modelem liniowym, przywracając orientację słuchową z oddali.
 - **Kroki:** Wstrzymywanie poprzednich instancji przed nowym stąpnięciem, eliminując nakładanie się 12-sekundowych próbek.
 - **Interfejs VR (Hold Button & Pauza):** Zwiększono rozmiary przycisków w menu, skonsumowano zdarzenia `InputEventScreenTouch` z viewportu VR, wymuszając aktywację **wyłącznie po przytrzymaniu triggera przez 0.65s** (brak przypadkowych kliknięć). Dodano alternatywne mapowanie pauzy (`by_button` Y/B oraz Escape/P).
+- **Poprawki UX & Dostępności (Nawigacja i Dźwięk):**
+  - Wycięto sound beam (dzwonek echolokacji) z przycisku A, eliminując kolizje z zatwierdzaniem UI.
+  - Zablokowano odczytywanie menu pauzy przez TTS podczas poruszania się gracza joystickiem na mapie gry.
+  - Wdrożono dwuosiową nawigację w menu Ustawień: gałka góra/dół wybiera wiersz (podświetlany neonem), gałka lewo/prawo płynnie zmienia głośność o ±10% z odczytem TTS i haptyką.
+  - Wybór nocy w Select Night natychmiast rozpoczyna rozgrywkę bez zbędnych kroków.
 
-*Ostatnia aktualizacja:* v0.5.2 (16.09.2026) — Wdrożenie szyn audio, spowolnienie i blokada sprintu Phantom Grasp, naprawa wyszarpywania, poprawa donośności Ballory, powiększenie i 100% ochrona przycisków VR przed luźnym kliknięciem (Hold Button).
+*Ostatnia aktualizacja:* v0.5.2 (16.09.2026) — Wdrożenie szyn audio, nawigacja joystickiem VR w menu, bezpieczny Hold Button, natychmiastowy Select Night i eliminacja konfliktów audio.

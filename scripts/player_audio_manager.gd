@@ -5,8 +5,6 @@ class_name PlayerAudioManager
 @export var sprint_noise_level: float = 2.8
 @export var wall_noise_level: float = 3.5
 @export var wall_cooldown: float = 0.4
-@export var echolocation_noise_level: float = 4.5
-@export var echolocation_cooldown: float = 2.0
 
 @onready var origin: XROrigin3D = get_node_or_null("../XROrigin3D")
 @onready var footstep_provider = get_node_or_null("../XROrigin3D/MovementFootstep")
@@ -17,7 +15,6 @@ var left_ctrl: XRController3D
 var right_ctrl: XRController3D
 
 var _wall_hit_timer: float = 0.0
-var _echolocation_timer: float = 0.0
 
 func _ready():
 	if origin == null and get_parent():
@@ -39,8 +36,6 @@ func _ready():
 func _physics_process(delta: float):
 	if _wall_hit_timer > 0.0:
 		_wall_hit_timer -= delta
-	if _echolocation_timer > 0.0:
-		_echolocation_timer -= delta
 
 	# 1. Wykrywanie kolizji ze ścianami (hałas, dźwięk uderzenia, haptyka)
 	if player_body and player_body.is_on_wall() and _wall_hit_timer <= 0.0:
@@ -55,17 +50,6 @@ func _physics_process(delta: float):
 		if moving:
 			_wall_hit_timer = wall_cooldown
 			_trigger_wall_collision()
-
-	# 2. Obsługa pulsu echolokacji (przycisk ax_button na kontrolerze VR)
-	var ax_pressed := false
-	if left_ctrl and left_ctrl.is_button_pressed("ax_button"):
-		ax_pressed = true
-	elif right_ctrl and right_ctrl.is_button_pressed("ax_button"):
-		ax_pressed = true
-		
-	if ax_pressed and _echolocation_timer <= 0.0:
-		_echolocation_timer = echolocation_cooldown
-		_trigger_echolocation()
 
 
 func _trigger_wall_collision():
@@ -112,56 +96,3 @@ func _on_footstep(_surface_name: String):
 	if EventBus:
 		EventBus.noise_emitted.emit(origin.global_position if origin else Vector3.ZERO, current_noise)
 
-func _trigger_echolocation():
-	if origin == null:
-		return
-		
-	var space_state = origin.get_world_3d().direct_space_state
-	var start_pos = origin.global_position + Vector3(0, 1.2, 0)
-	
-	# Startowy impuls dźwiękowy
-	var pulse_player = AudioStreamPlayer.new()
-	pulse_player.stream = preload("res://assets/sounds/Broken bell.ogg")
-	pulse_player.volume_db = -4.0
-	pulse_player.pitch_scale = 1.65
-	add_child(pulse_player)
-	pulse_player.play()
-	pulse_player.finished.connect(pulse_player.queue_free)
-	
-	# Hałas sonaru ostrzegający wrogów (ryzyko ściągnięcia Foxy'ego!)
-	if EventBus:
-		EventBus.noise_emitted.emit(origin.global_position, echolocation_noise_level)
-		
-	# Haptyka impulsu na kontrolerach
-	if left_ctrl:
-		left_ctrl.trigger_haptic_pulse("haptic", 160.0, 0.7, 0.12, 0.0)
-	if right_ctrl:
-		right_ctrl.trigger_haptic_pulse("haptic", 160.0, 0.7, 0.12, 0.0)
-		
-	# Wypuszczenie 8 promieni echolokacyjnych (równomiernie w 8 stron świata)
-	for i in range(8):
-		var angle = (float(i) / 8.0) * TAU
-		var dir = Vector3(cos(angle), 0, sin(angle))
-		var end_pos = start_pos + dir * 35.0
-		var query = PhysicsRayQueryParameters3D.create(start_pos, end_pos, 1)
-		var result = space_state.intersect_ray(query)
-		if result:
-			var hit_pos: Vector3 = result.position
-			var dist = start_pos.distance_to(hit_pos)
-			var delay = clamp(dist / 28.0, 0.06, 1.1)
-			_spawn_delayed_echo(hit_pos, dist, delay)
-
-func _spawn_delayed_echo(hit_pos: Vector3, dist: float, delay: float):
-	await get_tree().create_timer(delay).timeout
-	if not is_inside_tree():
-		return
-	var echo = AudioStreamPlayer3D.new()
-	echo.stream = preload("res://assets/sounds/Broken bell.ogg")
-	echo.unit_size = 10.0
-	echo.max_distance = 40.0
-	echo.volume_db = clamp(remap(dist, 2.0, 30.0, 0.0, -16.0), -16.0, 0.0)
-	echo.pitch_scale = clamp(remap(dist, 2.0, 30.0, 1.1, 0.55), 0.55, 1.1)
-	add_child(echo)
-	echo.global_position = hit_pos
-	echo.play()
-	echo.finished.connect(echo.queue_free)

@@ -14,13 +14,18 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_setup_accessibility()
 	_navigator = VRUINavigator.new()
+	_navigator.name = "VRUINavigator"
 	_navigator.root_control = self
+	_navigator.enabled = false
 	add_child(_navigator)
-	visibility_changed.connect(_on_visibility_changed)
+	visible = false
 
-func _on_visibility_changed() -> void:
-	if visible and _navigator:
-		_navigator.refresh_buttons()
+func set_active(active: bool) -> void:
+	visible = active
+	if _navigator:
+		_navigator.enabled = active
+		if active:
+			_navigator.refresh_buttons()
 
 func _setup_accessibility() -> void:
 	if TTSManager:

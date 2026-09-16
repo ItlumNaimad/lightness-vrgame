@@ -29,7 +29,12 @@ func _deferred_connect_ui() -> void:
 			var ui = sub_vp.get_child(0)
 			_connect_ui_signals(ui)
 
+var _ui_instance: Node = null
+
 func _connect_ui_signals(ui: Node) -> void:
+	_ui_instance = ui
+	if _ui_instance and _ui_instance.has_method("set_active"):
+		_ui_instance.set_active(false)
 	if ui.has_signal("resume_requested") and not ui.resume_requested.is_connected(toggle_pause):
 		ui.resume_requested.connect(toggle_pause)
 	if ui.has_signal("restart_requested") and not ui.restart_requested.is_connected(_on_restart):
@@ -80,6 +85,9 @@ func toggle_pause() -> void:
 	is_paused = !is_paused
 	get_tree().paused = is_paused
 	visible = is_paused
+	
+	if _ui_instance and _ui_instance.has_method("set_active"):
+		_ui_instance.set_active(is_paused)
 	
 	if is_paused:
 		_position_in_front_of_player()
