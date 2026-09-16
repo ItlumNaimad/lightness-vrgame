@@ -93,3 +93,4 @@ script = ExtResource("12_audio_mgr")
 [node name="TurnAudioPlayer" type="AudioStreamPlayer" parent="PlayerAudioManager" unique_id=745962780]
 stream = ExtResource("13_whoosh")
 volume_db = 5.0
+bus = &"Whoosh"

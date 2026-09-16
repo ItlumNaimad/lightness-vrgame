@@ -6,8 +6,8 @@ enum State { DORMANT, STALKING, GRABBED }
 @export var max_dormant_time: float = 45.0
 @export var stalk_duration: float = 3.0
 @export var escape_time_limit: float = 3.5
-@export var required_shake: float = 16.0
-@export var shake_accel_threshold: float = 6.0
+@export var required_shakes: int = 2
+@export var shake_speed_threshold: float = 1.2
 
 @onready var crawl_sound: AudioStreamPlayer3D = $CrawlSound
 @onready var grab_sound: AudioStreamPlayer3D = $GrabSound
@@ -15,7 +15,8 @@ enum State { DORMANT, STALKING, GRABBED }
 
 var current_state: State = State.DORMANT
 var _state_timer: float = 0.0
-var _shake_progress: float = 0.0
+var _shake_count: int = 0
+var _shake_cooldown: float = 0.0
 
 var player_root: Node3D
 var left_hand: XRController3D
@@ -23,7 +24,6 @@ var right_hand: XRController3D
 var target_hand: XRController3D
 
 var _last_hand_pos: Vector3 = Vector3.ZERO
-var _last_vel: Vector3 = Vector3.ZERO
 var _haptic_loop_timer: float = 0.0
 
 func _ready():
@@ -73,7 +73,8 @@ func _enter_stalking():
 func _enter_grabbed():
 	current_state = State.GRABBED
 	_state_timer = escape_time_limit
-	_shake_progress = 0.0
+	_shake_count = 0
+	_shake_cooldown = 0.0
 	_haptic_loop_timer = 0.0
 	
 	if crawl_sound:
@@ -83,8 +84,7 @@ func _enter_grabbed():
 		
 	if target_hand:
 		_last_hand_pos = target_hand.global_position
-		_last_vel = Vector3.ZERO
-	print("Phantom Grasp: CHWYT za dłoń! Potrząsaj kontrolerem, by się wyrwać!")
+	print("Phantom Grasp: CHWYT za dłoń! Wstrząśnij kontrolerem 2 razy, by się wyrwać!")
 
 func _process(delta: float):
 	match current_state:
@@ -105,6 +105,9 @@ func _process(delta: float):
 
 		State.GRABBED:
 			_state_timer -= delta
+			if _shake_cooldown > 0.0:
+				_shake_cooldown -= delta
+				
 			if target_hand:
 				global_position = target_hand.global_position
 				
@@ -112,21 +115,25 @@ func _process(delta: float):
 				_haptic_loop_timer -= delta
 				if _haptic_loop_timer <= 0.0:
 					_haptic_loop_timer = 0.08
-					target_hand.trigger_haptic_pulse("haptic", 150.0, 1.0, 0.08, 0.0)
+					target_hand.trigger_haptic_pulse("haptic", 160.0, 1.0, 0.08, 0.0)
 
-				# Detekcja wyszarpywania (gwałtowne potrząsanie)
+				# Detekcja wyszarpywania (gwałtowne potrząśnięcie ręką)
 				var cur_pos = target_hand.global_position
 				var vel = (cur_pos - _last_hand_pos) / max(delta, 0.001)
-				var accel = (vel - _last_vel).length()
+				var speed = vel.length()
 				_last_hand_pos = cur_pos
-				_last_vel = vel
 				
-				if accel >= shake_accel_threshold:
-					_shake_progress += accel * delta * 1.8
+				if speed >= shake_speed_threshold and _shake_cooldown <= 0.0:
+					_shake_count += 1
+					_shake_cooldown = 0.22 # Wymaga 2 wyraźnych, oddzielnych ruchów
+					print("Phantom Grasp: Szarpnięcie! (", _shake_count, " / ", required_shakes, ")")
 					
-				if _shake_progress >= required_shake:
-					_break_free()
-					return
+					# Impuls potwierdzenia szarpnięcia
+					target_hand.trigger_haptic_pulse("haptic", 180.0, 0.85, 0.12, 0.0)
+					
+					if _shake_count >= required_shakes:
+						_break_free()
+						return
 
 			if _state_timer <= 0.0:
 				_trigger_jumpscare()

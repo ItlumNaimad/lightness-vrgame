@@ -56,10 +56,16 @@ func _process(_delta: float) -> void:
 		_find_vr_nodes()
 
 	var pressed := false
-	if left_ctrl and left_ctrl.is_button_pressed("menu_button"):
-		pressed = true
-	elif right_ctrl and right_ctrl.is_button_pressed("menu_button"):
-		pressed = true
+	if left_ctrl:
+		if left_ctrl.is_button_pressed("menu_button") or left_ctrl.is_button_pressed("by_button"):
+			pressed = true
+	if right_ctrl and not pressed:
+		if right_ctrl.is_button_pressed("menu_button") or right_ctrl.is_button_pressed("by_button"):
+			pressed = true
+			
+	if not pressed:
+		if Input.is_action_just_pressed("ui_cancel") or Input.is_key_pressed(KEY_ESCAPE) or Input.is_key_pressed(KEY_P):
+			pressed = true
 		
 	if pressed and not _menu_btn_down:
 		_menu_btn_down = true

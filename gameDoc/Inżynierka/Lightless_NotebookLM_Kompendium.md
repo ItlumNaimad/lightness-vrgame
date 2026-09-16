@@ -1020,13 +1020,41 @@ Ręczne celowanie wskaźnikiem laserowym VR (`FunctionPointer`) w trójwymiarow�
 
 4. **Płynna pula kroków audio (`XRToolsMovementFootstep`):**
    - Zwiększono rozmiar puli odtwarzaczy kroków w `addons/godot-xr-tools/functions/movement_footstep.gd` z 3 do 8 oraz wdrożono mechanizm recyklingu najstarszego grającego odtwarzacza w razie chwilowego wyczerpania puli. Zapobiega to gubieniu odgłosów kroków podczas szybkiego marszu lub sprintu.
-   
+
 ## Ustalenia 16.09.2026 po przetestowaniu zmian po Audycie
-- Do wywalenia dźwięk kompas. Nie pomaga
-- Dodać oddzielne ustawienia dźwięku kroków, dźwięków przeciwników, efektu woosh po obrocie i jumpscare'u
-- Marionette powinna być trochę wyżej bo bywa, że sam obrót gracza gdy ręce ma na dole pozbywa się jej.
-- Przemyśleć jakąś mechanikę przeciwnika, która albo zatrzymuje gracza albo zmusza go do zatrzymania (tak jak poprzednia marionette) bo to stresowało gracza i budowało napięcie.
--
+- [x] **Do wywalenia dźwięk kompasu. Nie pomaga:**
+  - Całkowicie usunięto instancję `CompassAudioPlayer` oraz timer kompasu z `scripts/player_audio_manager.gd`.
+  - Usunięto zbędny przełącznik kompasu z menu ustawień `scenes/main_menu_ui.tscn`. Zostawiono czysty, przestrzenny odgłos obrotu (Whoosh).
+- [x] **Dodać oddzielne ustawienia dźwięku kroków, dźwięków przeciwników, efektu whoosh po obrocie i jumpscare'u:**
+  - Utworzono szyny w `default_bus_layout.tres`: `Master`, `Enemies`, `Footsteps`, `Whoosh`, `Jumpscare`.
+  - Przypisano wszystkie źródła `AudioStreamPlayer3D` przeciwników (Balora, Marionette, Foxy, PhantomGrasp) do szyny `Enemies`, a ich jumpscare'y do `Jumpscare`.
+  - Przypisano odtwarzacz obrotu w `player.tscn` do `Whoosh`, a odtwarzacze kroków w `movement_footstep.tscn` do `Footsteps`.
+  - W `main_menu_ui.gd` i `main_menu_ui.tscn` dodano niezależne karty sterowania głośnością (0-100%) z odczytem lektorskim TTS.
+- [x] **Marionette powinna być trochę dalej od gracza bo bywa, że sam obrót gracza gdy ręce ma na dole pozbywa się jej. Gracz powinien wysunąć w jej stronę rękę:**
+  - Zwiększono dystans spawnu szeptu do 1.8m - 2.4m na wysokości głowy/uszu gracza (zamiast 0.8m).
+  - W `marionette.gd` dodano wymóg uniesienia ręki (wysokość > 0.7m od stóp) oraz wysunięcia dłoni w kierunku szeptu (iloczyn skalarny `hand_to_whisper.dot(head_forward) > 0.15`), zapobiegając przypadkowemu odpędzaniu przy pasie.
+- [x] **Mechanika zatrzymania gracza (Whisper Freeze):**
+  - Gracz w trakcie trwania szeptu musi się zatrzymać. W `marionette.gd` dodano sprawdzanie prędkości horyzontalnej gracza: jeśli gracz stawia kroki/biegnie w trakcie szeptu (`move_speed > 0.25`), timer ataku przyspiesza 3.5-krotnie (`attack_timer += delta * 3.5`), drastycznie skracając czas na reakcję i wymuszając natychmiastowy bezruch.
+- [x] **PhantomGraspa nie da się pokonać - trzęsienie kontrolerami nie pokonuje phantomgraspa:**
+  - Usunięto niestabilne podwójne całkowanie przyspieszenia.
+  - Wdrożono czytelne zliczanie nagłych zmian kierunku prędkości kontrolera (`shake_speed >= 1.2 m/s` z debouncem 0.22s).
+  - Zgodnie z ustaleniami zredukowano wymaganą liczbę szarpnięć do **dokładnie 2 energicznych potrząśnięć** (`required_shakes = 2`), dodając wyraźny impuls haptyczny przy każdym zaliczonym potrząśnięciu.
+- [x] **Ballora jest za cicha, nie słychać jej z daleka i trzeba podejść blisko niej:**
+  - W `scenes/balora.tscn` zmieniono parametry dźwięku `BaloraTheme`: `max_distance = 65.0m`, `unit_size = 35.0m`, `volume_db = 7.5 dB`, a model tłumienia przestawiono na odwrotny/liniowy (`attenuation_model = 0`), dzięki czemu pozytywka jest słyszalna z dalekiego dystansu i pozwala na nawigację słuchową.
+- [x] **Kroki się glitchują i nakładają się na siebie. Być może jest to za długi dźwięk i to dlatego:**
+  - W `addons/godot-xr-tools/functions/movement_footstep.gd` dodano zatrzymywanie poprzednio grających odtwarzaczy kroków przed wystartowaniem nowego stąpnięcia. Zapobiega to nakładaniu się wielu 12-sekundowych próbek `woodwalking.wav`.
+  - Wymiana plików audio na krótkie próbki (chód vs bieg) zostanie wykonana przez użytkownika w kolejnym kroku.
+- [x] **Przyciski w MENU są zbyt małe. Powinny być trochę większe by łatwiej było nawigować. Aktywacja tylko po przytrzymaniu:**
+  - Zwiększono rozmiary przycisków w menu głównym (StartButton: 650x88px font 40; Settings/Guide/Exit: 600x80px font 34; PanelContainer: 1120x720px).
+  - Zmodyfikowano `scripts/hold_button.gd`: wyłączono natychmiastowe kliknięcie (`accept_event()`), przycisk aktywuje się **wyłącznie po przytrzymaniu triggera na przycisku** do pełnego naładowania paska (Hold/Dwell 0.6s).
+  - **Przycisk Menu Pauzy:** Pauza domyślnie wywoływana jest przyciskiem systemowym `menu_button` (na lewym kontrolerze Meta Quest / Pico - mały płaski przycisk z menu). W `scripts/pause_menu.gd` dodano obsługę alternatyw: przycisk `by_button` (górny przycisk Y na lewym kontrolerze lub B na prawym) oraz klawisze `Escape` i `P` na klawiaturze.
+
+## SUGESTIE DO DŹWIĘKÓW NA PÓŹNIEJ:
+- Dodać ambient zbliżania się przeciwnika jak zbliżanie się sąsiada w Hello Neighbor
+- Dodać oddzielny ambient ataku PhantomGraspa
+- Oddzielny dźwięk na minięcie 10-u sekund i oddzielny dźwięk na focus przeciwnika (zmiany stanu Ballory, pojawienie się/wykrycie przez Marionette, szarża Foxy'ego)
+- Oddzielny dźwięk na kroki i na bieganie.
+- Pokonanie PhantomGrasp'a alternatywną mechaniką: "beam dźwiękowy", który natychmiast niszczy macki, ale generuje olbrzymi hałas triggerujący szarżę Foxy'ego oraz kierujący Ballorę w to miejsce.
 ````
 
 ## File: gameDoc/Inżynierka/README.md
@@ -1129,9 +1157,20 @@ Gra zorganizowana jest w 6 zróżnicowanych nocy, wprowadzających gracza krok p
 3. **Noc 2 (60s)**: Balora przyspieszająca co 10s + Marionette atakująca co 20s (zwieńczona podwójnym szeptem).
 4. **Noc 3**: Wprowadzenie Foxy'ego o wysokiej tolerancji na hałas. Nauka mechaniki ciszy i bloku.
 5. **Noc 4**: Eskalacja agresji Foxy'ego, serie szeptów Marionetki i uściski Phantom Grasp.
-6. **Noc 5 (Finał)**: Podwójny Foxy, superszybka Balora i pełna presja sensoryczna.
 
-*Ostatnia aktualizacja:* v0.5.2 — Realizacja audytu technicznego i poprawek stabilności (eliminacja crasha wejścia w ścianę w PlayerAudioManager, optymalizacja runtime NavMesh na CPU, pełna eliminacja ostrzeżeń tool/footstep pool, failsafe pauzy i zabezpieczenia coroutines).
+---
+
+## 🎧 Aktualizacja sensoryczna i gameplayowa (16.09.2026)
+Wdrożono kluczowe poprawki na podstawie testów VR z dnia 16.09.2026:
+- **Niezależne szyny audio (`default_bus_layout.tres`):** Pełna kontrola suwakami w UI nad głośnością szyn: Master, Enemies (dźwięki przeciwników), Footsteps (kroki gracza), Whoosh (odgłos obrotu) oraz Jumpscare.
+- **Usunięcie kompasu:** Skasowano dezorientujący dźwięk dzwonka kompasu (`Broken bell.ogg`); nawigacja obrotowa opiera się wyłącznie na czystym Whooshu.
+- **Marionette (Whisper Freeze & Dystans):** Zwiększono dystans spawnu do 1.8m-2.4m, dodano wymóg uniesienia i wyciągnięcia dłoni w kierunku szeptu (obrót z rękami przy pasie nie odpędza wroga). Wprowadzono mechanikę **Whisper Freeze**: ruch nogami w trakcie trwania szeptu przyspiesza atak 3.5x.
+- **Phantom Grasp (Wyszarpywanie):** Zastąpiono podwójne całkowanie prostą i niezawodną detekcją 2 gwałtownych potrząśnięć kontrolerem z feedbackiem haptycznym.
+- **Ballora (Donośność pozytywki):** Zwiększono zasięg do 65m, `unit_size` do 35.0 i `volume_db` do 7.5 dB z modelem liniowym, przywracając orientację słuchową z oddali.
+- **Kroki:** Wstrzymywanie poprzednich instancji przed nowym stąpnięciem, eliminując nakładanie się 12-sekundowych próbek.
+- **Interfejs VR (Hold Button & Pauza):** Zwiększono rozmiary przycisków w menu, wymuszono aktywację wyłącznie po przytrzymaniu triggera (brak przypadkowych kliknięć). Dodano alternatywne mapowanie pauzy (`by_button` Y/B oraz Escape/P).
+
+*Ostatnia aktualizacja:* v0.5.2 (16.09.2026) — Wdrożenie szyn audio, Whisper Freeze Marionetki, naprawa wyszarpywania Phantom Grasp, poprawa donośności Ballory, powiększenie i przytrzymanie przycisków VR.
 ````
 
 ## File: scripts/ballora.gd.uid
@@ -1326,10 +1365,16 @@ func _process(_delta: float) -> void:
 		_find_vr_nodes()
 
 	var pressed := false
-	if left_ctrl and left_ctrl.is_button_pressed("menu_button"):
-		pressed = true
-	elif right_ctrl and right_ctrl.is_button_pressed("menu_button"):
-		pressed = true
+	if left_ctrl:
+		if left_ctrl.is_button_pressed("menu_button") or left_ctrl.is_button_pressed("by_button"):
+			pressed = true
+	if right_ctrl and not pressed:
+		if right_ctrl.is_button_pressed("menu_button") or right_ctrl.is_button_pressed("by_button"):
+			pressed = true
+			
+	if not pressed:
+		if Input.is_action_just_pressed("ui_cancel") or Input.is_key_pressed(KEY_ESCAPE) or Input.is_key_pressed(KEY_P):
+			pressed = true
 		
 	if pressed and not _menu_btn_down:
 		_menu_btn_down = true
@@ -1393,8 +1438,8 @@ enum State { DORMANT, STALKING, GRABBED }
 @export var max_dormant_time: float = 45.0
 @export var stalk_duration: float = 3.0
 @export var escape_time_limit: float = 3.5
-@export var required_shake: float = 16.0
-@export var shake_accel_threshold: float = 6.0
+@export var required_shakes: int = 2
+@export var shake_speed_threshold: float = 1.2
 
 @onready var crawl_sound: AudioStreamPlayer3D = $CrawlSound
 @onready var grab_sound: AudioStreamPlayer3D = $GrabSound
@@ -1402,7 +1447,8 @@ enum State { DORMANT, STALKING, GRABBED }
 
 var current_state: State = State.DORMANT
 var _state_timer: float = 0.0
-var _shake_progress: float = 0.0
+var _shake_count: int = 0
+var _shake_cooldown: float = 0.0
 
 var player_root: Node3D
 var left_hand: XRController3D
@@ -1410,7 +1456,6 @@ var right_hand: XRController3D
 var target_hand: XRController3D
 
 var _last_hand_pos: Vector3 = Vector3.ZERO
-var _last_vel: Vector3 = Vector3.ZERO
 var _haptic_loop_timer: float = 0.0
 
 func _ready():
@@ -1460,7 +1505,8 @@ func _enter_stalking():
 func _enter_grabbed():
 	current_state = State.GRABBED
 	_state_timer = escape_time_limit
-	_shake_progress = 0.0
+	_shake_count = 0
+	_shake_cooldown = 0.0
 	_haptic_loop_timer = 0.0
 	
 	if crawl_sound:
@@ -1470,8 +1516,7 @@ func _enter_grabbed():
 		
 	if target_hand:
 		_last_hand_pos = target_hand.global_position
-		_last_vel = Vector3.ZERO
-	print("Phantom Grasp: CHWYT za dłoń! Potrząsaj kontrolerem, by się wyrwać!")
+	print("Phantom Grasp: CHWYT za dłoń! Wstrząśnij kontrolerem 2 razy, by się wyrwać!")
 
 func _process(delta: float):
 	match current_state:
@@ -1492,6 +1537,9 @@ func _process(delta: float):
 
 		State.GRABBED:
 			_state_timer -= delta
+			if _shake_cooldown > 0.0:
+				_shake_cooldown -= delta
+				
 			if target_hand:
 				global_position = target_hand.global_position
 				
@@ -1499,21 +1547,25 @@ func _process(delta: float):
 				_haptic_loop_timer -= delta
 				if _haptic_loop_timer <= 0.0:
 					_haptic_loop_timer = 0.08
-					target_hand.trigger_haptic_pulse("haptic", 150.0, 1.0, 0.08, 0.0)
+					target_hand.trigger_haptic_pulse("haptic", 160.0, 1.0, 0.08, 0.0)
 
-				# Detekcja wyszarpywania (gwałtowne potrząsanie)
+				# Detekcja wyszarpywania (gwałtowne potrząśnięcie ręką)
 				var cur_pos = target_hand.global_position
 				var vel = (cur_pos - _last_hand_pos) / max(delta, 0.001)
-				var accel = (vel - _last_vel).length()
+				var speed = vel.length()
 				_last_hand_pos = cur_pos
-				_last_vel = vel
 				
-				if accel >= shake_accel_threshold:
-					_shake_progress += accel * delta * 1.8
+				if speed >= shake_speed_threshold and _shake_cooldown <= 0.0:
+					_shake_count += 1
+					_shake_cooldown = 0.22 # Wymaga 2 wyraźnych, oddzielnych ruchów
+					print("Phantom Grasp: Szarpnięcie! (", _shake_count, " / ", required_shakes, ")")
 					
-				if _shake_progress >= required_shake:
-					_break_free()
-					return
+					# Impuls potwierdzenia szarpnięcia
+					target_hand.trigger_haptic_pulse("haptic", 180.0, 0.85, 0.12, 0.0)
+					
+					if _shake_count >= required_shakes:
+						_break_free()
+						return
 
 			if _state_timer <= 0.0:
 				_trigger_jumpscare()
@@ -1773,6 +1825,7 @@ volume_db = 2.0
 unit_size = 8.0
 max_distance = 15.0
 pitch_scale = 0.65
+bus = &"Enemies"
 
 [node name="GrabSound" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("3_grab")
@@ -1780,10 +1833,12 @@ volume_db = 8.0
 unit_size = 10.0
 max_distance = 20.0
 pitch_scale = 1.3
+bus = &"Enemies"
 
 [node name="JumpscareSound" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("4_jump")
 volume_db = 10.0
+bus = &"Jumpscare"
 ````
 
 ## File: scripts/event_bus.gd
@@ -1972,9 +2027,11 @@ stream = ExtResource("2_y05hy")
 volume_db = 8.0
 unit_size = 15.0
 max_distance = 25.0
+bus = &"Enemies"
 
 [node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=1378429979]
 stream = ExtResource("3_jump")
+bus = &"Jumpscare"
 ````
 
 ## File: scripts/game_over_ui.gd
@@ -3131,13 +3188,16 @@ mesh = SubResource("CapsuleMesh_yfgsf")
 
 [node name="BaloraTheme" type="AudioStreamPlayer3D" parent="." unique_id=1844263034]
 stream = ExtResource("2_yfgsf")
-volume_db = 4.009
-unit_size = 23.5
+volume_db = 7.5
+unit_size = 35.0
 autoplay = true
-max_distance = 20.11
+max_distance = 65.0
+attenuation_model = 0
+bus = &"Enemies"
 
 [node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=566194156]
 stream = ExtResource("3_24ggd")
+bus = &"Jumpscare"
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=854780239]
 
@@ -3147,6 +3207,334 @@ collision_mask = 524289
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="JumpscareTrigger" unique_id=131938276]
 shape = SubResource("SphereShape3D_jumpscare")
+````
+
+## File: scripts/main_menu_ui.gd
+````
+extends Control
+
+signal start_pressed
+signal exit_pressed
+
+@onready var main_panel: VBoxContainer = $CenterContainer/PanelContainer/MarginContainer/MainPanel
+@onready var settings_panel: VBoxContainer = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel
+@onready var guide_panel: VBoxContainer = $CenterContainer/PanelContainer/MarginContainer/GuidePanel
+
+# Przyciski główne
+@onready var start_button: Button = $CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/StartButton
+@onready var settings_button: Button = $CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/SettingsButton
+@onready var guide_button: Button = $CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/GuideButton
+@onready var exit_button: Button = $CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/ExitButton
+
+# Kontrolki ustawień
+@onready var tts_toggle_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/TTSCard/Margin/HBox/TTSToggleBtn
+
+@onready var master_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterMinusBtn
+@onready var master_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterPlusBtn
+@onready var master_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterValueLabel
+@onready var master_progress_bar: ProgressBar = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterProgressBar
+
+@onready var enemies_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesMinusBtn
+@onready var enemies_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesPlusBtn
+@onready var enemies_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesValueLabel
+@onready var enemies_progress_bar: ProgressBar = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesProgressBar
+
+@onready var footsteps_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsMinusBtn
+@onready var footsteps_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsPlusBtn
+@onready var footsteps_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsValueLabel
+@onready var footsteps_progress_bar: ProgressBar = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsProgressBar
+
+@onready var whoosh_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshMinusBtn
+@onready var whoosh_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshPlusBtn
+@onready var whoosh_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshValueLabel
+@onready var whoosh_progress_bar: ProgressBar = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshProgressBar
+
+@onready var jumpscare_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscareMinusBtn
+@onready var jumpscare_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscarePlusBtn
+@onready var jumpscare_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscareValueLabel
+@onready var jumpscare_progress_bar: ProgressBar = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscareProgressBar
+
+@onready var back_from_settings_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/BackFromSettingsButton
+
+# Kontrolki poradnika
+@onready var back_from_guide_btn: Button = $CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/BackFromGuideButton
+
+# Telemetria
+@onready var last_time_label: Label = $CenterContainer/PanelContainer/MarginContainer/MainPanel/TelemetryContainer/HBoxContainer/LastTimeValue
+
+var _master_volume_percent: int = 80
+var _enemies_volume_percent: int = 85
+var _footsteps_volume_percent: int = 80
+var _whoosh_volume_percent: int = 75
+var _jumpscare_volume_percent: int = 90
+
+func _ready() -> void:
+	_show_panel("main")
+	_update_telemetry()
+	_apply_all_audio_buses()
+	_update_settings_ui()
+	_setup_accessibility()
+
+func _update_telemetry() -> void:
+	if last_time_label:
+		if SceneLoader and SceneLoader.last_survival_time > 0.0:
+			var total_seconds: int = int(SceneLoader.last_survival_time)
+			var minutes: int = int(total_seconds / 60.0)
+			var seconds: int = total_seconds % 60
+			last_time_label.text = "%02d:%02d" % [minutes, seconds]
+		else:
+			last_time_label.text = "--:--"
+
+func _apply_all_audio_buses() -> void:
+	_apply_bus_volume("Master", _master_volume_percent)
+	_apply_bus_volume("Enemies", _enemies_volume_percent)
+	_apply_bus_volume("Footsteps", _footsteps_volume_percent)
+	_apply_bus_volume("Whoosh", _whoosh_volume_percent)
+	_apply_bus_volume("Jumpscare", _jumpscare_volume_percent)
+
+func _apply_bus_volume(bus_name: String, percent: int) -> void:
+	var bus_idx = AudioServer.get_bus_index(bus_name)
+	if bus_idx >= 0:
+		var linear = percent / 100.0
+		var db = linear_to_db(linear) if linear > 0.01 else -80.0
+		AudioServer.set_bus_volume_db(bus_idx, db)
+
+func _update_settings_ui() -> void:
+	if master_value_label: master_value_label.text = "%d%%" % _master_volume_percent
+	if master_progress_bar: master_progress_bar.value = _master_volume_percent
+
+	if enemies_value_label: enemies_value_label.text = "%d%%" % _enemies_volume_percent
+	if enemies_progress_bar: enemies_progress_bar.value = _enemies_volume_percent
+
+	if footsteps_value_label: footsteps_value_label.text = "%d%%" % _footsteps_volume_percent
+	if footsteps_progress_bar: footsteps_progress_bar.value = _footsteps_volume_percent
+
+	if whoosh_value_label: whoosh_value_label.text = "%d%%" % _whoosh_volume_percent
+	if whoosh_progress_bar: whoosh_progress_bar.value = _whoosh_volume_percent
+
+	if jumpscare_value_label: jumpscare_value_label.text = "%d%%" % _jumpscare_volume_percent
+	if jumpscare_progress_bar: jumpscare_progress_bar.value = _jumpscare_volume_percent
+
+	if tts_toggle_btn:
+		var is_on = TTSManager.tts_enabled if TTSManager else true
+		tts_toggle_btn.text = "TTS Voice: " + ("ON" if is_on else "OFF")
+
+func _setup_accessibility() -> void:
+	if Engine.is_editor_hint() or TTSManager == null:
+		return
+		
+	TTSManager.setup_button(start_button, "Start Game")
+	TTSManager.setup_button(settings_button, "Settings")
+	TTSManager.setup_button(guide_button, "Controls and Survival Guide")
+	TTSManager.setup_button(exit_button, "Exit Game")
+	
+	# Settings controls with dynamic speech
+	TTSManager.setup_button(master_minus_btn, func(): return "Decrease master volume. Currently %d percent" % _master_volume_percent)
+	TTSManager.setup_button(master_plus_btn, func(): return "Increase master volume. Currently %d percent" % _master_volume_percent)
+	
+	TTSManager.setup_button(enemies_minus_btn, func(): return "Decrease enemy sounds volume. Currently %d percent" % _enemies_volume_percent)
+	TTSManager.setup_button(enemies_plus_btn, func(): return "Increase enemy sounds volume. Currently %d percent" % _enemies_volume_percent)
+	
+	TTSManager.setup_button(footsteps_minus_btn, func(): return "Decrease footstep volume. Currently %d percent" % _footsteps_volume_percent)
+	TTSManager.setup_button(footsteps_plus_btn, func(): return "Increase footstep volume. Currently %d percent" % _footsteps_volume_percent)
+
+	TTSManager.setup_button(whoosh_minus_btn, func(): return "Decrease turn sound volume. Currently %d percent" % _whoosh_volume_percent)
+	TTSManager.setup_button(whoosh_plus_btn, func(): return "Increase turn sound volume. Currently %d percent" % _whoosh_volume_percent)
+
+	TTSManager.setup_button(jumpscare_minus_btn, func(): return "Decrease jumpscare volume. Currently %d percent" % _jumpscare_volume_percent)
+	TTSManager.setup_button(jumpscare_plus_btn, func(): return "Increase jumpscare volume. Currently %d percent" % _jumpscare_volume_percent)
+
+	TTSManager.setup_button(tts_toggle_btn, func(): return "TTS Voice. Currently " + ("enabled" if (TTSManager and TTSManager.tts_enabled) else "disabled"))
+	TTSManager.setup_button(back_from_settings_btn, "Back to Main Menu")
+	TTSManager.setup_button(back_from_guide_btn, "Back to Main Menu")
+
+func _show_panel(panel_name: String) -> void:
+	print("[MainMenuUI] Switching to panel: ", panel_name)
+	if main_panel:
+		main_panel.visible = (panel_name == "main")
+	if settings_panel:
+		settings_panel.visible = (panel_name == "settings")
+	if guide_panel:
+		guide_panel.visible = (panel_name == "guide")
+
+func _on_start_button_pressed() -> void:
+	print("[MainMenuUI] Start button pressed! Emitting start_pressed...")
+	start_pressed.emit()
+	if start_pressed.get_connections().is_empty():
+		SceneLoader.load_scene("res://scenes/game_map.tscn")
+
+func _on_settings_button_pressed() -> void:
+	print("[MainMenuUI] Settings button pressed! Calling _show_panel('settings')")
+	_show_panel("settings")
+	if TTSManager:
+		TTSManager.announce_panel("Audio settings screen. Adjust master, enemies, footsteps, turn sound and jumpscares.")
+
+func _on_guide_button_pressed() -> void:
+	_show_panel("guide")
+	if TTSManager:
+		TTSManager.announce_panel("Controls and survival guide. Left controller: snap turn and sprint. Right controller: move and block charges.")
+
+func _on_exit_button_pressed() -> void:
+	exit_pressed.emit()
+	if exit_pressed.get_connections().is_empty():
+		get_tree().quit()
+
+func _on_back_pressed() -> void:
+	_show_panel("main")
+	if TTSManager:
+		TTSManager.announce_panel("Main Menu")
+
+# Master volume
+func _on_master_minus_pressed() -> void:
+	_master_volume_percent = clamp(_master_volume_percent - 10, 0, 100)
+	_apply_bus_volume("Master", _master_volume_percent)
+	_update_settings_ui()
+	if TTSManager: TTSManager.speak("Master volume: %d percent" % _master_volume_percent, true)
+
+func _on_master_plus_pressed() -> void:
+	_master_volume_percent = clamp(_master_volume_percent + 10, 0, 100)
+	_apply_bus_volume("Master", _master_volume_percent)
+	_update_settings_ui()
+	if TTSManager: TTSManager.speak("Master volume: %d percent" % _master_volume_percent, true)
+
+# Enemies volume
+func _on_enemies_minus_pressed() -> void:
+	_enemies_volume_percent = clamp(_enemies_volume_percent - 10, 0, 100)
+	_apply_bus_volume("Enemies", _enemies_volume_percent)
+	_update_settings_ui()
+	if TTSManager: TTSManager.speak("Enemy sounds volume: %d percent" % _enemies_volume_percent, true)
+
+func _on_enemies_plus_pressed() -> void:
+	_enemies_volume_percent = clamp(_enemies_volume_percent + 10, 0, 100)
+	_apply_bus_volume("Enemies", _enemies_volume_percent)
+	_update_settings_ui()
+	if TTSManager: TTSManager.speak("Enemy sounds volume: %d percent" % _enemies_volume_percent, true)
+
+# Footsteps volume
+func _on_footsteps_minus_pressed() -> void:
+	_footsteps_volume_percent = clamp(_footsteps_volume_percent - 10, 0, 100)
+	_apply_bus_volume("Footsteps", _footsteps_volume_percent)
+	_update_settings_ui()
+	if TTSManager: TTSManager.speak("Footsteps volume: %d percent" % _footsteps_volume_percent, true)
+
+func _on_footsteps_plus_pressed() -> void:
+	_footsteps_volume_percent = clamp(_footsteps_volume_percent + 10, 0, 100)
+	_apply_bus_volume("Footsteps", _footsteps_volume_percent)
+	_update_settings_ui()
+	if TTSManager: TTSManager.speak("Footsteps volume: %d percent" % _footsteps_volume_percent, true)
+
+# Whoosh turn sound
+func _on_whoosh_minus_pressed() -> void:
+	_whoosh_volume_percent = clamp(_whoosh_volume_percent - 10, 0, 100)
+	_apply_bus_volume("Whoosh", _whoosh_volume_percent)
+	_update_settings_ui()
+	if TTSManager: TTSManager.speak("Turn sound volume: %d percent" % _whoosh_volume_percent, true)
+
+func _on_whoosh_plus_pressed() -> void:
+	_whoosh_volume_percent = clamp(_whoosh_volume_percent + 10, 0, 100)
+	_apply_bus_volume("Whoosh", _whoosh_volume_percent)
+	_update_settings_ui()
+	if TTSManager: TTSManager.speak("Turn sound volume: %d percent" % _whoosh_volume_percent, true)
+
+# Jumpscare volume
+func _on_jumpscare_minus_pressed() -> void:
+	_jumpscare_volume_percent = clamp(_jumpscare_volume_percent - 10, 0, 100)
+	_apply_bus_volume("Jumpscare", _jumpscare_volume_percent)
+	_update_settings_ui()
+	if TTSManager: TTSManager.speak("Jumpscare volume: %d percent" % _jumpscare_volume_percent, true)
+
+func _on_jumpscare_plus_pressed() -> void:
+	_jumpscare_volume_percent = clamp(_jumpscare_volume_percent + 10, 0, 100)
+	_apply_bus_volume("Jumpscare", _jumpscare_volume_percent)
+	_update_settings_ui()
+	if TTSManager: TTSManager.speak("Jumpscare volume: %d percent" % _jumpscare_volume_percent, true)
+
+# Toggle buttons
+func _on_tts_toggle_pressed() -> void:
+	if TTSManager:
+		TTSManager.tts_enabled = not TTSManager.tts_enabled
+		_update_settings_ui()
+		if TTSManager.tts_enabled:
+			TTSManager.speak("TTS voice enabled", true)
+````
+
+## File: scenes/foxy.tscn
+````
+[gd_scene format=3 uid="uid://cxabcf23t8foo"]
+
+[ext_resource type="Script" uid="uid://bebk6fhspwj0v" path="res://scripts/foxy.gd" id="1_foxy"]
+[ext_resource type="AudioStream" uid="uid://buv1fya4k5bwa" path="res://assets/sounds/foxy_runing.mp3" id="2_run"]
+[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="3_jump"]
+[ext_resource type="AudioStream" uid="uid://131ewctsgefe" path="res://assets/sounds/foxy_walking.wav" id="4_walk"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_foxy_col"]
+radius = 0.5571289
+height = 2.3572266
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_foxy_mat"]
+albedo_color = Color(1, 0.2, 0, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_foxy_mesh"]
+material = SubResource("StandardMaterial3D_foxy_mat")
+radius = 0.51416016
+height = 2.3575196
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_foxy_trig"]
+height = 2.3625977
+radius = 0.8149414
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_block"]
+size = Vector3(1.8463135, 2.1749024, 0.9095459)
+
+[node name="Foxy" type="CharacterBody3D" unique_id=2065885202 groups=["enemy"]]
+collision_layer = 4
+script = ExtResource("1_foxy")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=839306087]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1786133, 0)
+shape = SubResource("CapsuleShape3D_foxy_col")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1730761299]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1787598, 0)
+mesh = SubResource("CapsuleMesh_foxy_mesh")
+
+[node name="RunSound" type="AudioStreamPlayer3D" parent="." unique_id=693784785]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+stream = ExtResource("2_run")
+volume_db = 15.24
+unit_size = 16.12
+max_distance = 25.0
+bus = &"Enemies"
+
+[node name="WalkSound" type="AudioStreamPlayer3D" parent="." unique_id=998877665]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+stream = ExtResource("4_walk")
+volume_db = 15.614
+unit_size = 17.05
+max_distance = 25.0
+bus = &"Enemies"
+
+[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=1594056728]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+stream = ExtResource("3_jump")
+volume_db = 9.019
+bus = &"Jumpscare"
+
+[node name="JumpscareTrigger" type="Area3D" parent="." unique_id=1994404484]
+collision_layer = 0
+collision_mask = 524289
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpscareTrigger" unique_id=829897168]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1812989, 0)
+shape = SubResource("CylinderShape3D_foxy_trig")
+
+[node name="BlockTrigger" type="Area3D" parent="." unique_id=1234567890]
+collision_layer = 0
+collision_mask = 131072
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BlockTrigger" unique_id=820912904]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.038757324, 1.1874512, -0.70477295)
+shape = SubResource("BoxShape3D_block")
 ````
 
 ## File: scripts/game_map.gd
@@ -3340,188 +3728,6 @@ func stop_timer_and_save():
 	SceneLoader.last_survival_time = time_survived
 ````
 
-## File: scripts/main_menu_ui.gd
-````
-extends Control
-
-signal start_pressed
-signal exit_pressed
-
-@onready var main_panel: VBoxContainer = $CenterContainer/PanelContainer/MarginContainer/MainPanel
-@onready var settings_panel: VBoxContainer = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel
-@onready var guide_panel: VBoxContainer = $CenterContainer/PanelContainer/MarginContainer/GuidePanel
-
-# Przyciski główne
-@onready var start_button: Button = $CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/StartButton
-@onready var settings_button: Button = $CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/SettingsButton
-@onready var guide_button: Button = $CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/GuideButton
-@onready var exit_button: Button = $CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer/ExitButton
-
-# Kontrolki ustawień
-@onready var master_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterMinusBtn
-@onready var master_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterPlusBtn
-@onready var master_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterValueLabel
-@onready var master_progress_bar: ProgressBar = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterProgressBar
-
-@onready var whoosh_minus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshMinusBtn
-@onready var whoosh_plus_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshPlusBtn
-@onready var whoosh_value_label: Label = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshValueLabel
-@onready var whoosh_progress_bar: ProgressBar = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshProgressBar
-
-@onready var compass_toggle_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassCard/Margin/HBox/CompassToggleBtn
-@onready var tts_toggle_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/TTSCard/Margin/HBox/TTSToggleBtn
-@onready var back_from_settings_btn: Button = $CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/BackFromSettingsButton
-
-# Kontrolki poradnika
-@onready var back_from_guide_btn: Button = $CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/BackFromGuideButton
-
-# Telemetria
-@onready var last_time_label: Label = $CenterContainer/PanelContainer/MarginContainer/MainPanel/TelemetryContainer/HBoxContainer/LastTimeValue
-
-var _master_volume_percent: int = 80
-var _whoosh_volume_db: float = 3.0
-
-func _ready() -> void:
-	_show_panel("main")
-	_update_telemetry()
-	_update_settings_ui()
-	_setup_accessibility()
-
-func _update_telemetry() -> void:
-	if last_time_label:
-		if SceneLoader and SceneLoader.last_survival_time > 0.0:
-			var total_seconds: int = int(SceneLoader.last_survival_time)
-			var minutes: int = int(total_seconds / 60.0)
-			var seconds: int = total_seconds % 60
-			last_time_label.text = "%02d:%02d" % [minutes, seconds]
-		else:
-			last_time_label.text = "--:--"
-
-func _update_settings_ui() -> void:
-	if master_value_label:
-		master_value_label.text = "%d%%" % _master_volume_percent
-	if master_progress_bar:
-		master_progress_bar.value = _master_volume_percent
-		
-	if whoosh_value_label:
-		whoosh_value_label.text = "%+.1f dB" % _whoosh_volume_db
-	if whoosh_progress_bar:
-		whoosh_progress_bar.value = clamp((_whoosh_volume_db + 10.0) / 25.0 * 100.0, 0.0, 100.0)
-		
-	if compass_toggle_btn:
-		var is_on = TTSManager.sound_compass_enabled if TTSManager else true
-		compass_toggle_btn.text = "Sound Compass: " + ("ON" if is_on else "OFF")
-	if tts_toggle_btn:
-		var is_on = TTSManager.tts_enabled if TTSManager else true
-		tts_toggle_btn.text = "TTS Voice: " + ("ON" if is_on else "OFF")
-
-func _setup_accessibility() -> void:
-	if Engine.is_editor_hint() or TTSManager == null:
-		return
-		
-	TTSManager.setup_button(start_button, "Start Game")
-	TTSManager.setup_button(settings_button, "Settings")
-	TTSManager.setup_button(guide_button, "Controls and Survival Guide")
-	TTSManager.setup_button(exit_button, "Exit Game")
-	
-	# Settings controls with dynamic speech
-	TTSManager.setup_button(master_minus_btn, func(): return "Decrease master volume. Currently %d percent" % _master_volume_percent)
-	TTSManager.setup_button(master_plus_btn, func(): return "Increase master volume. Currently %d percent" % _master_volume_percent)
-	TTSManager.setup_button(whoosh_minus_btn, func(): return "Decrease turn volume. Currently %.1f decibels" % _whoosh_volume_db)
-	TTSManager.setup_button(whoosh_plus_btn, func(): return "Increase turn volume. Currently %.1f decibels" % _whoosh_volume_db)
-	TTSManager.setup_button(compass_toggle_btn, func(): return "Sound compass. Currently " + ("enabled" if (TTSManager and TTSManager.sound_compass_enabled) else "disabled"))
-	TTSManager.setup_button(tts_toggle_btn, func(): return "TTS Voice. Currently " + ("enabled" if (TTSManager and TTSManager.tts_enabled) else "disabled"))
-	TTSManager.setup_button(back_from_settings_btn, "Back to Main Menu")
-	TTSManager.setup_button(back_from_guide_btn, "Back to Main Menu")
-
-func _show_panel(panel_name: String) -> void:
-	print("[MainMenuUI] Switching to panel: ", panel_name)
-	if main_panel:
-		main_panel.visible = (panel_name == "main")
-	if settings_panel:
-		settings_panel.visible = (panel_name == "settings")
-	if guide_panel:
-		guide_panel.visible = (panel_name == "guide")
-
-func _on_start_button_pressed() -> void:
-	print("[MainMenuUI] Start button pressed! Emitting start_pressed...")
-	start_pressed.emit()
-	if start_pressed.get_connections().is_empty():
-		SceneLoader.load_scene("res://scenes/game_map.tscn")
-
-func _on_settings_button_pressed() -> void:
-	print("[MainMenuUI] Settings button pressed! Calling _show_panel('settings')")
-	_show_panel("settings")
-	if TTSManager:
-		TTSManager.announce_panel("Settings screen. Use plus and minus buttons to adjust volume.")
-
-func _on_guide_button_pressed() -> void:
-	_show_panel("guide")
-	if TTSManager:
-		TTSManager.announce_panel("Controls and survival guide. Left controller: snap turn and sprint. Right controller: move and block charges.")
-
-func _on_exit_button_pressed() -> void:
-	exit_pressed.emit()
-	if exit_pressed.get_connections().is_empty():
-		get_tree().quit()
-
-func _on_back_pressed() -> void:
-	_show_panel("main")
-	if TTSManager:
-		TTSManager.announce_panel("Main Menu")
-
-# Master volume buttons
-func _on_master_minus_pressed() -> void:
-	_master_volume_percent = clamp(_master_volume_percent - 10, 0, 100)
-	_apply_master_volume()
-	_update_settings_ui()
-	if TTSManager:
-		TTSManager.speak("Master volume: %d percent" % _master_volume_percent, true)
-
-func _on_master_plus_pressed() -> void:
-	_master_volume_percent = clamp(_master_volume_percent + 10, 0, 100)
-	_apply_master_volume()
-	_update_settings_ui()
-	if TTSManager:
-		TTSManager.speak("Master volume: %d percent" % _master_volume_percent, true)
-
-func _apply_master_volume() -> void:
-	var bus_idx = AudioServer.get_bus_index("Master")
-	if bus_idx >= 0:
-		var linear = _master_volume_percent / 100.0
-		var db = linear_to_db(linear) if linear > 0.01 else -80.0
-		AudioServer.set_bus_volume_db(bus_idx, db)
-
-# Whoosh turn sound buttons
-func _on_whoosh_minus_pressed() -> void:
-	_whoosh_volume_db = clamp(_whoosh_volume_db - 2.0, -10.0, 15.0)
-	if TTSManager:
-		TTSManager.whoosh_volume_db = _whoosh_volume_db
-		TTSManager.speak("Turn volume: %.0f decibels" % _whoosh_volume_db, true)
-	_update_settings_ui()
-
-func _on_whoosh_plus_pressed() -> void:
-	_whoosh_volume_db = clamp(_whoosh_volume_db + 2.0, -10.0, 15.0)
-	if TTSManager:
-		TTSManager.whoosh_volume_db = _whoosh_volume_db
-		TTSManager.speak("Turn volume: %.0f decibels" % _whoosh_volume_db, true)
-	_update_settings_ui()
-
-# Toggle buttons
-func _on_compass_toggle_pressed() -> void:
-	if TTSManager:
-		TTSManager.sound_compass_enabled = not TTSManager.sound_compass_enabled
-		_update_settings_ui()
-		TTSManager.speak("Sound compass " + ("enabled" if TTSManager.sound_compass_enabled else "disabled"), true)
-
-func _on_tts_toggle_pressed() -> void:
-	if TTSManager:
-		TTSManager.tts_enabled = not TTSManager.tts_enabled
-		_update_settings_ui()
-		if TTSManager.tts_enabled:
-			TTSManager.speak("TTS voice enabled", true)
-````
-
 ## File: scripts/player_audio_manager.gd
 ````
 extends Node
@@ -3547,7 +3753,6 @@ var right_ctrl: XRController3D
 var _last_rotation_y: float = 0.0
 var _accumulated_turn: float = 0.0
 var _wall_hit_timer: float = 0.0
-var _compass_cooldown_timer: float = 0.0
 var _echolocation_timer: float = 0.0
 
 func _ready():
@@ -3571,8 +3776,6 @@ func _ready():
 func _physics_process(delta: float):
 	if _wall_hit_timer > 0.0:
 		_wall_hit_timer -= delta
-	if _compass_cooldown_timer > 0.0:
-		_compass_cooldown_timer -= delta
 	if _echolocation_timer > 0.0:
 		_echolocation_timer -= delta
 
@@ -3625,12 +3828,6 @@ func _physics_process(delta: float):
 				
 				turn_audio_player.play()
 				
-				# Kompas dźwiękowy: Północ (0) -> wysoki ton, Południe (+/- PI) -> niski ton
-				if (TTSManager == null or TTSManager.sound_compass_enabled) and _compass_cooldown_timer <= 0.0:
-					_compass_cooldown_timer = 0.25
-					var compass_pitch = remap(abs(current_rotation_y), 0.0, PI, 1.4, 0.6)
-					_trigger_compass_ping(compass_pitch)
-				
 		_last_rotation_y = current_rotation_y
 
 func _trigger_wall_collision():
@@ -3661,19 +3858,6 @@ func _trigger_collision_rumble():
 			left_ctrl.trigger_haptic_pulse("haptic", 120.0, 0.7, 0.2, 0.0)
 		if right_ctrl:
 			right_ctrl.trigger_haptic_pulse("haptic", 120.0, 0.7, 0.2, 0.0)
-
-func _trigger_compass_ping(pitch: float):
-	await get_tree().create_timer(0.18).timeout
-	if not is_inside_tree():
-		return
-	var compass_player = AudioStreamPlayer.new()
-	# Dedykowany dzwon kompasu zamiast wieloznacznego nice-sfx
-	compass_player.stream = preload("res://assets/sounds/Broken bell.ogg")
-	compass_player.volume_db = -12.0
-	compass_player.pitch_scale = pitch
-	add_child(compass_player)
-	compass_player.play()
-	compass_player.finished.connect(compass_player.queue_free)
 
 func _on_footstep(_surface_name: String):
 	# Zarejestrowano krok. Zliczamy statystykę w SceneLoader.
@@ -3745,82 +3929,6 @@ func _spawn_delayed_echo(hit_pos: Vector3, dist: float, delay: float):
 	echo.finished.connect(echo.queue_free)
 ````
 
-## File: scenes/foxy.tscn
-````
-[gd_scene format=3 uid="uid://cxabcf23t8foo"]
-
-[ext_resource type="Script" uid="uid://bebk6fhspwj0v" path="res://scripts/foxy.gd" id="1_foxy"]
-[ext_resource type="AudioStream" uid="uid://buv1fya4k5bwa" path="res://assets/sounds/foxy_runing.mp3" id="2_run"]
-[ext_resource type="AudioStream" uid="uid://bb0jbi0xyp25h" path="res://assets/sounds/jumpscare_main.mp3" id="3_jump"]
-[ext_resource type="AudioStream" uid="uid://131ewctsgefe" path="res://assets/sounds/foxy_walking.wav" id="4_walk"]
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_foxy_col"]
-radius = 0.5571289
-height = 2.3572266
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_foxy_mat"]
-albedo_color = Color(1, 0.2, 0, 1)
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_foxy_mesh"]
-material = SubResource("StandardMaterial3D_foxy_mat")
-radius = 0.51416016
-height = 2.3575196
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_foxy_trig"]
-height = 2.3625977
-radius = 0.8149414
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_block"]
-size = Vector3(1.8463135, 2.1749024, 0.9095459)
-
-[node name="Foxy" type="CharacterBody3D" unique_id=2065885202 groups=["enemy"]]
-collision_layer = 4
-script = ExtResource("1_foxy")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=839306087]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1786133, 0)
-shape = SubResource("CapsuleShape3D_foxy_col")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1730761299]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1787598, 0)
-mesh = SubResource("CapsuleMesh_foxy_mesh")
-
-[node name="RunSound" type="AudioStreamPlayer3D" parent="." unique_id=693784785]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-stream = ExtResource("2_run")
-volume_db = 15.24
-unit_size = 16.12
-max_distance = 25.0
-
-[node name="WalkSound" type="AudioStreamPlayer3D" parent="." unique_id=998877665]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-stream = ExtResource("4_walk")
-volume_db = 15.614
-unit_size = 17.05
-max_distance = 25.0
-
-[node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=1594056728]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
-stream = ExtResource("3_jump")
-volume_db = 9.019
-
-[node name="JumpscareTrigger" type="Area3D" parent="." unique_id=1994404484]
-collision_layer = 0
-collision_mask = 524289
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="JumpscareTrigger" unique_id=829897168]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1812989, 0)
-shape = SubResource("CylinderShape3D_foxy_trig")
-
-[node name="BlockTrigger" type="Area3D" parent="." unique_id=1234567890]
-collision_layer = 0
-collision_mask = 131072
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="BlockTrigger" unique_id=820912904]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.038757324, 1.1874512, -0.70477295)
-shape = SubResource("BoxShape3D_block")
-````
-
 ## File: project.godot
 ````
 ; Engine configuration file.
@@ -3872,6 +3980,10 @@ renderer/rendering_method="mobile"
 
 openxr/enabled=true
 shaders/enabled=true
+
+[audio]
+
+default_bus_layout="res://default_bus_layout.tres"
 ````
 
 ## File: README.md
@@ -3940,7 +4052,7 @@ class_name HoldButton
 ## Samo najechanie NIE ładuje opcji. Aby zatwierdzić, gracz musi PRZYTRZYMAĆ spust (trigger).
 ## Po aktywacji przycisk jest zablokowany do momentu, gdy gracz PUŚCI trigger.
 
-@export var charge_time_hold: float = 0.55
+@export var charge_time_hold: float = 0.6
 
 var _is_hovered: bool = false
 var _is_input_holding: bool = false
@@ -3964,7 +4076,6 @@ const COLOR_GLOW_AURA := Color(0.0, 1.0, 0.64, 0.6)
 func _ready() -> void:
 	disabled = false
 	toggle_mode = false
-	action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
 	
 	var empty_style := StyleBoxEmpty.new()
 	add_theme_stylebox_override("normal", empty_style)
@@ -3994,6 +4105,11 @@ func _apply_engraved_style() -> void:
 	add_theme_constant_override("shadow_offset_x", 2)
 	add_theme_constant_override("shadow_offset_y", 3)
 	add_theme_constant_override("outline_size", 2)
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		_is_input_holding = event.pressed
+		accept_event() # Blokuje standardową natychmiastową aktywację bazy Button!
 
 func _input(event: InputEvent) -> void:
 	if not _is_hovered:
@@ -4145,14 +4261,14 @@ var current_state: State = State.HIDDEN
 @export var map_bounds_max: Vector3 = Vector3(9.0, 3.0, 9.0)
 
 ## Dystans spawnu od gracza
-@export var spawn_distance_min: float = 1.0
-@export var spawn_distance_max: float = 1.5
+@export var spawn_distance_min: float = 1.8
+@export var spawn_distance_max: float = 2.4
 
 ## Prędkość zamachu kontrolera (m/s) wymagana do odpędzenia szeptu
-@export var swing_speed_threshold: float = 1.3
+@export var swing_speed_threshold: float = 1.1
 
 ## Dystans uderzenia dłonią w szept
-@export var swing_proximity_distance: float = 0.85
+@export var swing_proximity_distance: float = 0.65
 
 ## Maksymalny czas na reakcję przed Jumpscare'em (sekundy)
 @export var attack_duration_limit: float = 5.5
@@ -4260,13 +4376,32 @@ func _process(delta: float):
 		
 		State.WHISPERING:
 			attack_timer += delta
+			
+			# Mechanika Whisper Freeze: ruch nogami gracza prowokuje natychmiastowy atak Marionetki!
+			var moving_feet := false
+			if player:
+				var pb = player.get_node_or_null("XROrigin3D/PlayerBody")
+				if pb:
+					if "ground_control_velocity" in pb:
+						var gcv = pb.ground_control_velocity
+						if (gcv is Vector2 or gcv is Vector3) and gcv.length() > 0.25:
+							moving_feet = true
+					elif "velocity" in pb and pb.velocity is Vector3 and pb.velocity.length() > 0.35:
+						moving_feet = true
+						
+			if moving_feet:
+				# Gracz nie zastyga w bezruchu: zegar ataku leci 3.5x szybciej!
+				attack_timer += delta * 3.5
+				if left_hand: left_hand.trigger_haptic_pulse("haptic", 120.0, 0.75, 0.05, 0.0)
+				if right_hand: right_hand.trigger_haptic_pulse("haptic", 120.0, 0.75, 0.05, 0.0)
+
 			if attack_timer > attack_duration_limit:
 				_trigger_jumpscare("Czas na reakcję (%.1fs) minął!" % attack_duration_limit)
 				return
 				
 			# Przyczepienie do gracza: ciągłe podążanie za głową gracza z wylosowanym kątem
-			# Efekt crescendo: dystans z czasem maleje o max 60% potęgując wrażenie zbliżania szeptu do ucha
-			var crescendo_mult = 1.0 - (attack_timer / attack_duration_limit) * 0.6
+			# Efekt crescendo: dystans z czasem maleje o max 50% potęgując wrażenie zbliżania szeptu do ucha
+			var crescendo_mult = 1.0 - (attack_timer / attack_duration_limit) * 0.5
 			var target_pos = camera.global_position + (current_offset * crescendo_mult)
 			target_pos.x = clamp(target_pos.x, map_bounds_min.x, map_bounds_max.x)
 			target_pos.y = clamp(target_pos.y, map_bounds_min.y, map_bounds_max.y)
@@ -4289,44 +4424,41 @@ func _process(delta: float):
 			_check_controller_defense(delta)
 
 func _check_controller_defense(delta: float):
-	if delta <= 0.0001:
+	if delta <= 0.0001 or camera == null:
 		return
 
 	var to_whisper = (global_position - camera.global_position).normalized()
 	
-	# Weryfikacja lewej ręki
-	if left_hand:
-		var cur_pos = left_hand.global_position
-		var vel = (cur_pos - _last_left_pos) / delta
+	for ctrl in [left_hand, right_hand]:
+		if ctrl == null:
+			continue
+			
+		var cur_pos = ctrl.global_position
+		var last_pos = _last_left_pos if ctrl == left_hand else _last_right_pos
+		var vel = (cur_pos - last_pos) / delta
 		var speed = vel.length()
 		var dist = cur_pos.distance_to(global_position)
-		_last_left_pos = cur_pos
 		
-		if speed >= swing_speed_threshold:
-			var swing_dir = vel.normalized()
-			if swing_dir.dot(to_whisper) > 0.25 or dist < swing_proximity_distance:
-				_whisper_survived(left_hand)
-				return
-		elif dist < 0.5 and speed > 0.8:
-			_whisper_survived(left_hand)
-			return
-
-	# Weryfikacja prawej ręki
-	if right_hand:
-		var cur_pos = right_hand.global_position
-		var vel = (cur_pos - _last_right_pos) / delta
-		var speed = vel.length()
-		var dist = cur_pos.distance_to(global_position)
-		_last_right_pos = cur_pos
+		if ctrl == left_hand:
+			_last_left_pos = cur_pos
+		else:
+			_last_right_pos = cur_pos
+			
+		# 1. Ręka musi być uniesiona powyżej pasa
+		var is_hand_raised = cur_pos.y > (camera.global_position.y - 0.45)
 		
-		if speed >= swing_speed_threshold:
+		# 2. Ręka musi być wysunięta w stronę szeptu
+		var hand_vector = cur_pos - camera.global_position
+		var is_hand_facing = hand_vector.normalized().dot(to_whisper) > 0.2
+		
+		if is_hand_raised and is_hand_facing:
 			var swing_dir = vel.normalized()
-			if swing_dir.dot(to_whisper) > 0.25 or dist < swing_proximity_distance:
-				_whisper_survived(right_hand)
+			var is_swing_towards = swing_dir.dot(to_whisper) > 0.25
+			
+			# Odparcie szeptu: energiczny zamach w stronę szeptu LUB przybliżenie ręki blisko szeptu
+			if (speed >= swing_speed_threshold and is_swing_towards) or (dist < swing_proximity_distance and speed >= 0.7):
+				_whisper_survived(ctrl)
 				return
-		elif dist < 0.5 and speed > 0.8:
-			_whisper_survived(right_hand)
-			return
 
 ## Gracz odpędził jeden szept machnięciem dłoni
 func _whisper_survived(controller: XRController3D = null):
@@ -4378,7 +4510,7 @@ func _enter_whispering():
 		# Obliczenie losowego kąta wokół głowy gracza
 		var angle = randf_range(0, TAU)
 		var distance = randf_range(spawn_distance_min, spawn_distance_max)
-		current_offset = Vector3(cos(angle) * distance, randf_range(-0.3, 0.3), sin(angle) * distance)
+		current_offset = Vector3(cos(angle) * distance, randf_range(0.05, 0.35), sin(angle) * distance)
 		
 		var spawn_pos = initial_player_pos + current_offset
 		spawn_pos.x = clamp(spawn_pos.x, map_bounds_min.x, map_bounds_max.x)
@@ -4617,163 +4749,6 @@ func _trigger_jumpscare():
 	await JumpscareHelper.execute(self, jumpscare_sound, [mesh_instance, audio_player], "Balora — Złapanie w strefie krytycznej")
 ````
 
-## File: scenes/game_map.tscn
-````
-[gd_scene format=3 uid="uid://cjyxx2d4hafto"]
-
-[ext_resource type="Script" uid="uid://cbilw02reekmp" path="res://scripts/game_map.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://d3qvt0affmqvn" path="res://assets/textures/Wooden Floor Texture/wood2_COLOR.jpg" id="2_lp764"]
-[ext_resource type="Texture2D" uid="uid://ch8av1pfgrixv" path="res://assets/textures/Wooden Floor Texture/wood2_OCC.jpg" id="3_m2cng"]
-[ext_resource type="Texture2D" uid="uid://bkxkmyk7y0hl4" path="res://assets/textures/Wooden Floor Texture/wood2_NRM.jpg" id="4_oviui"]
-[ext_resource type="AudioStream" uid="uid://bv6a0kufxjmtr" path="res://assets/sounds/ambience.mp3" id="5_m2cng"]
-[ext_resource type="PackedScene" uid="uid://b4ml2o2jh5ooc" path="res://scenes/balora.tscn" id="6_oviui"]
-[ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="7_player"]
-[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="8_startxr"]
-[ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="9_fade"]
-[ext_resource type="PackedScene" uid="uid://b3t54b22cxxxx" path="res://scenes/marionette.tscn" id="10_marnin"]
-[ext_resource type="PackedScene" uid="uid://cxabcf23t8foo" path="res://scenes/foxy.tscn" id="11_foxy"]
-[ext_resource type="PackedScene" path="res://scenes/phantom_grasp.tscn" id="12_grasp"]
-[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="13_pause"]
-
-[sub_resource type="Environment" id="Environment_iau3x"]
-background_mode = 1
-background_color = Color(0.1, 0.1, 0.1, 1)
-ambient_light_source = 2
-ambient_light_color = Color(0.2, 0.2, 0.2, 1)
-
-[sub_resource type="NavigationMesh" id="NavigationMesh_new"]
-geometry_parsed_geometry_type = 1
-agent_height = 2.75
-agent_radius = 0.75
-cell_size = 0.25
-cell_height = 0.25
-
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_test"]
-size = Vector3(40.593994, 1, 43.245117)
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_test"]
-lightmap_size_hint = Vector2i(102, 102)
-size = Vector2(40, 43)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial_test"]
-disable_specular_occlusion = true
-albedo_texture = ExtResource("2_lp764")
-normal_enabled = true
-normal_scale = 14.51
-normal_texture = ExtResource("4_oviui")
-ao_enabled = true
-ao_light_affect = 1.0
-ao_texture = ExtResource("3_m2cng")
-uv1_triplanar = true
-uv1_triplanar_sharpness = 1.6008334
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ns"]
-size = Vector3(40.58618, 4, 0.5)
-
-[sub_resource type="BoxMesh" id="BoxMesh_wall_ns"]
-size = Vector3(40, 4, 0.5)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial_wall"]
-albedo_color = Color(0.15, 0.12, 0.1, 1)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ew"]
-size = Vector3(0.5, 4, 43.78125)
-
-[sub_resource type="BoxMesh" id="BoxMesh_wall_ew"]
-size = Vector3(0.5, 4, 44)
-
-[node name="GameMap" type="Node3D" unique_id=120756022]
-script = ExtResource("1_script")
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=982597785]
-environment = SubResource("Environment_iau3x")
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1915778391]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10, 0)
-light_energy = 2.0
-
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=990958998]
-navigation_mesh = SubResource("NavigationMesh_new")
-
-[node name="Floor" type="StaticBody3D" parent="NavigationRegion3D" unique_id=309467535]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Floor" unique_id=1961788420]
-shape = SubResource("BoxShape3D_test")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Floor" unique_id=1559076285]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-mesh = SubResource("PlaneMesh_test")
-surface_material_override/0 = SubResource("StandardMaterial_test")
-
-[node name="WallNorth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=723940986]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 21.738867)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallNorth" unique_id=1396440935]
-shape = SubResource("BoxShape3D_wall_ns")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallNorth" unique_id=730965168]
-mesh = SubResource("BoxMesh_wall_ns")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="WallSouth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=118626652]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -21.617676)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallSouth" unique_id=913572083]
-shape = SubResource("BoxShape3D_wall_ns")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallSouth" unique_id=1717054843]
-mesh = SubResource("BoxMesh_wall_ns")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="WallEast" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1399451984]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.171703, 2, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallEast" unique_id=727175830]
-shape = SubResource("BoxShape3D_wall_ew")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallEast" unique_id=350134398]
-mesh = SubResource("BoxMesh_wall_ew")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="WallWest" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1916824261]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.25622, 2, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallWest" unique_id=584697121]
-shape = SubResource("BoxShape3D_wall_ew")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallWest" unique_id=1766290024]
-mesh = SubResource("BoxMesh_wall_ew")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=569793408]
-stream = ExtResource("5_m2cng")
-volume_db = -1.273
-autoplay = true
-
-[node name="Marionette" parent="." unique_id=958148592 instance=ExtResource("10_marnin")]
-
-[node name="StartXR" parent="." unique_id=1224595367 instance=ExtResource("8_startxr")]
-
-[node name="Player" parent="." unique_id=805658640 instance=ExtResource("7_player")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.8063904, -1.6275938)
-
-[node name="Fade" parent="." unique_id=1010360029 instance=ExtResource("9_fade")]
-
-[node name="Balora" parent="." unique_id=1656694762 instance=ExtResource("6_oviui")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4395071, 16.287754)
-
-[node name="Foxy" parent="." unique_id=123456789 instance=ExtResource("11_foxy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1.4, -18.799488)
-
-[node name="PhantomGrasp" parent="." unique_id=987654321 instance=ExtResource("12_grasp")]
-
-[node name="PauseMenu" parent="." instance=ExtResource("13_pause")]
-
-[editable path="Player"]
-````
-
 ## File: scenes/main_menu_ui.tscn
 ````
 [gd_scene load_steps=22 format=3 uid="uid://bvwh78d1g322u"]
@@ -4944,7 +4919,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
-custom_minimum_size = Vector2(1040, 640)
+custom_minimum_size = Vector2(1120, 720)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_btn_normal")
 
@@ -4999,18 +4974,18 @@ text = "--:--"
 
 [node name="ButtonsContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel"]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 16
 alignment = 1
 
 [node name="StartButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer"]
-custom_minimum_size = Vector2(500, 62)
+custom_minimum_size = Vector2(650, 88)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.78, 0.82, 0.88, 0.9)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 40
 theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
@@ -5018,14 +4993,14 @@ text = "start game"
 script = ExtResource("2_hold_btn")
 
 [node name="SettingsButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer"]
-custom_minimum_size = Vector2(500, 56)
+custom_minimum_size = Vector2(600, 80)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.65, 0.7, 0.76, 0.85)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 34
 theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
@@ -5033,14 +5008,14 @@ text = "settings"
 script = ExtResource("2_hold_btn")
 
 [node name="GuideButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer"]
-custom_minimum_size = Vector2(500, 56)
+custom_minimum_size = Vector2(600, 80)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.65, 0.7, 0.76, 0.85)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 34
 theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
@@ -5048,14 +5023,14 @@ text = "guide"
 script = ExtResource("2_hold_btn")
 
 [node name="ExitButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer"]
-custom_minimum_size = Vector2(500, 56)
+custom_minimum_size = Vector2(600, 80)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.65, 0.7, 0.76, 0.85)
 theme_override_colors/font_hover_color = Color(1, 0.4, 0.5, 1)
 theme_override_colors/font_focus_color = Color(1, 0.4, 0.5, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 34
 theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
@@ -5087,14 +5062,14 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 0.64, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
 theme_override_font_sizes/font_size = 26
-text = "SETTINGS"
+text = "AUDIO & ACCESSIBILITY SETTINGS"
 horizontal_alignment = 1
 
 [node name="HSeparator1" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
 layout_mode = 2
 
 [node name="TTSCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
-custom_minimum_size = Vector2(0, 62)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_setting_card")
 
@@ -5111,11 +5086,11 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 15
 text = "TTS (TEXT TO SPEECH)"
 
 [node name="TTSToggleBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/TTSCard/Margin/HBox"]
-custom_minimum_size = Vector2(170, 42)
+custom_minimum_size = Vector2(170, 40)
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 0.64, 1)
 theme_override_font_sizes/font_size = 15
@@ -5126,7 +5101,7 @@ text = "TTS Voice: ON"
 script = ExtResource("2_hold_btn")
 
 [node name="MasterCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
-custom_minimum_size = Vector2(0, 62)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_setting_card")
 
@@ -5143,15 +5118,15 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
-theme_override_font_sizes/font_size = 16
-text = "MAIN VOLUME"
+theme_override_font_sizes/font_size = 15
+text = "MASTER VOLUME"
 
 [node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="MasterMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(46, 40)
+custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
@@ -5162,7 +5137,7 @@ script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
 
 [node name="MasterProgressBar" type="ProgressBar" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(150, 8)
+custom_minimum_size = Vector2(140, 8)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
@@ -5171,15 +5146,143 @@ value = 80.0
 show_percentage = false
 
 [node name="MasterValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(60, 0)
+custom_minimum_size = Vector2(56, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 0.64, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 15
 text = "80%"
 horizontal_alignment = 2
 
 [node name="MasterPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(46, 40)
+custom_minimum_size = Vector2(44, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
+text = "+"
+script = ExtResource("2_hold_btn")
+allow_repeat_on_hold = true
+
+[node name="EnemiesCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_setting_card")
+
+[node name="Margin" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin"]
+layout_mode = 2
+alignment = 1
+
+[node name="EnemiesLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
+theme_override_font_sizes/font_size = 15
+text = "ENEMY SOUNDS"
+
+[node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="EnemiesMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(44, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
+text = "−"
+script = ExtResource("2_hold_btn")
+allow_repeat_on_hold = true
+
+[node name="EnemiesProgressBar" type="ProgressBar" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(140, 8)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_progress_fill")
+value = 85.0
+show_percentage = false
+
+[node name="EnemiesValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.64, 1)
+theme_override_font_sizes/font_size = 15
+text = "85%"
+horizontal_alignment = 2
+
+[node name="EnemiesPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(44, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
+text = "+"
+script = ExtResource("2_hold_btn")
+allow_repeat_on_hold = true
+
+[node name="FootstepsCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_setting_card")
+
+[node name="Margin" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin"]
+layout_mode = 2
+alignment = 1
+
+[node name="FootstepsLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
+theme_override_font_sizes/font_size = 15
+text = "PLAYER FOOTSTEPS"
+
+[node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="FootstepsMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(44, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
+text = "−"
+script = ExtResource("2_hold_btn")
+allow_repeat_on_hold = true
+
+[node name="FootstepsProgressBar" type="ProgressBar" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(140, 8)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_progress_fill")
+value = 80.0
+show_percentage = false
+
+[node name="FootstepsValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.64, 1)
+theme_override_font_sizes/font_size = 15
+text = "80%"
+horizontal_alignment = 2
+
+[node name="FootstepsPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
@@ -5190,7 +5293,7 @@ script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
 
 [node name="WhooshCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
-custom_minimum_size = Vector2(0, 62)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_setting_card")
 
@@ -5207,7 +5310,7 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 15
 text = "TURN SOUND (WHOOSH)"
 
 [node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox"]
@@ -5215,7 +5318,7 @@ layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="WhooshMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(46, 40)
+custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
@@ -5226,24 +5329,24 @@ script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
 
 [node name="WhooshProgressBar" type="ProgressBar" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(150, 8)
+custom_minimum_size = Vector2(140, 8)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_progress_fill")
-value = 52.0
+value = 75.0
 show_percentage = false
 
 [node name="WhooshValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(68, 0)
+custom_minimum_size = Vector2(56, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 0.64, 1)
-theme_override_font_sizes/font_size = 16
-text = "+3.0 dB"
+theme_override_font_sizes/font_size = 15
+text = "75%"
 horizontal_alignment = 2
 
 [node name="WhooshPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(46, 40)
+custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
@@ -5253,48 +5356,80 @@ text = "+"
 script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
 
-[node name="CompassCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
-custom_minimum_size = Vector2(0, 62)
+[node name="JumpscareCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_setting_card")
 
-[node name="Margin" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassCard"]
+[node name="Margin" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard"]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_right = 20
 
-[node name="HBox" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassCard/Margin"]
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin"]
 layout_mode = 2
 alignment = 1
 
-[node name="CompassLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassCard/Margin/HBox"]
+[node name="JumpscareLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
-theme_override_font_sizes/font_size = 16
-text = "SOUND COMPASS"
+theme_override_font_sizes/font_size = 15
+text = "JUMPSCARE VOLUME"
 
-[node name="CompassToggleBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassCard/Margin/HBox"]
-custom_minimum_size = Vector2(170, 42)
+[node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="JumpscareMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(44, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
+text = "−"
+script = ExtResource("2_hold_btn")
+allow_repeat_on_hold = true
+
+[node name="JumpscareProgressBar" type="ProgressBar" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(140, 8)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_progress_fill")
+value = 90.0
+show_percentage = false
+
+[node name="JumpscareValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(56, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 0.64, 1)
 theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxFlat_pill_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_pill_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_pill_hover")
-text = "Sound Compass: ON"
+text = "90%"
+horizontal_alignment = 2
+
+[node name="JumpscarePlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(44, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
+text = "+"
 script = ExtResource("2_hold_btn")
+allow_repeat_on_hold = true
 
 [node name="HSeparator2" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
 layout_mode = 2
 
 [node name="BackFromSettingsButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
-custom_minimum_size = Vector2(360, 48)
+custom_minimum_size = Vector2(420, 52)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_pill_btn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_pill_hover")
 theme_override_styles/focus = SubResource("StyleBoxFlat_pill_hover")
@@ -5389,11 +5524,173 @@ script = ExtResource("2_hold_btn")
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/TTSCard/Margin/HBox/TTSToggleBtn" to="." method="_on_tts_toggle_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterMinusBtn" to="." method="_on_master_minus_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterPlusBtn" to="." method="_on_master_plus_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesMinusBtn" to="." method="_on_enemies_minus_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesPlusBtn" to="." method="_on_enemies_plus_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsMinusBtn" to="." method="_on_footsteps_minus_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsPlusBtn" to="." method="_on_footsteps_plus_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshMinusBtn" to="." method="_on_whoosh_minus_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshPlusBtn" to="." method="_on_whoosh_plus_pressed"]
-[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassCard/Margin/HBox/CompassToggleBtn" to="." method="_on_compass_toggle_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscareMinusBtn" to="." method="_on_jumpscare_minus_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscarePlusBtn" to="." method="_on_jumpscare_plus_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/BackFromSettingsButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/BackFromGuideButton" to="." method="_on_back_pressed"]
+````
+
+## File: scenes/game_map.tscn
+````
+[gd_scene format=3 uid="uid://cjyxx2d4hafto"]
+
+[ext_resource type="Script" uid="uid://cbilw02reekmp" path="res://scripts/game_map.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://d3qvt0affmqvn" path="res://assets/textures/Wooden Floor Texture/wood2_COLOR.jpg" id="2_lp764"]
+[ext_resource type="Texture2D" uid="uid://ch8av1pfgrixv" path="res://assets/textures/Wooden Floor Texture/wood2_OCC.jpg" id="3_m2cng"]
+[ext_resource type="Texture2D" uid="uid://bkxkmyk7y0hl4" path="res://assets/textures/Wooden Floor Texture/wood2_NRM.jpg" id="4_oviui"]
+[ext_resource type="AudioStream" uid="uid://bv6a0kufxjmtr" path="res://assets/sounds/ambience.mp3" id="5_m2cng"]
+[ext_resource type="PackedScene" uid="uid://b4ml2o2jh5ooc" path="res://scenes/balora.tscn" id="6_oviui"]
+[ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="7_player"]
+[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="8_startxr"]
+[ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="9_fade"]
+[ext_resource type="PackedScene" uid="uid://b3t54b22cxxxx" path="res://scenes/marionette.tscn" id="10_marnin"]
+[ext_resource type="PackedScene" uid="uid://cxabcf23t8foo" path="res://scenes/foxy.tscn" id="11_foxy"]
+[ext_resource type="PackedScene" path="res://scenes/phantom_grasp.tscn" id="12_grasp"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="13_pause"]
+
+[sub_resource type="Environment" id="Environment_iau3x"]
+background_mode = 1
+background_color = Color(0.1, 0.1, 0.1, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.2, 0.2, 0.2, 1)
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_new"]
+geometry_parsed_geometry_type = 1
+agent_height = 2.75
+agent_radius = 0.75
+cell_size = 0.25
+cell_height = 0.25
+
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_test"]
+size = Vector3(40.593994, 1, 43.245117)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_test"]
+lightmap_size_hint = Vector2i(102, 102)
+size = Vector2(40, 43)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial_test"]
+disable_specular_occlusion = true
+albedo_texture = ExtResource("2_lp764")
+normal_enabled = true
+normal_scale = 14.51
+normal_texture = ExtResource("4_oviui")
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = ExtResource("3_m2cng")
+uv1_triplanar = true
+uv1_triplanar_sharpness = 1.6008334
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ns"]
+size = Vector3(40.58618, 4, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_ns"]
+size = Vector3(40, 4, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial_wall"]
+albedo_color = Color(0.15, 0.12, 0.1, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ew"]
+size = Vector3(0.5, 4, 43.78125)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_ew"]
+size = Vector3(0.5, 4, 44)
+
+[node name="GameMap" type="Node3D" unique_id=120756022]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=982597785]
+environment = SubResource("Environment_iau3x")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1915778391]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10, 0)
+light_energy = 2.0
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=990958998]
+navigation_mesh = SubResource("NavigationMesh_new")
+
+[node name="Floor" type="StaticBody3D" parent="NavigationRegion3D" unique_id=309467535]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Floor" unique_id=1961788420]
+shape = SubResource("BoxShape3D_test")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Floor" unique_id=1559076285]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("PlaneMesh_test")
+surface_material_override/0 = SubResource("StandardMaterial_test")
+
+[node name="WallNorth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=723940986]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 21.738867)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallNorth" unique_id=1396440935]
+shape = SubResource("BoxShape3D_wall_ns")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallNorth" unique_id=730965168]
+mesh = SubResource("BoxMesh_wall_ns")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="WallSouth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=118626652]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -21.617676)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallSouth" unique_id=913572083]
+shape = SubResource("BoxShape3D_wall_ns")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallSouth" unique_id=1717054843]
+mesh = SubResource("BoxMesh_wall_ns")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="WallEast" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1399451984]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.171703, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallEast" unique_id=727175830]
+shape = SubResource("BoxShape3D_wall_ew")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallEast" unique_id=350134398]
+mesh = SubResource("BoxMesh_wall_ew")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="WallWest" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1916824261]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.25622, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallWest" unique_id=584697121]
+shape = SubResource("BoxShape3D_wall_ew")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallWest" unique_id=1766290024]
+mesh = SubResource("BoxMesh_wall_ew")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=569793408]
+stream = ExtResource("5_m2cng")
+volume_db = -1.273
+autoplay = true
+
+[node name="Marionette" parent="." unique_id=958148592 instance=ExtResource("10_marnin")]
+
+[node name="StartXR" parent="." unique_id=1224595367 instance=ExtResource("8_startxr")]
+
+[node name="Player" parent="." unique_id=805658640 instance=ExtResource("7_player")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.8063904, -1.6275938)
+
+[node name="Fade" parent="." unique_id=1010360029 instance=ExtResource("9_fade")]
+
+[node name="Balora" parent="." unique_id=1656694762 instance=ExtResource("6_oviui")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4395071, 16.287754)
+
+[node name="Foxy" parent="." unique_id=123456789 instance=ExtResource("11_foxy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1.4, -18.799488)
+
+[node name="PhantomGrasp" parent="." unique_id=987654321 instance=ExtResource("12_grasp")]
+
+[node name="PauseMenu" parent="." instance=ExtResource("13_pause")]
+
+[editable path="Player"]
 ````
 
 ## File: scenes/main_menu.tscn
@@ -5711,4 +6008,5 @@ script = ExtResource("12_audio_mgr")
 [node name="TurnAudioPlayer" type="AudioStreamPlayer" parent="PlayerAudioManager" unique_id=745962780]
 stream = ExtResource("13_whoosh")
 volume_db = 5.0
+bus = &"Whoosh"
 ````

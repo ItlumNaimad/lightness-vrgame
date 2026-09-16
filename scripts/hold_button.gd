@@ -1,11 +1,11 @@
-﻿extends Button
+extends Button
 class_name HoldButton
 
 ## HoldButton — Interaktywny przycisk VR stylizowany na wyryty w betonowej ścianie.
 ## Samo najechanie NIE ładuje opcji. Aby zatwierdzić, gracz musi PRZYTRZYMAĆ spust (trigger).
 ## Po aktywacji przycisk jest zablokowany do momentu, gdy gracz PUŚCI trigger.
 
-@export var charge_time_hold: float = 0.55
+@export var charge_time_hold: float = 0.6
 
 var _is_hovered: bool = false
 var _is_input_holding: bool = false
@@ -29,7 +29,6 @@ const COLOR_GLOW_AURA := Color(0.0, 1.0, 0.64, 0.6)
 func _ready() -> void:
 	disabled = false
 	toggle_mode = false
-	action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
 	
 	var empty_style := StyleBoxEmpty.new()
 	add_theme_stylebox_override("normal", empty_style)
@@ -59,6 +58,11 @@ func _apply_engraved_style() -> void:
 	add_theme_constant_override("shadow_offset_x", 2)
 	add_theme_constant_override("shadow_offset_y", 3)
 	add_theme_constant_override("outline_size", 2)
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		_is_input_holding = event.pressed
+		accept_event() # Blokuje standardową natychmiastową aktywację bazy Button!
 
 func _input(event: InputEvent) -> void:
 	if not _is_hovered:

@@ -166,7 +166,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
-custom_minimum_size = Vector2(1040, 640)
+custom_minimum_size = Vector2(1120, 720)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_btn_normal")
 
@@ -221,18 +221,18 @@ text = "--:--"
 
 [node name="ButtonsContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel"]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 16
 alignment = 1
 
 [node name="StartButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer"]
-custom_minimum_size = Vector2(500, 62)
+custom_minimum_size = Vector2(650, 88)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.78, 0.82, 0.88, 0.9)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 40
 theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
@@ -240,14 +240,14 @@ text = "start game"
 script = ExtResource("2_hold_btn")
 
 [node name="SettingsButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer"]
-custom_minimum_size = Vector2(500, 56)
+custom_minimum_size = Vector2(600, 80)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.65, 0.7, 0.76, 0.85)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 34
 theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
@@ -255,14 +255,14 @@ text = "settings"
 script = ExtResource("2_hold_btn")
 
 [node name="GuideButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer"]
-custom_minimum_size = Vector2(500, 56)
+custom_minimum_size = Vector2(600, 80)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.65, 0.7, 0.76, 0.85)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 34
 theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
@@ -270,14 +270,14 @@ text = "guide"
 script = ExtResource("2_hold_btn")
 
 [node name="ExitButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/MainPanel/ButtonsContainer"]
-custom_minimum_size = Vector2(500, 56)
+custom_minimum_size = Vector2(600, 80)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.65, 0.7, 0.76, 0.85)
 theme_override_colors/font_hover_color = Color(1, 0.4, 0.5, 1)
 theme_override_colors/font_focus_color = Color(1, 0.4, 0.5, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 34
 theme_override_styles/normal = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
@@ -309,14 +309,14 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 0.64, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
 theme_override_font_sizes/font_size = 26
-text = "SETTINGS"
+text = "AUDIO & ACCESSIBILITY SETTINGS"
 horizontal_alignment = 1
 
 [node name="HSeparator1" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
 layout_mode = 2
 
 [node name="TTSCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
-custom_minimum_size = Vector2(0, 62)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_setting_card")
 
@@ -333,11 +333,11 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 15
 text = "TTS (TEXT TO SPEECH)"
 
 [node name="TTSToggleBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/TTSCard/Margin/HBox"]
-custom_minimum_size = Vector2(170, 42)
+custom_minimum_size = Vector2(170, 40)
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 0.64, 1)
 theme_override_font_sizes/font_size = 15
@@ -348,7 +348,7 @@ text = "TTS Voice: ON"
 script = ExtResource("2_hold_btn")
 
 [node name="MasterCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
-custom_minimum_size = Vector2(0, 62)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_setting_card")
 
@@ -365,15 +365,15 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
-theme_override_font_sizes/font_size = 16
-text = "MAIN VOLUME"
+theme_override_font_sizes/font_size = 15
+text = "MASTER VOLUME"
 
 [node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="MasterMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(46, 40)
+custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
@@ -384,7 +384,7 @@ script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
 
 [node name="MasterProgressBar" type="ProgressBar" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(150, 8)
+custom_minimum_size = Vector2(140, 8)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
@@ -393,15 +393,143 @@ value = 80.0
 show_percentage = false
 
 [node name="MasterValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(60, 0)
+custom_minimum_size = Vector2(56, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 0.64, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 15
 text = "80%"
 horizontal_alignment = 2
 
 [node name="MasterPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(46, 40)
+custom_minimum_size = Vector2(44, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
+text = "+"
+script = ExtResource("2_hold_btn")
+allow_repeat_on_hold = true
+
+[node name="EnemiesCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_setting_card")
+
+[node name="Margin" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin"]
+layout_mode = 2
+alignment = 1
+
+[node name="EnemiesLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
+theme_override_font_sizes/font_size = 15
+text = "ENEMY SOUNDS"
+
+[node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="EnemiesMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(44, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
+text = "−"
+script = ExtResource("2_hold_btn")
+allow_repeat_on_hold = true
+
+[node name="EnemiesProgressBar" type="ProgressBar" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(140, 8)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_progress_fill")
+value = 85.0
+show_percentage = false
+
+[node name="EnemiesValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.64, 1)
+theme_override_font_sizes/font_size = 15
+text = "85%"
+horizontal_alignment = 2
+
+[node name="EnemiesPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(44, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
+text = "+"
+script = ExtResource("2_hold_btn")
+allow_repeat_on_hold = true
+
+[node name="FootstepsCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_setting_card")
+
+[node name="Margin" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin"]
+layout_mode = 2
+alignment = 1
+
+[node name="FootstepsLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
+theme_override_font_sizes/font_size = 15
+text = "PLAYER FOOTSTEPS"
+
+[node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="FootstepsMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(44, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
+text = "−"
+script = ExtResource("2_hold_btn")
+allow_repeat_on_hold = true
+
+[node name="FootstepsProgressBar" type="ProgressBar" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(140, 8)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_progress_fill")
+value = 80.0
+show_percentage = false
+
+[node name="FootstepsValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 0.64, 1)
+theme_override_font_sizes/font_size = 15
+text = "80%"
+horizontal_alignment = 2
+
+[node name="FootstepsPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
@@ -412,7 +540,7 @@ script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
 
 [node name="WhooshCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
-custom_minimum_size = Vector2(0, 62)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_setting_card")
 
@@ -429,7 +557,7 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 15
 text = "TURN SOUND (WHOOSH)"
 
 [node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox"]
@@ -437,7 +565,7 @@ layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="WhooshMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(46, 40)
+custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
@@ -448,24 +576,24 @@ script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
 
 [node name="WhooshProgressBar" type="ProgressBar" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(150, 8)
+custom_minimum_size = Vector2(140, 8)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_progress_fill")
-value = 52.0
+value = 75.0
 show_percentage = false
 
 [node name="WhooshValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(68, 0)
+custom_minimum_size = Vector2(56, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 0.64, 1)
-theme_override_font_sizes/font_size = 16
-text = "+3.0 dB"
+theme_override_font_sizes/font_size = 15
+text = "75%"
 horizontal_alignment = 2
 
 [node name="WhooshPlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls"]
-custom_minimum_size = Vector2(46, 40)
+custom_minimum_size = Vector2(44, 38)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
@@ -475,48 +603,80 @@ text = "+"
 script = ExtResource("2_hold_btn")
 allow_repeat_on_hold = true
 
-[node name="CompassCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
-custom_minimum_size = Vector2(0, 62)
+[node name="JumpscareCard" type="PanelContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_setting_card")
 
-[node name="Margin" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassCard"]
+[node name="Margin" type="MarginContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard"]
 layout_mode = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_right = 20
 
-[node name="HBox" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassCard/Margin"]
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin"]
 layout_mode = 2
 alignment = 1
 
-[node name="CompassLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassCard/Margin/HBox"]
+[node name="JumpscareLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.75, 0.82, 0.78, 1)
-theme_override_font_sizes/font_size = 16
-text = "SOUND COMPASS"
+theme_override_font_sizes/font_size = 15
+text = "JUMPSCARE VOLUME"
 
-[node name="CompassToggleBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassCard/Margin/HBox"]
-custom_minimum_size = Vector2(170, 42)
+[node name="Controls" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="JumpscareMinusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(44, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
+text = "−"
+script = ExtResource("2_hold_btn")
+allow_repeat_on_hold = true
+
+[node name="JumpscareProgressBar" type="ProgressBar" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(140, 8)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_progress_fill")
+value = 90.0
+show_percentage = false
+
+[node name="JumpscareValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(56, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 0.64, 1)
 theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxFlat_pill_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_pill_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_pill_hover")
-text = "Sound Compass: ON"
+text = "90%"
+horizontal_alignment = 2
+
+[node name="JumpscarePlusBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls"]
+custom_minimum_size = Vector2(44, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_step_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn_normal")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btn_normal")
+text = "+"
 script = ExtResource("2_hold_btn")
+allow_repeat_on_hold = true
 
 [node name="HSeparator2" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
 layout_mode = 2
 
 [node name="BackFromSettingsButton" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content"]
-custom_minimum_size = Vector2(360, 48)
+custom_minimum_size = Vector2(420, 52)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("5_font_cinzel")
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_pill_btn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_pill_hover")
 theme_override_styles/focus = SubResource("StyleBoxFlat_pill_hover")
@@ -611,10 +771,16 @@ script = ExtResource("2_hold_btn")
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/TTSCard/Margin/HBox/TTSToggleBtn" to="." method="_on_tts_toggle_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterMinusBtn" to="." method="_on_master_minus_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/MasterCard/Margin/HBox/Controls/MasterPlusBtn" to="." method="_on_master_plus_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesMinusBtn" to="." method="_on_enemies_minus_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/EnemiesCard/Margin/HBox/Controls/EnemiesPlusBtn" to="." method="_on_enemies_plus_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsMinusBtn" to="." method="_on_footsteps_minus_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/FootstepsCard/Margin/HBox/Controls/FootstepsPlusBtn" to="." method="_on_footsteps_plus_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshMinusBtn" to="." method="_on_whoosh_minus_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/WhooshCard/Margin/HBox/Controls/WhooshPlusBtn" to="." method="_on_whoosh_plus_pressed"]
-[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/CompassCard/Margin/HBox/CompassToggleBtn" to="." method="_on_compass_toggle_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscareMinusBtn" to="." method="_on_jumpscare_minus_pressed"]
+[connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/JumpscareCard/Margin/HBox/Controls/JumpscarePlusBtn" to="." method="_on_jumpscare_plus_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/SettingsPanel/SettingsBg/Margin/Content/BackFromSettingsButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/BackFromGuideButton" to="." method="_on_back_pressed"]
+
 
 

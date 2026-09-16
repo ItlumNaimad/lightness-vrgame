@@ -98,4 +98,17 @@ Gra zorganizowana jest w 6 zróżnicowanych nocy, wprowadzających gracza krok p
 5. **Noc 4**: Eskalacja agresji Foxy'ego, serie szeptów Marionetki i uściski Phantom Grasp.
 6. **Noc 5 (Finał)**: Podwójny Foxy, superszybka Balora i pełna presja sensoryczna.
 
-*Ostatnia aktualizacja:* v0.5.2 — Realizacja audytu technicznego i poprawek stabilności (eliminacja crasha wejścia w ścianę w PlayerAudioManager, optymalizacja runtime NavMesh na CPU, pełna eliminacja ostrzeżeń tool/footstep pool, failsafe pauzy i zabezpieczenia coroutines).
+
+---
+
+## 🎧 Aktualizacja sensoryczna i gameplayowa (16.09.2026)
+Wdrożono kluczowe poprawki na podstawie testów VR z dnia 16.09.2026:
+- **Niezależne szyny audio (`default_bus_layout.tres`):** Pełna kontrola suwakami w UI nad głośnością szyn: Master, Enemies (dźwięki przeciwników), Footsteps (kroki gracza), Whoosh (odgłos obrotu) oraz Jumpscare.
+- **Usunięcie kompasu:** Skasowano dezorientujący dźwięk dzwonka kompasu (`Broken bell.ogg`); nawigacja obrotowa opiera się wyłącznie na czystym Whooshu.
+- **Marionette (Whisper Freeze & Dystans):** Zwiększono dystans spawnu do 1.8m-2.4m, dodano wymóg uniesienia i wyciągnięcia dłoni w kierunku szeptu (obrót z rękami przy pasie nie odpędza wroga). Wprowadzono mechanikę **Whisper Freeze**: ruch nogami w trakcie trwania szeptu przyspiesza atak 3.5x.
+- **Phantom Grasp (Wyszarpywanie):** Zastąpiono podwójne całkowanie prostą i niezawodną detekcją 2 gwałtownych potrząśnięć kontrolerem z feedbackiem haptycznym.
+- **Ballora (Donośność pozytywki):** Zwiększono zasięg do 65m, `unit_size` do 35.0 i `volume_db` do 7.5 dB z modelem liniowym, przywracając orientację słuchową z oddali.
+- **Kroki:** Wstrzymywanie poprzednich instancji przed nowym stąpnięciem, eliminując nakładanie się 12-sekundowych próbek.
+- **Interfejs VR (Hold Button & Pauza):** Zwiększono rozmiary przycisków w menu, wymuszono aktywację wyłącznie po przytrzymaniu triggera (brak przypadkowych kliknięć). Dodano alternatywne mapowanie pauzy (`by_button` Y/B oraz Escape/P).
+
+*Ostatnia aktualizacja:* v0.5.2 (16.09.2026) — Wdrożenie szyn audio, Whisper Freeze Marionetki, naprawa wyszarpywania Phantom Grasp, poprawa donośności Ballory, powiększenie i przytrzymanie przycisków VR.

@@ -21,7 +21,6 @@ var right_ctrl: XRController3D
 var _last_rotation_y: float = 0.0
 var _accumulated_turn: float = 0.0
 var _wall_hit_timer: float = 0.0
-var _compass_cooldown_timer: float = 0.0
 var _echolocation_timer: float = 0.0
 
 func _ready():
@@ -45,8 +44,6 @@ func _ready():
 func _physics_process(delta: float):
 	if _wall_hit_timer > 0.0:
 		_wall_hit_timer -= delta
-	if _compass_cooldown_timer > 0.0:
-		_compass_cooldown_timer -= delta
 	if _echolocation_timer > 0.0:
 		_echolocation_timer -= delta
 
@@ -99,12 +96,6 @@ func _physics_process(delta: float):
 				
 				turn_audio_player.play()
 				
-				# Kompas dźwiękowy: Północ (0) -> wysoki ton, Południe (+/- PI) -> niski ton
-				if (TTSManager == null or TTSManager.sound_compass_enabled) and _compass_cooldown_timer <= 0.0:
-					_compass_cooldown_timer = 0.25
-					var compass_pitch = remap(abs(current_rotation_y), 0.0, PI, 1.4, 0.6)
-					_trigger_compass_ping(compass_pitch)
-				
 		_last_rotation_y = current_rotation_y
 
 func _trigger_wall_collision():
@@ -135,19 +126,6 @@ func _trigger_collision_rumble():
 			left_ctrl.trigger_haptic_pulse("haptic", 120.0, 0.7, 0.2, 0.0)
 		if right_ctrl:
 			right_ctrl.trigger_haptic_pulse("haptic", 120.0, 0.7, 0.2, 0.0)
-
-func _trigger_compass_ping(pitch: float):
-	await get_tree().create_timer(0.18).timeout
-	if not is_inside_tree():
-		return
-	var compass_player = AudioStreamPlayer.new()
-	# Dedykowany dzwon kompasu zamiast wieloznacznego nice-sfx
-	compass_player.stream = preload("res://assets/sounds/Broken bell.ogg")
-	compass_player.volume_db = -12.0
-	compass_player.pitch_scale = pitch
-	add_child(compass_player)
-	compass_player.play()
-	compass_player.finished.connect(compass_player.queue_free)
 
 func _on_footstep(_surface_name: String):
 	# Zarejestrowano krok. Zliczamy statystykę w SceneLoader.

@@ -47,3 +47,8 @@ renderer/rendering_method="mobile"
 
 openxr/enabled=true
 shaders/enabled=true
+
+[audio]
+
+default_bus_layout="res://default_bus_layout.tres"
+

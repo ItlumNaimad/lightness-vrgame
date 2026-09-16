@@ -11,14 +11,14 @@ var current_state: State = State.HIDDEN
 @export var map_bounds_max: Vector3 = Vector3(9.0, 3.0, 9.0)
 
 ## Dystans spawnu od gracza
-@export var spawn_distance_min: float = 1.0
-@export var spawn_distance_max: float = 1.5
+@export var spawn_distance_min: float = 1.8
+@export var spawn_distance_max: float = 2.4
 
 ## Prędkość zamachu kontrolera (m/s) wymagana do odpędzenia szeptu
-@export var swing_speed_threshold: float = 1.3
+@export var swing_speed_threshold: float = 1.1
 
 ## Dystans uderzenia dłonią w szept
-@export var swing_proximity_distance: float = 0.85
+@export var swing_proximity_distance: float = 0.65
 
 ## Maksymalny czas na reakcję przed Jumpscare'em (sekundy)
 @export var attack_duration_limit: float = 5.5
@@ -126,13 +126,32 @@ func _process(delta: float):
 		
 		State.WHISPERING:
 			attack_timer += delta
+			
+			# Mechanika Whisper Freeze: ruch nogami gracza prowokuje natychmiastowy atak Marionetki!
+			var moving_feet := false
+			if player:
+				var pb = player.get_node_or_null("XROrigin3D/PlayerBody")
+				if pb:
+					if "ground_control_velocity" in pb:
+						var gcv = pb.ground_control_velocity
+						if (gcv is Vector2 or gcv is Vector3) and gcv.length() > 0.25:
+							moving_feet = true
+					elif "velocity" in pb and pb.velocity is Vector3 and pb.velocity.length() > 0.35:
+						moving_feet = true
+						
+			if moving_feet:
+				# Gracz nie zastyga w bezruchu: zegar ataku leci 3.5x szybciej!
+				attack_timer += delta * 3.5
+				if left_hand: left_hand.trigger_haptic_pulse("haptic", 120.0, 0.75, 0.05, 0.0)
+				if right_hand: right_hand.trigger_haptic_pulse("haptic", 120.0, 0.75, 0.05, 0.0)
+
 			if attack_timer > attack_duration_limit:
 				_trigger_jumpscare("Czas na reakcję (%.1fs) minął!" % attack_duration_limit)
 				return
 				
 			# Przyczepienie do gracza: ciągłe podążanie za głową gracza z wylosowanym kątem
-			# Efekt crescendo: dystans z czasem maleje o max 60% potęgując wrażenie zbliżania szeptu do ucha
-			var crescendo_mult = 1.0 - (attack_timer / attack_duration_limit) * 0.6
+			# Efekt crescendo: dystans z czasem maleje o max 50% potęgując wrażenie zbliżania szeptu do ucha
+			var crescendo_mult = 1.0 - (attack_timer / attack_duration_limit) * 0.5
 			var target_pos = camera.global_position + (current_offset * crescendo_mult)
 			target_pos.x = clamp(target_pos.x, map_bounds_min.x, map_bounds_max.x)
 			target_pos.y = clamp(target_pos.y, map_bounds_min.y, map_bounds_max.y)
@@ -155,44 +174,41 @@ func _process(delta: float):
 			_check_controller_defense(delta)
 
 func _check_controller_defense(delta: float):
-	if delta <= 0.0001:
+	if delta <= 0.0001 or camera == null:
 		return
 
 	var to_whisper = (global_position - camera.global_position).normalized()
 	
-	# Weryfikacja lewej ręki
-	if left_hand:
-		var cur_pos = left_hand.global_position
-		var vel = (cur_pos - _last_left_pos) / delta
+	for ctrl in [left_hand, right_hand]:
+		if ctrl == null:
+			continue
+			
+		var cur_pos = ctrl.global_position
+		var last_pos = _last_left_pos if ctrl == left_hand else _last_right_pos
+		var vel = (cur_pos - last_pos) / delta
 		var speed = vel.length()
 		var dist = cur_pos.distance_to(global_position)
-		_last_left_pos = cur_pos
 		
-		if speed >= swing_speed_threshold:
-			var swing_dir = vel.normalized()
-			if swing_dir.dot(to_whisper) > 0.25 or dist < swing_proximity_distance:
-				_whisper_survived(left_hand)
-				return
-		elif dist < 0.5 and speed > 0.8:
-			_whisper_survived(left_hand)
-			return
-
-	# Weryfikacja prawej ręki
-	if right_hand:
-		var cur_pos = right_hand.global_position
-		var vel = (cur_pos - _last_right_pos) / delta
-		var speed = vel.length()
-		var dist = cur_pos.distance_to(global_position)
-		_last_right_pos = cur_pos
+		if ctrl == left_hand:
+			_last_left_pos = cur_pos
+		else:
+			_last_right_pos = cur_pos
+			
+		# 1. Ręka musi być uniesiona powyżej pasa
+		var is_hand_raised = cur_pos.y > (camera.global_position.y - 0.45)
 		
-		if speed >= swing_speed_threshold:
+		# 2. Ręka musi być wysunięta w stronę szeptu
+		var hand_vector = cur_pos - camera.global_position
+		var is_hand_facing = hand_vector.normalized().dot(to_whisper) > 0.2
+		
+		if is_hand_raised and is_hand_facing:
 			var swing_dir = vel.normalized()
-			if swing_dir.dot(to_whisper) > 0.25 or dist < swing_proximity_distance:
-				_whisper_survived(right_hand)
+			var is_swing_towards = swing_dir.dot(to_whisper) > 0.25
+			
+			# Odparcie szeptu: energiczny zamach w stronę szeptu LUB przybliżenie ręki blisko szeptu
+			if (speed >= swing_speed_threshold and is_swing_towards) or (dist < swing_proximity_distance and speed >= 0.7):
+				_whisper_survived(ctrl)
 				return
-		elif dist < 0.5 and speed > 0.8:
-			_whisper_survived(right_hand)
-			return
 
 ## Gracz odpędził jeden szept machnięciem dłoni
 func _whisper_survived(controller: XRController3D = null):
@@ -244,7 +260,7 @@ func _enter_whispering():
 		# Obliczenie losowego kąta wokół głowy gracza
 		var angle = randf_range(0, TAU)
 		var distance = randf_range(spawn_distance_min, spawn_distance_max)
-		current_offset = Vector3(cos(angle) * distance, randf_range(-0.3, 0.3), sin(angle) * distance)
+		current_offset = Vector3(cos(angle) * distance, randf_range(0.05, 0.35), sin(angle) * distance)
 		
 		var spawn_pos = initial_player_pos + current_offset
 		spawn_pos.x = clamp(spawn_pos.x, map_bounds_min.x, map_bounds_max.x)

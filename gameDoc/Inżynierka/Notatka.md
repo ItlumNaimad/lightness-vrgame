@@ -327,10 +327,39 @@ Ręczne celowanie wskaźnikiem laserowym VR (`FunctionPointer`) w trójwymiarow�
 
 4. **Płynna pula kroków audio (`XRToolsMovementFootstep`):**
    - Zwiększono rozmiar puli odtwarzaczy kroków w `addons/godot-xr-tools/functions/movement_footstep.gd` z 3 do 8 oraz wdrożono mechanizm recyklingu najstarszego grającego odtwarzacza w razie chwilowego wyczerpania puli. Zapobiega to gubieniu odgłosów kroków podczas szybkiego marszu lub sprintu.
-   
+
 ## Ustalenia 16.09.2026 po przetestowaniu zmian po Audycie
-- Do wywalenia dźwięk kompas. Nie pomaga
-- Dodać oddzielne ustawienia dźwięku kroków, dźwięków przeciwników, efektu woosh po obrocie i jumpscare'u
-- Marionette powinna być trochę wyżej bo bywa, że sam obrót gracza gdy ręce ma na dole pozbywa się jej.
-- Przemyśleć jakąś mechanikę przeciwnika, która albo zatrzymuje gracza albo zmusza go do zatrzymania (tak jak poprzednia marionette) bo to stresowało gracza i budowało napięcie.
-- 
+- [x] **Do wywalenia dźwięk kompasu. Nie pomaga:**
+  - Całkowicie usunięto instancję `CompassAudioPlayer` oraz timer kompasu z `scripts/player_audio_manager.gd`.
+  - Usunięto zbędny przełącznik kompasu z menu ustawień `scenes/main_menu_ui.tscn`. Zostawiono czysty, przestrzenny odgłos obrotu (Whoosh).
+- [x] **Dodać oddzielne ustawienia dźwięku kroków, dźwięków przeciwników, efektu whoosh po obrocie i jumpscare'u:**
+  - Utworzono szyny w `default_bus_layout.tres`: `Master`, `Enemies`, `Footsteps`, `Whoosh`, `Jumpscare`.
+  - Przypisano wszystkie źródła `AudioStreamPlayer3D` przeciwników (Balora, Marionette, Foxy, PhantomGrasp) do szyny `Enemies`, a ich jumpscare'y do `Jumpscare`.
+  - Przypisano odtwarzacz obrotu w `player.tscn` do `Whoosh`, a odtwarzacze kroków w `movement_footstep.tscn` do `Footsteps`.
+  - W `main_menu_ui.gd` i `main_menu_ui.tscn` dodano niezależne karty sterowania głośnością (0-100%) z odczytem lektorskim TTS.
+- [x] **Marionette powinna być trochę dalej od gracza bo bywa, że sam obrót gracza gdy ręce ma na dole pozbywa się jej. Gracz powinien wysunąć w jej stronę rękę:**
+  - Zwiększono dystans spawnu szeptu do 1.8m - 2.4m na wysokości głowy/uszu gracza (zamiast 0.8m).
+  - W `marionette.gd` dodano wymóg uniesienia ręki (wysokość > 0.7m od stóp) oraz wysunięcia dłoni w kierunku szeptu (iloczyn skalarny `hand_to_whisper.dot(head_forward) > 0.15`), zapobiegając przypadkowemu odpędzaniu przy pasie.
+- [x] **Mechanika zatrzymania gracza (Whisper Freeze):**
+  - Gracz w trakcie trwania szeptu musi się zatrzymać. W `marionette.gd` dodano sprawdzanie prędkości horyzontalnej gracza: jeśli gracz stawia kroki/biegnie w trakcie szeptu (`move_speed > 0.25`), timer ataku przyspiesza 3.5-krotnie (`attack_timer += delta * 3.5`), drastycznie skracając czas na reakcję i wymuszając natychmiastowy bezruch.
+- [x] **PhantomGraspa nie da się pokonać - trzęsienie kontrolerami nie pokonuje phantomgraspa:**
+  - Usunięto niestabilne podwójne całkowanie przyspieszenia.
+  - Wdrożono czytelne zliczanie nagłych zmian kierunku prędkości kontrolera (`shake_speed >= 1.2 m/s` z debouncem 0.22s).
+  - Zgodnie z ustaleniami zredukowano wymaganą liczbę szarpnięć do **dokładnie 2 energicznych potrząśnięć** (`required_shakes = 2`), dodając wyraźny impuls haptyczny przy każdym zaliczonym potrząśnięciu.
+- [x] **Ballora jest za cicha, nie słychać jej z daleka i trzeba podejść blisko niej:**
+  - W `scenes/balora.tscn` zmieniono parametry dźwięku `BaloraTheme`: `max_distance = 65.0m`, `unit_size = 35.0m`, `volume_db = 7.5 dB`, a model tłumienia przestawiono na odwrotny/liniowy (`attenuation_model = 0`), dzięki czemu pozytywka jest słyszalna z dalekiego dystansu i pozwala na nawigację słuchową.
+- [x] **Kroki się glitchują i nakładają się na siebie. Być może jest to za długi dźwięk i to dlatego:**
+  - W `addons/godot-xr-tools/functions/movement_footstep.gd` dodano zatrzymywanie poprzednio grających odtwarzaczy kroków przed wystartowaniem nowego stąpnięcia. Zapobiega to nakładaniu się wielu 12-sekundowych próbek `woodwalking.wav`.
+  - Wymiana plików audio na krótkie próbki (chód vs bieg) zostanie wykonana przez użytkownika w kolejnym kroku.
+- [x] **Przyciski w MENU są zbyt małe. Powinny być trochę większe by łatwiej było nawigować. Aktywacja tylko po przytrzymaniu:**
+  - Zwiększono rozmiary przycisków w menu głównym (StartButton: 650x88px font 40; Settings/Guide/Exit: 600x80px font 34; PanelContainer: 1120x720px).
+  - Zmodyfikowano `scripts/hold_button.gd`: wyłączono natychmiastowe kliknięcie (`accept_event()`), przycisk aktywuje się **wyłącznie po przytrzymaniu triggera na przycisku** do pełnego naładowania paska (Hold/Dwell 0.6s).
+  - **Przycisk Menu Pauzy:** Pauza domyślnie wywoływana jest przyciskiem systemowym `menu_button` (na lewym kontrolerze Meta Quest / Pico - mały płaski przycisk z menu). W `scripts/pause_menu.gd` dodano obsługę alternatyw: przycisk `by_button` (górny przycisk Y na lewym kontrolerze lub B na prawym) oraz klawisze `Escape` i `P` na klawiaturze.
+
+## SUGESTIE DO DŹWIĘKÓW NA PÓŹNIEJ:
+- Dodać ambient zbliżania się przeciwnika jak zbliżanie się sąsiada w Hello Neighbor
+- Dodać oddzielny ambient ataku PhantomGraspa
+- Oddzielny dźwięk na minięcie 10-u sekund i oddzielny dźwięk na focus przeciwnika (zmiany stanu Ballory, pojawienie się/wykrycie przez Marionette, szarża Foxy'ego)
+- Oddzielny dźwięk na kroki i na bieganie.
+- Pokonanie PhantomGrasp'a alternatywną mechaniką: "beam dźwiękowy", który natychmiast niszczy macki, ale generuje olbrzymi hałas triggerujący szarżę Foxy'ego oraz kierujący Ballorę w to miejsce.
+
