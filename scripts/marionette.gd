@@ -272,4 +272,3 @@ func _trigger_jumpscare(reason: String):
 	
 	# Delegacja do wspólnego helpera (zatrzymanie timera, reparenting, haptyka, ekran Game Over)
 	await JumpscareHelper.execute(self, jumpscare_sound, [], "Marionette — " + reason)
-

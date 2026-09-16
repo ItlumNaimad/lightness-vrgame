@@ -1,8 +1,8 @@
-﻿[gd_scene load_steps=18 format=3 uid="uid://cobrdt2tet5ga"]
+[gd_scene format=3 uid="uid://dqjc1nwqm8odk"]
 
-[ext_resource type="Script" path="res://scripts/main_menu.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://c1n8p7fin4eiq" path="res://scripts/main_menu.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="2_bqqt6"]
-[ext_resource type="PackedScene" path="res://scenes/main_menu_ui.tscn" id="3_ui"]
+[ext_resource type="PackedScene" uid="uid://bvwh78d1g322u" path="res://scenes/main_menu_ui.tscn" id="3_ui"]
 [ext_resource type="AudioStream" uid="uid://1c33sur8mvu1" path="res://assets/sounds/main_menu.mp3" id="4_wu84c"]
 [ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="5_player"]
 [ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="6_startxr"]
@@ -27,6 +27,17 @@ ambient_light_source = 2
 ambient_light_color = Color(0.08, 0.1, 0.14, 1)
 ambient_light_energy = 0.6
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(20, 1, 20)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.08, 0.09, 0.11, 1)
+roughness = 0.9
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
+material = SubResource("StandardMaterial3D_floor")
+size = Vector2(20, 20)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
 albedo_color = Color(0.48, 0.5, 0.52, 1)
 albedo_texture = ExtResource("8_wall_color")
@@ -43,6 +54,18 @@ size = Vector3(10, 4.8, 0.2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
 size = Vector3(10, 4.8, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pipe"]
+albedo_color = Color(0.18, 0.17, 0.16, 1)
+metallic = 0.88
+roughness = 0.38
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pipe"]
+material = SubResource("StandardMaterial3D_pipe")
+top_radius = 0.045
+bottom_radius = 0.045
+height = 4.8
+radial_segments = 16
 
 [sub_resource type="BoxMesh" id="BoxMesh_wall_side"]
 material = SubResource("StandardMaterial3D_wall")
@@ -71,29 +94,6 @@ bottom_radius = 0.25
 height = 0.1
 radial_segments = 16
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pipe"]
-albedo_color = Color(0.18, 0.17, 0.16, 1)
-metallic = 0.88
-roughness = 0.38
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_pipe"]
-material = SubResource("StandardMaterial3D_pipe")
-top_radius = 0.045
-bottom_radius = 0.045
-height = 4.8
-radial_segments = 16
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
-albedo_color = Color(0.08, 0.09, 0.11, 1)
-roughness = 0.9
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
-material = SubResource("StandardMaterial3D_floor")
-size = Vector2(20, 20)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
-size = Vector3(20, 1, 20)
-
 [node name="MainMenu" type="Node3D" unique_id=2052640717]
 script = ExtResource("1_script")
 
@@ -105,11 +105,10 @@ transform = Transform3D(1, 0, 0, 0, 0.9563048, 0.2923717, 0, -0.2923717, 0.95630
 light_color = Color(0.88, 0.93, 1, 1)
 light_energy = 2.6
 spot_range = 6.0
-spot_angle = 45.0
 spot_attenuation = 1.1
 
 [node name="MenuAmbientLight" type="OmniLight3D" parent="." unique_id=184910293]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, -1.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -1.2)
 light_color = Color(0.25, 0.55, 0.95, 1)
 light_energy = 0.4
 omni_range = 4.5
@@ -127,68 +126,68 @@ mesh = SubResource("PlaneMesh_floor")
 [node name="IndustrialWall" type="StaticBody3D" parent="." unique_id=992817263]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -2.8)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="IndustrialWall"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="IndustrialWall" unique_id=575337685]
 mesh = SubResource("BoxMesh_wall")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="IndustrialWall"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="IndustrialWall" unique_id=175644465]
 shape = SubResource("BoxShape3D_wall")
 
-[node name="Pipes" type="Node3D" parent="."]
+[node name="Pipes" type="Node3D" parent="." unique_id=2142528203]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -2.75)
 
-[node name="PipeLeft" type="MeshInstance3D" parent="Pipes"]
+[node name="PipeLeft" type="MeshInstance3D" parent="Pipes" unique_id=548966718]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.2, 0, 0)
 mesh = SubResource("CylinderMesh_pipe")
 
-[node name="PipeRight" type="MeshInstance3D" parent="Pipes"]
+[node name="PipeRight" type="MeshInstance3D" parent="Pipes" unique_id=1927873173]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, 0)
 mesh = SubResource("CylinderMesh_pipe")
 
-[node name="PipeTop" type="MeshInstance3D" parent="Pipes"]
+[node name="PipeTop" type="MeshInstance3D" parent="Pipes" unique_id=1440785262]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 2.1, 0.02)
 mesh = SubResource("CylinderMesh_pipe")
 
 [node name="BackWall" type="StaticBody3D" parent="." unique_id=194827101]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 6.2)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="BackWall"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="BackWall" unique_id=956818226]
 mesh = SubResource("BoxMesh_wall")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="BackWall"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BackWall" unique_id=2007040235]
 shape = SubResource("BoxShape3D_wall")
 
 [node name="LeftWall" type="StaticBody3D" parent="." unique_id=194827102]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.0, 2.2, 1.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 2.2, 1.7)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="LeftWall"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LeftWall" unique_id=819012728]
 mesh = SubResource("BoxMesh_wall_side")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="LeftWall"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LeftWall" unique_id=718482392]
 shape = SubResource("BoxShape3D_wall_side")
 
 [node name="RightWall" type="StaticBody3D" parent="." unique_id=194827103]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.0, 2.2, 1.7)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2.2, 1.7)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="RightWall"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RightWall" unique_id=1390380056]
 mesh = SubResource("BoxMesh_wall_side")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RightWall"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RightWall" unique_id=454655938]
 shape = SubResource("BoxShape3D_wall_side")
 
 [node name="Ceiling" type="StaticBody3D" parent="." unique_id=194827104]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 1.7)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Ceiling"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ceiling" unique_id=270118421]
 mesh = SubResource("BoxMesh_ceiling")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling" unique_id=409537979]
 shape = SubResource("BoxShape3D_ceiling")
 
-[node name="CeilingLampFixture" type="MeshInstance3D" parent="Ceiling"]
+[node name="CeilingLampFixture" type="MeshInstance3D" parent="Ceiling" unique_id=139906738]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
 mesh = SubResource("CylinderMesh_lamp")
 
-[node name="CeilingLight" type="OmniLight3D" parent="Ceiling"]
+[node name="CeilingLight" type="OmniLight3D" parent="Ceiling" unique_id=1928428580]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0)
 light_color = Color(0.65, 0.8, 1, 1)
 light_energy = 0.8
@@ -211,12 +210,5 @@ autoplay = true
 [node name="StartXR" parent="." unique_id=2039475675 instance=ExtResource("6_startxr")]
 
 [node name="Player" parent="." unique_id=629638343 instance=ExtResource("5_player")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Fade" parent="." unique_id=1653293877 instance=ExtResource("7_fade")]
-
-
-
-
-
-
