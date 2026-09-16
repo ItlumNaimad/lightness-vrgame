@@ -19,6 +19,10 @@ run/main_scene="res://scenes/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
+[audio]
+
+default_bus_layout="res://default_bus_layout.tres"
+
 [autoload]
 
 XRToolsUserSettings="*uid://bqgb8i74tm0t"
@@ -48,8 +52,3 @@ renderer/rendering_method="mobile"
 
 openxr/enabled=true
 shaders/enabled=true
-
-[audio]
-
-default_bus_layout="res://default_bus_layout.tres"
-

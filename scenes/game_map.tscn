@@ -16,18 +16,13 @@
 
 [sub_resource type="Environment" id="Environment_iau3x"]
 background_mode = 1
-background_color = Color(0, 0, 0, 1)
 ambient_light_source = 1
 ambient_light_energy = 0.0
-
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_new"]
 geometry_parsed_geometry_type = 1
 agent_height = 2.75
 agent_radius = 0.75
-cell_size = 0.25
-cell_height = 0.25
-
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_test"]
 size = Vector3(40.593994, 1, 43.245117)
@@ -73,7 +68,6 @@ environment = SubResource("Environment_iau3x")
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10, 0)
 visible = false
 light_energy = 0.0
-
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=990958998]
 navigation_mesh = SubResource("NavigationMesh_new")
@@ -150,11 +144,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4395071, 16.287754)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1.4, -18.799488)
 
 [node name="Foxy2" parent="." unique_id=123456790 instance=ExtResource("11_foxy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.4, 18.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.4, 18)
 
 [node name="PhantomGrasp" parent="." unique_id=987654321 instance=ExtResource("12_grasp")]
 
-[node name="PauseMenu" parent="." instance=ExtResource("13_pause")]
-
+[node name="PauseMenu" parent="." unique_id=1457039507 instance=ExtResource("13_pause")]
 
 [editable path="Player"]
