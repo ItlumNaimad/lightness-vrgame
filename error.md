@@ -92,3 +92,42 @@ E 0:00:40:224   @implicit_ready: Trying to assign value of type 'Node' to a vari
 
 4. **Nieprawidłowe UID-y (`invalid UID: uid://..._01`):**
    - **Rozwiązanie:** Podmieniono fikcyjne identyfikatory UID w `scenes/pause_menu.tscn`, `scenes/pause_menu_ui.tscn`, `scenes/phantom_grasp.tscn` i `scenes/game_map.tscn` na rzeczywiste UID skryptów.
+
+
+Błędy po naprawie:
+## Debuger:
+	E 0:02:34:166   PlayerAudioManager._physics_process: Invalid cast: could not convert value to 'Vector3'.
+  <Źródło GDScript>player_audio_manager.gd:57 @ PlayerAudioManager._physics_process()
+  <Ślad stosu>  player_audio_manager.gd:57 @ _physics_process()
+W 0:02:33:757   movement_footstep.gd:222 @ _play_sound(): XRToolsMovementFootstep idle audio pool empty
+  <Źródło C++>  core/variant/variant_utility.cpp:1033 @ push_warning()
+  <Ślad stosu>  movement_footstep.gd:222 @ _play_sound()
+                movement_footstep.gd:204 @ _play_step_sound()
+                movement_footstep.gd:129 @ physics_movement()
+                player_body.gd:348 @ _physics_process()
+W 0:00:29:305   set_navigation_mesh: A navigation mesh that uses a `cell_height` of 0.15000000596046 was assigned to a navigation map set to a larger `cell_height` of 0.25.
+This mismatch in cell height can cause rasterization errors with navigation mesh edges on the navigation map.
+The cell height for navigation maps can be changed by using the NavigationServer map_set_cell_height() function.
+The cell height for default navigation maps can also be changed in the project settings.
+This warning can be toggled under 'navigation/3d/warnings/navmesh_cell_size_mismatch' in the project settings.
+  <Źródło C++>  modules/navigation_3d/nav_region_3d.cpp:113 @ set_navigation_mesh()
+W 0:00:29:305   set_navigation_mesh: A navigation mesh that uses a `cell_size` of 0.15000000596046 was assigned to a navigation map set to a larger `cell_size` of 0.25.
+This mismatch in cell size can cause rasterization errors with navigation mesh edges on the navigation map.
+The cell size for navigation maps can be changed by using the NavigationServer map_set_cell_size() function.
+The cell size for default navigation maps can also be changed in the project settings.
+This warning can be toggled under 'navigation/3d/warnings/navmesh_cell_size_mismatch' in the project settings.
+  <Źródło C++>  modules/navigation_3d/nav_region_3d.cpp:110 @ set_navigation_mesh()
+W 0:00:29:258   generator_bake_from_source_geometry_data: Property agent_radius is ceiled to cell_size voxel units and loses precision.
+  <Źródło C++>  modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:373 @ generator_bake_from_source_geometry_data()
+W 0:00:29:258   generator_bake_from_source_geometry_data: Property agent_max_climb is floored to cell_height voxel units and loses precision.
+  <Źródło C++>  modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:370 @ generator_bake_from_source_geometry_data()
+W 0:00:29:258   generator_bake_from_source_geometry_data: Property agent_height is ceiled to cell_height voxel units and loses precision.
+  <Źródło C++>  modules/navigation_3d/3d/nav_mesh_generator_3d.cpp:367 @ generator_bake_from_source_geometry_data()
+W 0:00:29:253   game_map.gd:77 @ _deferred_bake_navmesh(): Source geometry parsing for navigation mesh baking had to parse RenderingServer meshes at runtime.
+		This poses a significant performance issues as visual meshes store geometry data on the GPU and transferring this data back to the CPU blocks the rendering.
+		For runtime (re)baking navigation meshes use and parse collision shapes as source geometry or create geometry data procedurally in scripts.
+  <Źródło C++>  scene/resources/3d/navigation_mesh_source_geometry_data_3d.cpp:205 @ add_mesh()
+  <Ślad stosu>  game_map.gd:77 @ _deferred_bake_navmesh()
+W 0:00:28:970   GDScript::reload: The base class script has the "@tool" annotation, but this script does not have it.
+  <Błąd GDScript>MISSING_TOOL
+  <Źródło GDScript>game_map.gd:1 @ GDScript::reload()
