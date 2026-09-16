@@ -15,7 +15,7 @@ signal footstep(name)
 
 
 # Number of audio players to pool
-const AUDIO_POOL_SIZE := 3
+const AUDIO_POOL_SIZE := 8
 
 
 ## Movement provider order
@@ -217,13 +217,29 @@ func _play_sound(name : String, stream : AudioStream, pitch : float = 1.0) -> vo
 	# Emit the footstep signal
 	footstep.emit(name)
 
+	# Zatrzymujemy poprzednio grające odtwarzacze kroków, aby długie próbki nie nakładały się na siebie
+	if _foot_spatial:
+		for child in _foot_spatial.get_children():
+			if child is AudioStreamPlayer3D and child.playing:
+				child.stop()
+				if not _audio_pool_idle.has(child):
+					_audio_pool_idle.append(child)
+
 	# Verify we have an audio player
-	if _audio_pool_idle.size() == 0:
-		push_warning("XRToolsMovementFootstep idle audio pool empty")
+	if _audio_pool_idle.is_empty():
+		if _foot_spatial and _foot_spatial.get_child_count() > 0:
+			var oldest = _foot_spatial.get_child(0) as AudioStreamPlayer3D
+			if oldest:
+				oldest.stop()
+				_audio_pool_idle.append(oldest)
+
+	if _audio_pool_idle.is_empty():
 		return
 
 	# Play the sound
 	var player : AudioStreamPlayer3D = _audio_pool_idle.pop_front()
+	if _foot_spatial:
+		_foot_spatial.move_child(player, -1)
 	player.stream = stream
 	player.pitch_scale = pitch
 	player.play()

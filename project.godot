@@ -14,21 +14,30 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 [application]
 
-config/name="Inżynierka"
+config/name="Lightless"
 run/main_scene="res://scenes/main_menu.tscn"
-config/features=PackedStringArray("4.6", "Mobile")
+config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
 [autoload]
 
 XRToolsUserSettings="*uid://bqgb8i74tm0t"
-XRToolsRumbleManager="*uid://by853dk86g1qw"
 SceneLoader="*res://scripts/scene_loader.gd"
 EventBus="*res://scripts/event_bus.gd"
+TTSManager="*res://scripts/tts_manager.gd"
+XRToolsRumbleManager="*uid://by853dk86g1qw"
 
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/godot-xr-tools/plugin.cfg")
+
+[layer_names]
+
+3d_physics/layer_1="World"
+3d_physics/layer_2="Balora"
+3d_physics/layer_3="Foxy"
+3d_physics/layer_18="PlayerHand"
+3d_physics/layer_20="Player"
 
 [rendering]
 
@@ -39,10 +48,7 @@ renderer/rendering_method="mobile"
 openxr/enabled=true
 shaders/enabled=true
 
-[layer_names]
+[audio]
 
-3d_physics/layer_1="World"
-3d_physics/layer_2="Balora"
-3d_physics/layer_3="Foxy"
-3d_physics/layer_18="PlayerHand"
-3d_physics/layer_20="Player"
+default_bus_layout="res://default_bus_layout.tres"
+

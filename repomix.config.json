@@ -1,0 +1,39 @@
+{
+  "$schema": "https://partykit.github.io/repomix/repomix.config.json",
+  "output": {
+    "filePath": "gameDoc/Inżynierka/Lightless_NotebookLM_Kompendium.md",
+    "style": "markdown",
+    "parsableStyle": false,
+    "fileSummary": true,
+    "directoryStructure": true,
+    "removeComments": false,
+    "removeEmptyLines": false,
+    "topFilesLength": 25,
+    "headerText": "# Kompendium Projektu Lightless VR — Kompletna Baza Wiedzy i Kodu dla NotebookLM\n\nNiniejszy dokument stanowi skonsolidowane, kompletne źródło wiedzy o projekcie gry VR 'Lightless' tworzonej w silniku Godot Engine 4.x na potrzeby pracy inżynierskiej.\nGra jest survival horrorem zaprojektowanym w 100% z myślą o dostępności dla osób niewidomych (rozgrywka oparta na przestrzennym 3D Audio, haptyce kontrolerów OpenXR oraz sterowaniu joystickiem w interfejsach).\n\nDokument zawiera:\n1. Zasady projektowe i wytyczne inżynierskie (.agents/AGENTS.md)\n2. Dziennik zmian, notatki techniczne, założenia poziomów (nocy) oraz audyty (gameDoc/Inżynierka/)\n3. Kompletny kod źródłowy wszystkich autorskich skryptów GDScript (scripts/) wraz z pełnymi komentarzami i maszynami stanów\n4. Trójwymiarową strukturę węzłów i właściwości scen (scenes/*.tscn)\n5. Konfigurację projektu i warstw kolizji (project.godot)"
+  },
+  "include": [
+    "scripts/**",
+    "scenes/*.tscn",
+    "gameDoc/Inżynierka/Notatka.md",
+    "gameDoc/Inżynierka/README.md",
+    "gameDoc/Inżynierka/Audit_2026-08.md",
+    "gameDoc/Inżynierka/.obsidian/audit_09-09-2026.md",
+    ".agents/AGENTS.md",
+    "README.md",
+    "project.godot"
+  ],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "addons/**",
+      "assets/**",
+      "*.uid",
+      "*.import",
+      ".godot/**",
+      "gameDoc/Inżynierka/Dokumentacja.pdf",
+      "gameDoc/Inżynierka/Audit.md",
+      "gameDoc/Inżynierka/audit2.md"
+    ]
+  }
+}

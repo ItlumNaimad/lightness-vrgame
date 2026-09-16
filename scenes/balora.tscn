@@ -22,7 +22,6 @@ radius = 1.3971037
 
 [node name="Balora" type="CharacterBody3D" unique_id=1656694762 groups=["enemy"]]
 collision_layer = 2
-collision_mask = 1
 script = ExtResource("1_2mo37")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=237287144]
@@ -33,17 +32,22 @@ mesh = SubResource("CapsuleMesh_yfgsf")
 
 [node name="BaloraTheme" type="AudioStreamPlayer3D" parent="." unique_id=1844263034]
 stream = ExtResource("2_yfgsf")
-volume_db = 3.729
-unit_size = 23.5
+volume_db = 7.5
+unit_size = 35.0
 autoplay = true
-max_distance = 20.11
+max_distance = 65.0
+attenuation_model = 0
+bus = &"Enemies"
 
 [node name="JumpscareSound" type="AudioStreamPlayer3D" parent="." unique_id=566194156]
 stream = ExtResource("3_24ggd")
+bus = &"Jumpscare"
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=854780239]
 
 [node name="JumpscareTrigger" type="Area3D" parent="." unique_id=24209624]
+collision_layer = 0
+collision_mask = 524289
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="JumpscareTrigger" unique_id=131938276]
 shape = SubResource("SphereShape3D_jumpscare")

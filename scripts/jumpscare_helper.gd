@@ -2,23 +2,28 @@
 ## Wydzielony helper do obsługi sekwencji Jumpscare.
 class_name JumpscareHelper
 
+const GAME_OVER_PATH = "res://scenes/game_over.tscn"
 const MAIN_MENU_PATH = "res://scenes/main_menu.tscn"
 
 static var is_jumpscaring_global: bool = false
 
 ## Wywołuje pełną sekwencję Jumpscare:
-## 1. Zatrzymuje timer przetrwania (jeśli istnieje).
+## 1. Zatrzymuje timer przetrwania i zapisuje statystyki.
 ## 2. Reparentuje dźwięk jumpscare'a do kamery gracza.
-## 3. Wibruje kontrolerami (jeśli XRToolsRumbleManager jest dostępny).
-## 4. Odtwarza dźwięk i czeka, po czym ładuje Menu Główne.
+## 3. Wibruje kontrolerami (trigger_haptic_pulse).
+## 4. Odtwarza dźwięk i czeka, po czym ładuje Ekran Game Over.
 static func execute(
 	caller: Node,
 	jumpscare_sound: AudioStreamPlayer3D,
-	extra_nodes_to_reparent: Array[Node3D] = []
+	extra_nodes_to_reparent: Array[Node3D] = [],
+	death_reason: String = "Nieznane zagrożenie"
 ) -> void:
 	if is_jumpscaring_global:
 		return
 	is_jumpscaring_global = true
+	
+	# Zapisanie przyczyny porażki w SceneLoader
+	SceneLoader.last_death_reason = death_reason
 	
 	# 1. Zatrzymanie timera
 	var game_map = caller.get_tree().current_scene
@@ -44,22 +49,14 @@ static func execute(
 	target_transform.origin = Vector3(0, -0.3, -0.5)
 	
 	if jumpscare_sound and jumpscare_sound.get_parent():
-		var audio_trans = jumpscare_sound.global_transform
-		jumpscare_sound.get_parent().remove_child(jumpscare_sound)
-		camera.add_child(jumpscare_sound)
-		jumpscare_sound.global_transform = audio_trans
-		
+		jumpscare_sound.reparent(camera, true)
 		var tween = caller.get_tree().create_tween()
 		tween.tween_property(jumpscare_sound, "transform", target_transform, 0.2).set_trans(Tween.TRANS_SINE)
 
 	# 4. Reparenting dodatkowych węzłów (np. MeshInstance3D Balory)
 	for node in extra_nodes_to_reparent:
 		if node and node.get_parent():
-			var node_trans = node.global_transform
-			node.get_parent().remove_child(node)
-			camera.add_child(node)
-			node.global_transform = node_trans
-			
+			node.reparent(camera, true)
 			var tween2 = caller.get_tree().create_tween()
 			tween2.tween_property(node, "transform", target_transform, 0.2).set_trans(Tween.TRANS_SINE)
 	
@@ -70,14 +67,12 @@ static func execute(
 	if jumpscare_sound:
 		jumpscare_sound.play()
 
-	# 7. Czekamy na zakończenie sekwencji i wracamy do menu
+	# 7. Czekamy na zakończenie sekwencji i przechodzimy do Game Over
 	await caller.get_tree().create_timer(2.0).timeout
-	SceneLoader.load_scene(MAIN_MENU_PATH)
+	SceneLoader.load_scene(GAME_OVER_PATH)
 
 
 static func _trigger_rumble(caller: Node) -> void:
-	# Próba użycia XRToolsRumbleManager (jest w Autoload)
-	var left = caller.get_viewport().find_world_3d()
 	# Szukamy kontrolerów XR
 	var controllers = caller.get_tree().get_nodes_in_group("player")
 	if controllers.size() == 0:

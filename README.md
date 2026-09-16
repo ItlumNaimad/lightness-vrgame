@@ -1,17 +1,23 @@
-# Lightness VR
+# Lightless VR
 
-**Lightness** to autorski, inżynierski projekt gry w wirtualnej rzeczywistości (VR) utworzony w silniku Godot Engine. Gra jest survival horrorem zaprojektowanym w taki sposób, aby była w pełni dostępna dla osób niewidomych – bodźce wizualne dają minimalną (lub żadną) przewagę rozgrywki.
+**Lightless** to autorski, inżynierski projekt gry w wirtualnej rzeczywistości (VR) utworzony w silniku Godot Engine. Gra jest survival horrorem zaprojektowanym w taki sposób, aby była w pełni dostępna dla osób niewidomych – bodźce wizualne dają minimalną (lub żadną) przewagę rozgrywki.
 
 ## Najnowsze zmiany (Version Log)
+- **v0.5.2** - Kompleksowa realizacja zaleceń audytu technicznego i poprawek stabilności: Naprawa systemu Fade w `SceneLoader.gd` (usunięcie nieskutecznych guardów `ClassDB.class_exists`, podwójny `await process_frame` po zmianie sceny, reset `is_loading` przy błędzie). Prawidłowy tracking gracza z poziomu głowy VR (`XRCamera3D` w grupie `player_head`) dla efektu zniekształcenia dźwięku (Distortion) i namierzania Foxy'ego. Rozdzielenie próbek audio (`danger.wav`, `whoosh2.mp3`, `Broken bell.ogg`, `nice-sfx.mp3`). Akustyka i haptyka kolizji ze ścianami (`EventBus.noise_emitted`). Nowa maszyna stanów Balory (Patrol, Alert z przyspieszającą pozytywką, Pościg, Ucieczka na odległość) i dopasowany NavMesh. Aktywna obrona przed Marionetką poprzez zamach kontrolerem VR z haptyką bliskości ucha. Threat Director (pacing pojawiania się wrogów na osi czasu). Nowy przeciwnik **Phantom Grasp** (chwyt za kontroler, wibracje i mechanika wyszarpywania). System **Echolokacji** (puls dźwiękowo-haptyczny na przycisku A/X sondujący układ ścian kosztem hałasu). Dedykowane **Menu Pauzy VR** (`scenes/pause_menu.tscn`). Naprawa wyłącznika lektora TTS w ustawieniach oraz zabezpieczenia `is_inside_tree()`. Architektura przestrzenna Menu Głównego 3D z industrialnym klimatem Google Stitch i cyfrowym glitchem `RubikGlitch`.
+- **v0.5.1** - Przebudowa Menu Głównego na styl industrialnej ściany 3D z wyrytymi napisami (inspirowane projektem z Google Stitch), dynamiczny efekt animacji glitch tytułu "LIGHTLESS", komponent `HoldButton` (Hold-to-Click 0.6s), eliminacja lagów TTS przez Dwell Debounce (80ms), fizyczne blokowanie rąk gracza (`CollisionHand`), subtelniejsze wskaźniki laserowe VR w chłodnej błękitnej tonacji oraz podpis autorski.
+- **v0.5.0** - Wdrożenie dedykowanego ekranu Game Over (`scenes/game_over.tscn`), systemu śledzenia telemetrii sesji w `SceneLoader` (czas przetrwania, statystyki obrony, powód porażki) oraz integracji z Google Stitch i `DESIGN.md`.
 - **v0.4.0** - Optymalizacja audio przy starcie mapy, wdrożenie "Kompasu Dźwiękowego", efekt zniekształcenia dźwięku Ambient (Distortion) w zależności od bliskości wrogów oraz re-balans AI (naprawa kolizji między wrogami, crescendo dla Marionetki, wibracje haptyczne HMD).
 - **v0.3.0** - Wdrożenie logiki przeciwników (Balora, Marionette) bazującej na wektorach kierunkowych (VR) i systemie punktów nawigacyjnych (NavMesh) oraz wspólnego systemu JumpscareHelper.
 - **v0.2.0** - Zaprojektowanie założeń koncepcyjnych oraz opracowanie customowego systemu zarządzania scenami (SceneLoader) rozwiązującego problemy fizyki XR podczas przeładowywania map.
 
+## Znane błędy i uwagi techniczne (Known Issues)
+- **Kliknięcie vs Przytrzymanie**: W bieżącej wersji przyciski reagują zarówno na natychmiastowe kliknięcie triggera, jak i na przytrzymanie do napełnienia paska – planowane jest usunięcie animacji ładowania paska na rzecz bezpośredniej reakcji na spust.
+
 ## O projekcie
-Głównym założeniem technologicznym było zbudowanie solidnego szkieletu ("Stagingu") dla VR, gdzie Gracz i jego wirtualne dłonie nie muszą być fizycznie resetowane czy przenoszone przy każdej zmianie lokacji. Rozgrywka opiera się na dźwiękowej orientacji przestrzennej i odpowiednich interakcjach z trójką specjalnych przeciwników.
+Głównym założeniem technologicznym było zbudowanie stabilnego szkieletu scen w VR z wykorzystaniem asynchronicznego menedżera `SceneLoader`, w którym każda scena jest w 100% samowystarczalna (zawiera własne instancje `Player`, `StartXR` i `Fade`). Zapobiega to błędom fizyki i kolizji przy przeładowaniach. Rozgrywka opiera się na dźwiękowej orientacji przestrzennej i odpowiednich interakcjach z przeciwnikami. Interfejs gry zaprojektowano z myślą o pełnej dostępności – obok wskaźnika laserowego VR oferuje kompletną nawigację gałką analogową kontrolera (joystickiem) z odczytem lektorskim (TTS) i haptyką, umożliwiając osobom niewidomym intuicyjną obsługę menu bez konieczności celowania w przestrzeni 3D.
 
 ## Stack technologiczny
-- **Godot Engine 4.x** (wersja Godot 4.6, ustawienia Mobile Renderer dla płynności)
+- **Godot Engine 4.x** (wersja Godot 4.7 / 4.x, ustawienia Mobile Renderer dla płynności)
 - **OpenXR** (Główna biblioteka do połączenia z goglami VR)
 - **Godot XR Tools** - standardowe pakiety fizyki dłoni i bazowych obiektów, dostosowane na potrzeby projektu.
 
@@ -20,8 +26,6 @@ Projekt przeznaczony jest na gogle VR obsługujące OpenXR (np. Meta Quest podpi
 1. Sklonuj repozytorium.
 2. Otwórz w **Godot 4.x** (wersja z obsługą .NET nie jest wymagana, używamy GDScript).
 3. Projekt uruchamia się bezpośrednio od `scenes/main_menu.tscn` (wbudowany autostart OpenXR). Za przechodzenie między mapami odpowiada asynchroniczny autoload `SceneLoader.gd`.
-
-
 
 ## Sounds:
 - Sound Effect by <a href="https://pixabay.com/users/freesounds123-49985424/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335600">free sound creator</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=335600">Pixabay</a>
