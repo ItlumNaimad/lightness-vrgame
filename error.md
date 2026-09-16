@@ -151,3 +151,14 @@ W 0:00:28:970   GDScript::reload: The base class script has the "@tool" annotati
 4. **Ostrzeżenie `XRToolsMovementFootstep idle audio pool empty`:**
    - **Przyczyna:** Pula odtwarzaczy kroków w `movement_footstep.gd` miała rozmiar zaledwie 3 (`AUDIO_POOL_SIZE = 3`). Przy szybszym marszu lub biegu wszystkie 3 instancje wciąż odtwarzały próbkę, wyczerpując pulę i pomijając odtwarzanie kolejnych kroków.
    - **Rozwiązanie:** Zwiększono `AUDIO_POOL_SIZE` do 8 oraz dodano płynny recykling najstarszego grającego odtwarzacza w razie chwilowego wyczerpania puli, co gwarantuje ciągłość kroków audio.
+
+## Nowy Error z Debuga
+E 0:00:04:747   VRUINavigator._gather_buttons: Invalid call. Nonexistent function 'is_visible_in_tree' in base 'Node (VRUINavigator)'.
+  <Źródło GDScript>vr_ui_navigator.gd:54 @ VRUINavigator._gather_buttons()
+  <Ślad stosu>  vr_ui_navigator.gd:54 @ _gather_buttons()
+                vr_ui_navigator.gd:59 @ _gather_buttons()
+                vr_ui_navigator.gd:39 @ refresh_buttons()
+                vr_ui_navigator.gd:26 @ _ready()
+                main_menu_ui.gd:70 @ _ready()
+                viewport_2d_in_3d.gd:549 @ _update_render()
+                viewport_2d_in_3d.gd:146 @ _ready()
