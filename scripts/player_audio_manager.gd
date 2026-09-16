@@ -95,4 +95,3 @@ func _on_footstep(_surface_name: String):
 	
 	if EventBus:
 		EventBus.noise_emitted.emit(origin.global_position if origin else Vector3.ZERO, current_noise)
-

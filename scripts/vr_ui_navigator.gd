@@ -190,4 +190,3 @@ func _apply_focus_to_current(ctrl: XRController3D) -> void:
 				txt = target_btn.tooltip_text
 			if not txt.is_empty():
 				TTSManager.speak(txt, true)
-

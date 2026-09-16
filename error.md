@@ -171,3 +171,17 @@ E 0:00:04:747   VRUINavigator._gather_buttons: Invalid call. Nonexistent functio
    - **Przyczyna:** Komponent `VRUINavigator` dziedziczy bezpośrednio po klasie bazowej `Node` i został dodany jako dziecko węzła UI (`main_menu_ui.gd`). Funkcja `_gather_buttons()` rekurencyjnie przeszukuje drzewo kontrolek w poszukiwaniu przycisków i wywoływała `node.is_visible_in_tree()`. Metoda ta istnieje wyłącznie w klasach dziedziczących po `CanvasItem` (elementy 2D/UI) oraz `Node3D` (elementy 3D), a nie istnieje w bazowym typie `Node`. Wejście pętli w węzeł `VRUINavigator` rzucało błąd w runtime.
    - **Rozwiązanie:** W `scripts/vr_ui_navigator.gd` dodano warunki sprawdzające typ węzła przed odpytaniem o widoczność (`if node is CanvasItem`, `elif node is Node3D`). Węzły bazowe `Node` są bezpiecznie pomijane, a przyciski `Button` są dodawane do nawigacji wyłącznie, jeśli są widoczne w drzewie.
 
+## Logi konsoli sesja 4
+  ERROR: scene/gui/text_edit.cpp:6981 - Index p_gutter = -1 is out of bounds (gutters.size() = 4).
+  ERROR: scene/gui/text_edit.cpp:6981 - Index p_gutter = -1 is out of bounds (gutters.size() = 4).
+  ERROR: scene/gui/text_edit.cpp:6981 - Index p_gutter = -1 is out of bounds (gutters.size() = 4).
+  ERROR: scene/gui/text_edit.cpp:6981 - Index p_gutter = -1 is out of bounds (gutters.size() = 4).
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+OpenXR: Created instance for OpenXR 1.0.54
+OpenXR: Running on OpenXR runtime:  SteamVR/OpenXR   2.17.9
+OpenXR: XrGraphicsRequirementsVulkan2KHR:
+ - minApiVersionSupported:  1.0.0
+ - maxApiVersionSupported:  1.2.0
+Vulkan 1.4.325 - Forward Mobile - Using Device #0: NVIDIA - NVIDIA GeForce RTX 3070
+
+[MainMenuUI] Switching to panel: main
