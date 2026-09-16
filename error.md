@@ -162,3 +162,12 @@ E 0:00:04:747   VRUINavigator._gather_buttons: Invalid call. Nonexistent functio
                 main_menu_ui.gd:70 @ _ready()
                 viewport_2d_in_3d.gd:549 @ _update_render()
                 viewport_2d_in_3d.gd:146 @ _ready()
+
+---
+
+## Rozwiązanie (Status: Naprawione 2026-09-16 - Sesja 3)
+
+1. **Błąd wywołania `Invalid call. Nonexistent function 'is_visible_in_tree' in base 'Node (VRUINavigator)'` w `vr_ui_navigator.gd:54`:**
+   - **Przyczyna:** Komponent `VRUINavigator` dziedziczy bezpośrednio po klasie bazowej `Node` i został dodany jako dziecko węzła UI (`main_menu_ui.gd`). Funkcja `_gather_buttons()` rekurencyjnie przeszukuje drzewo kontrolek w poszukiwaniu przycisków i wywoływała `node.is_visible_in_tree()`. Metoda ta istnieje wyłącznie w klasach dziedziczących po `CanvasItem` (elementy 2D/UI) oraz `Node3D` (elementy 3D), a nie istnieje w bazowym typie `Node`. Wejście pętli w węzeł `VRUINavigator` rzucało błąd w runtime.
+   - **Rozwiązanie:** W `scripts/vr_ui_navigator.gd` dodano warunki sprawdzające typ węzła przed odpytaniem o widoczność (`if node is CanvasItem`, `elif node is Node3D`). Węzły bazowe `Node` są bezpiecznie pomijane, a przyciski `Button` są dodawane do nawigacji wyłącznie, jeśli są widoczne w drzewie.
+

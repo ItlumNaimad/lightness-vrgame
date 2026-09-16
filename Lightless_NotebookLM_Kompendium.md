@@ -1587,9 +1587,14 @@ func refresh_buttons() -> void:
 			_current_buttons[0].grab_focus()
 
 func _gather_buttons(node: Node, out_list: Array[Button]) -> void:
-	if not node.is_visible_in_tree():
-		return
-	if node is Button and not node.disabled:
+	if node is CanvasItem:
+		if not (node as CanvasItem).is_visible_in_tree():
+			return
+	elif node is Node3D:
+		if not (node as Node3D).is_visible_in_tree():
+			return
+
+	if node is Button and not node.disabled and (node as CanvasItem).is_visible_in_tree():
 		out_list.append(node)
 	for child in node.get_children():
 		_gather_buttons(child, out_list)
@@ -5358,6 +5363,381 @@ func _trigger_jumpscare(reason: String):
 	await JumpscareHelper.execute(self, jumpscare_sound, [], "Marionette — " + reason)
 ````
 
+## File: scenes/main_menu.tscn
+````
+[gd_scene format=3 uid="uid://dqjc1nwqm8odk"]
+
+[ext_resource type="Script" uid="uid://c1n8p7fin4eiq" path="res://scripts/main_menu.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="2_bqqt6"]
+[ext_resource type="PackedScene" uid="uid://bvwh78d1g322u" path="res://scenes/main_menu_ui.tscn" id="3_ui"]
+[ext_resource type="AudioStream" uid="uid://1c33sur8mvu1" path="res://assets/sounds/main_menu.mp3" id="4_wu84c"]
+[ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="5_player"]
+[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="6_startxr"]
+[ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="7_fade"]
+[ext_resource type="Texture2D" uid="uid://bsc3ql0fq5x8b" path="res://assets/textures/Plaster006_2K-PNG/Plaster006_2K-PNG_Color.png" id="8_wall_color"]
+[ext_resource type="Texture2D" uid="uid://cpahkw3dcl28d" path="res://assets/textures/Plaster006_2K-PNG/Plaster006_2K-PNG_NormalGL.png" id="9_wall_normal"]
+[ext_resource type="Texture2D" uid="uid://dnum5txu5gvmk" path="res://assets/textures/Plaster006_2K-PNG/Plaster006_2K-PNG_Roughness.png" id="10_wall_rough"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_menu"]
+sky_top_color = Color(0.02, 0.03, 0.05, 1)
+sky_horizon_color = Color(0.05, 0.06, 0.08, 1)
+ground_bottom_color = Color(0.01, 0.01, 0.02, 1)
+ground_horizon_color = Color(0.05, 0.06, 0.08, 1)
+
+[sub_resource type="Sky" id="Sky_menu"]
+sky_material = SubResource("ProceduralSkyMaterial_menu")
+
+[sub_resource type="Environment" id="Environment_menu"]
+background_mode = 2
+sky = SubResource("Sky_menu")
+ambient_light_source = 2
+ambient_light_color = Color(0.08, 0.1, 0.14, 1)
+ambient_light_energy = 0.6
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(20, 1, 20)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.08, 0.09, 0.11, 1)
+roughness = 0.9
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
+material = SubResource("StandardMaterial3D_floor")
+size = Vector2(20, 20)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
+albedo_color = Color(0.48, 0.5, 0.52, 1)
+albedo_texture = ExtResource("8_wall_color")
+roughness = 0.95
+roughness_texture = ExtResource("10_wall_rough")
+normal_enabled = true
+normal_scale = 1.2
+normal_texture = ExtResource("9_wall_normal")
+uv1_scale = Vector3(2.5, 1.8, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall"]
+material = SubResource("StandardMaterial3D_wall")
+size = Vector3(10, 4.8, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
+size = Vector3(10, 4.8, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pipe"]
+albedo_color = Color(0.18, 0.17, 0.16, 1)
+metallic = 0.88
+roughness = 0.38
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pipe"]
+material = SubResource("StandardMaterial3D_pipe")
+top_radius = 0.045
+bottom_radius = 0.045
+height = 4.8
+radial_segments = 16
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_side"]
+material = SubResource("StandardMaterial3D_wall")
+size = Vector3(0.2, 4.8, 9.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_side"]
+size = Vector3(0.2, 4.8, 9.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ceiling"]
+material = SubResource("StandardMaterial3D_wall")
+size = Vector3(10.2, 0.2, 9.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ceiling"]
+size = Vector3(10.2, 0.2, 9.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lamp"]
+albedo_color = Color(0.8, 0.85, 0.9, 1)
+emission_enabled = true
+emission = Color(0.7, 0.85, 1, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_lamp"]
+material = SubResource("StandardMaterial3D_lamp")
+top_radius = 0.2
+bottom_radius = 0.25
+height = 0.1
+radial_segments = 16
+
+[node name="MainMenu" type="Node3D" unique_id=2052640717]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=728541218]
+environment = SubResource("Environment_menu")
+
+[node name="MenuSpotLight" type="SpotLight3D" parent="." unique_id=1738064566]
+transform = Transform3D(1, 0, 0, 0, 0.9563048, 0.2923717, 0, -0.2923717, 0.9563048, 0, 3.5, -0.7)
+light_color = Color(0.88, 0.93, 1, 1)
+light_energy = 2.6
+spot_range = 6.0
+spot_attenuation = 1.1
+
+[node name="MenuAmbientLight" type="OmniLight3D" parent="." unique_id=184910293]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -1.2)
+light_color = Color(0.25, 0.55, 0.95, 1)
+light_energy = 0.4
+omni_range = 4.5
+
+[node name="Floor" type="StaticBody3D" parent="." unique_id=1537649]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=982456613]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor" unique_id=123883215]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("PlaneMesh_floor")
+
+[node name="IndustrialWall" type="StaticBody3D" parent="." unique_id=992817263]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -2.8)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="IndustrialWall" unique_id=575337685]
+mesh = SubResource("BoxMesh_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="IndustrialWall" unique_id=175644465]
+shape = SubResource("BoxShape3D_wall")
+
+[node name="Pipes" type="Node3D" parent="." unique_id=2142528203]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -2.75)
+
+[node name="PipeLeft" type="MeshInstance3D" parent="Pipes" unique_id=548966718]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.2, 0, 0)
+mesh = SubResource("CylinderMesh_pipe")
+
+[node name="PipeRight" type="MeshInstance3D" parent="Pipes" unique_id=1927873173]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, 0)
+mesh = SubResource("CylinderMesh_pipe")
+
+[node name="PipeTop" type="MeshInstance3D" parent="Pipes" unique_id=1440785262]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 2.1, 0.02)
+mesh = SubResource("CylinderMesh_pipe")
+
+[node name="BackWall" type="StaticBody3D" parent="." unique_id=194827101]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 6.2)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="BackWall" unique_id=956818226]
+mesh = SubResource("BoxMesh_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BackWall" unique_id=2007040235]
+shape = SubResource("BoxShape3D_wall")
+
+[node name="LeftWall" type="StaticBody3D" parent="." unique_id=194827102]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 2.2, 1.7)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LeftWall" unique_id=819012728]
+mesh = SubResource("BoxMesh_wall_side")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LeftWall" unique_id=718482392]
+shape = SubResource("BoxShape3D_wall_side")
+
+[node name="RightWall" type="StaticBody3D" parent="." unique_id=194827103]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2.2, 1.7)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RightWall" unique_id=1390380056]
+mesh = SubResource("BoxMesh_wall_side")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RightWall" unique_id=454655938]
+shape = SubResource("BoxShape3D_wall_side")
+
+[node name="Ceiling" type="StaticBody3D" parent="." unique_id=194827104]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 1.7)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ceiling" unique_id=270118421]
+mesh = SubResource("BoxMesh_ceiling")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling" unique_id=409537979]
+shape = SubResource("BoxShape3D_ceiling")
+
+[node name="CeilingLampFixture" type="MeshInstance3D" parent="Ceiling" unique_id=139906738]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+mesh = SubResource("CylinderMesh_lamp")
+
+[node name="CeilingLight" type="OmniLight3D" parent="Ceiling" unique_id=1928428580]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0)
+light_color = Color(0.65, 0.8, 1, 1)
+light_energy = 0.8
+omni_range = 5.5
+omni_attenuation = 1.2
+
+[node name="Viewport2Din3D" parent="." unique_id=1130208441 instance=ExtResource("2_bqqt6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.15, -2.68)
+screen_size = Vector2(2.4, 1.45)
+scene = ExtResource("3_ui")
+viewport_size = Vector2(1280, 720)
+input_gamepad = true
+unshaded = true
+scene_properties_keys = PackedStringArray("main_menu_ui.gd")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1163565949]
+stream = ExtResource("4_wu84c")
+autoplay = true
+
+[node name="StartXR" parent="." unique_id=2039475675 instance=ExtResource("6_startxr")]
+
+[node name="Player" parent="." unique_id=629638343 instance=ExtResource("5_player")]
+
+[node name="Fade" parent="." unique_id=1653293877 instance=ExtResource("7_fade")]
+````
+
+## File: scenes/game_map.tscn
+````
+[gd_scene format=3 uid="uid://cjyxx2d4hafto"]
+
+[ext_resource type="Script" uid="uid://cbilw02reekmp" path="res://scripts/game_map.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://d3qvt0affmqvn" path="res://assets/textures/Wooden Floor Texture/wood2_COLOR.jpg" id="2_lp764"]
+[ext_resource type="Texture2D" uid="uid://ch8av1pfgrixv" path="res://assets/textures/Wooden Floor Texture/wood2_OCC.jpg" id="3_m2cng"]
+[ext_resource type="Texture2D" uid="uid://bkxkmyk7y0hl4" path="res://assets/textures/Wooden Floor Texture/wood2_NRM.jpg" id="4_oviui"]
+[ext_resource type="AudioStream" uid="uid://bv6a0kufxjmtr" path="res://assets/sounds/ambience.mp3" id="5_m2cng"]
+[ext_resource type="PackedScene" uid="uid://b4ml2o2jh5ooc" path="res://scenes/balora.tscn" id="6_oviui"]
+[ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="7_player"]
+[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="8_startxr"]
+[ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="9_fade"]
+[ext_resource type="PackedScene" uid="uid://b3t54b22cxxxx" path="res://scenes/marionette.tscn" id="10_marnin"]
+[ext_resource type="PackedScene" uid="uid://cxabcf23t8foo" path="res://scenes/foxy.tscn" id="11_foxy"]
+[ext_resource type="PackedScene" path="res://scenes/phantom_grasp.tscn" id="12_grasp"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="13_pause"]
+
+[sub_resource type="Environment" id="Environment_iau3x"]
+background_mode = 1
+ambient_light_source = 1
+ambient_light_energy = 0.0
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_new"]
+geometry_parsed_geometry_type = 1
+agent_height = 2.75
+agent_radius = 0.75
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_test"]
+size = Vector3(40.593994, 1, 43.245117)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_test"]
+lightmap_size_hint = Vector2i(102, 102)
+size = Vector2(40, 43)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial_test"]
+disable_specular_occlusion = true
+albedo_texture = ExtResource("2_lp764")
+normal_enabled = true
+normal_scale = 14.51
+normal_texture = ExtResource("4_oviui")
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = ExtResource("3_m2cng")
+uv1_triplanar = true
+uv1_triplanar_sharpness = 1.6008334
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ns"]
+size = Vector3(40.58618, 4, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_ns"]
+size = Vector3(40, 4, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial_wall"]
+albedo_color = Color(0.15, 0.12, 0.1, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ew"]
+size = Vector3(0.5, 4, 43.78125)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_ew"]
+size = Vector3(0.5, 4, 44)
+
+[node name="GameMap" type="Node3D" unique_id=120756022]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=982597785]
+environment = SubResource("Environment_iau3x")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1915778391]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10, 0)
+visible = false
+light_energy = 0.0
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=990958998]
+navigation_mesh = SubResource("NavigationMesh_new")
+
+[node name="Floor" type="StaticBody3D" parent="NavigationRegion3D" unique_id=309467535]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Floor" unique_id=1961788420]
+shape = SubResource("BoxShape3D_test")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Floor" unique_id=1559076285]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("PlaneMesh_test")
+surface_material_override/0 = SubResource("StandardMaterial_test")
+
+[node name="WallNorth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=723940986]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 21.738867)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallNorth" unique_id=1396440935]
+shape = SubResource("BoxShape3D_wall_ns")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallNorth" unique_id=730965168]
+mesh = SubResource("BoxMesh_wall_ns")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="WallSouth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=118626652]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -21.617676)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallSouth" unique_id=913572083]
+shape = SubResource("BoxShape3D_wall_ns")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallSouth" unique_id=1717054843]
+mesh = SubResource("BoxMesh_wall_ns")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="WallEast" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1399451984]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.171703, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallEast" unique_id=727175830]
+shape = SubResource("BoxShape3D_wall_ew")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallEast" unique_id=350134398]
+mesh = SubResource("BoxMesh_wall_ew")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="WallWest" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1916824261]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.25622, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallWest" unique_id=584697121]
+shape = SubResource("BoxShape3D_wall_ew")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallWest" unique_id=1766290024]
+mesh = SubResource("BoxMesh_wall_ew")
+surface_material_override/0 = SubResource("StandardMaterial_wall")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=569793408]
+stream = ExtResource("5_m2cng")
+volume_db = -1.273
+autoplay = true
+
+[node name="Marionette" parent="." unique_id=958148592 instance=ExtResource("10_marnin")]
+
+[node name="StartXR" parent="." unique_id=1224595367 instance=ExtResource("8_startxr")]
+
+[node name="Player" parent="." unique_id=805658640 instance=ExtResource("7_player")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.8063904, -1.6275938)
+
+[node name="Fade" parent="." unique_id=1010360029 instance=ExtResource("9_fade")]
+
+[node name="Balora" parent="." unique_id=1656694762 instance=ExtResource("6_oviui")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4395071, 16.287754)
+
+[node name="Foxy" parent="." unique_id=123456789 instance=ExtResource("11_foxy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1.4, -18.799488)
+
+[node name="Foxy2" parent="." unique_id=123456790 instance=ExtResource("11_foxy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.4, 18)
+
+[node name="PhantomGrasp" parent="." unique_id=987654321 instance=ExtResource("12_grasp")]
+
+[node name="PauseMenu" parent="." unique_id=1457039507 instance=ExtResource("13_pause")]
+
+[editable path="Player"]
+````
+
 ## File: scenes/main_menu_ui.tscn
 ````
 [gd_scene load_steps=22 format=3 uid="uid://bvwh78d1g322u"]
@@ -6219,381 +6599,6 @@ script = ExtResource("2_hold_btn")
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/Grid/Night5Btn" to="." method="_on_night_5_btn_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/NightsPanel/NightsBg/Margin/Content/BackFromNightsButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="CenterContainer/PanelContainer/MarginContainer/GuidePanel/GuideBg/Margin/Content/BackFromGuideButton" to="." method="_on_back_pressed"]
-````
-
-## File: scenes/main_menu.tscn
-````
-[gd_scene format=3 uid="uid://dqjc1nwqm8odk"]
-
-[ext_resource type="Script" uid="uid://c1n8p7fin4eiq" path="res://scripts/main_menu.gd" id="1_script"]
-[ext_resource type="PackedScene" uid="uid://clujaf3u776a3" path="res://addons/godot-xr-tools/objects/viewport_2d_in_3d.tscn" id="2_bqqt6"]
-[ext_resource type="PackedScene" uid="uid://bvwh78d1g322u" path="res://scenes/main_menu_ui.tscn" id="3_ui"]
-[ext_resource type="AudioStream" uid="uid://1c33sur8mvu1" path="res://assets/sounds/main_menu.mp3" id="4_wu84c"]
-[ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="5_player"]
-[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="6_startxr"]
-[ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="7_fade"]
-[ext_resource type="Texture2D" uid="uid://bsc3ql0fq5x8b" path="res://assets/textures/Plaster006_2K-PNG/Plaster006_2K-PNG_Color.png" id="8_wall_color"]
-[ext_resource type="Texture2D" uid="uid://cpahkw3dcl28d" path="res://assets/textures/Plaster006_2K-PNG/Plaster006_2K-PNG_NormalGL.png" id="9_wall_normal"]
-[ext_resource type="Texture2D" uid="uid://dnum5txu5gvmk" path="res://assets/textures/Plaster006_2K-PNG/Plaster006_2K-PNG_Roughness.png" id="10_wall_rough"]
-
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_menu"]
-sky_top_color = Color(0.02, 0.03, 0.05, 1)
-sky_horizon_color = Color(0.05, 0.06, 0.08, 1)
-ground_bottom_color = Color(0.01, 0.01, 0.02, 1)
-ground_horizon_color = Color(0.05, 0.06, 0.08, 1)
-
-[sub_resource type="Sky" id="Sky_menu"]
-sky_material = SubResource("ProceduralSkyMaterial_menu")
-
-[sub_resource type="Environment" id="Environment_menu"]
-background_mode = 2
-sky = SubResource("Sky_menu")
-ambient_light_source = 2
-ambient_light_color = Color(0.08, 0.1, 0.14, 1)
-ambient_light_energy = 0.6
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
-size = Vector3(20, 1, 20)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
-albedo_color = Color(0.08, 0.09, 0.11, 1)
-roughness = 0.9
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
-material = SubResource("StandardMaterial3D_floor")
-size = Vector2(20, 20)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
-albedo_color = Color(0.48, 0.5, 0.52, 1)
-albedo_texture = ExtResource("8_wall_color")
-roughness = 0.95
-roughness_texture = ExtResource("10_wall_rough")
-normal_enabled = true
-normal_scale = 1.2
-normal_texture = ExtResource("9_wall_normal")
-uv1_scale = Vector3(2.5, 1.8, 1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_wall"]
-material = SubResource("StandardMaterial3D_wall")
-size = Vector3(10, 4.8, 0.2)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
-size = Vector3(10, 4.8, 0.2)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pipe"]
-albedo_color = Color(0.18, 0.17, 0.16, 1)
-metallic = 0.88
-roughness = 0.38
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_pipe"]
-material = SubResource("StandardMaterial3D_pipe")
-top_radius = 0.045
-bottom_radius = 0.045
-height = 4.8
-radial_segments = 16
-
-[sub_resource type="BoxMesh" id="BoxMesh_wall_side"]
-material = SubResource("StandardMaterial3D_wall")
-size = Vector3(0.2, 4.8, 9.2)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_side"]
-size = Vector3(0.2, 4.8, 9.2)
-
-[sub_resource type="BoxMesh" id="BoxMesh_ceiling"]
-material = SubResource("StandardMaterial3D_wall")
-size = Vector3(10.2, 0.2, 9.2)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_ceiling"]
-size = Vector3(10.2, 0.2, 9.2)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lamp"]
-albedo_color = Color(0.8, 0.85, 0.9, 1)
-emission_enabled = true
-emission = Color(0.7, 0.85, 1, 1)
-emission_energy_multiplier = 2.0
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_lamp"]
-material = SubResource("StandardMaterial3D_lamp")
-top_radius = 0.2
-bottom_radius = 0.25
-height = 0.1
-radial_segments = 16
-
-[node name="MainMenu" type="Node3D" unique_id=2052640717]
-script = ExtResource("1_script")
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=728541218]
-environment = SubResource("Environment_menu")
-
-[node name="MenuSpotLight" type="SpotLight3D" parent="." unique_id=1738064566]
-transform = Transform3D(1, 0, 0, 0, 0.9563048, 0.2923717, 0, -0.2923717, 0.9563048, 0, 3.5, -0.7)
-light_color = Color(0.88, 0.93, 1, 1)
-light_energy = 2.6
-spot_range = 6.0
-spot_attenuation = 1.1
-
-[node name="MenuAmbientLight" type="OmniLight3D" parent="." unique_id=184910293]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -1.2)
-light_color = Color(0.25, 0.55, 0.95, 1)
-light_energy = 0.4
-omni_range = 4.5
-
-[node name="Floor" type="StaticBody3D" parent="." unique_id=1537649]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor" unique_id=982456613]
-shape = SubResource("BoxShape3D_floor")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor" unique_id=123883215]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-mesh = SubResource("PlaneMesh_floor")
-
-[node name="IndustrialWall" type="StaticBody3D" parent="." unique_id=992817263]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -2.8)
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="IndustrialWall" unique_id=575337685]
-mesh = SubResource("BoxMesh_wall")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="IndustrialWall" unique_id=175644465]
-shape = SubResource("BoxShape3D_wall")
-
-[node name="Pipes" type="Node3D" parent="." unique_id=2142528203]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -2.75)
-
-[node name="PipeLeft" type="MeshInstance3D" parent="Pipes" unique_id=548966718]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.2, 0, 0)
-mesh = SubResource("CylinderMesh_pipe")
-
-[node name="PipeRight" type="MeshInstance3D" parent="Pipes" unique_id=1927873173]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, 0)
-mesh = SubResource("CylinderMesh_pipe")
-
-[node name="PipeTop" type="MeshInstance3D" parent="Pipes" unique_id=1440785262]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 2.1, 0.02)
-mesh = SubResource("CylinderMesh_pipe")
-
-[node name="BackWall" type="StaticBody3D" parent="." unique_id=194827101]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 6.2)
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="BackWall" unique_id=956818226]
-mesh = SubResource("BoxMesh_wall")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="BackWall" unique_id=2007040235]
-shape = SubResource("BoxShape3D_wall")
-
-[node name="LeftWall" type="StaticBody3D" parent="." unique_id=194827102]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 2.2, 1.7)
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="LeftWall" unique_id=819012728]
-mesh = SubResource("BoxMesh_wall_side")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="LeftWall" unique_id=718482392]
-shape = SubResource("BoxShape3D_wall_side")
-
-[node name="RightWall" type="StaticBody3D" parent="." unique_id=194827103]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2.2, 1.7)
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="RightWall" unique_id=1390380056]
-mesh = SubResource("BoxMesh_wall_side")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RightWall" unique_id=454655938]
-shape = SubResource("BoxShape3D_wall_side")
-
-[node name="Ceiling" type="StaticBody3D" parent="." unique_id=194827104]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 1.7)
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Ceiling" unique_id=270118421]
-mesh = SubResource("BoxMesh_ceiling")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling" unique_id=409537979]
-shape = SubResource("BoxShape3D_ceiling")
-
-[node name="CeilingLampFixture" type="MeshInstance3D" parent="Ceiling" unique_id=139906738]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
-mesh = SubResource("CylinderMesh_lamp")
-
-[node name="CeilingLight" type="OmniLight3D" parent="Ceiling" unique_id=1928428580]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0)
-light_color = Color(0.65, 0.8, 1, 1)
-light_energy = 0.8
-omni_range = 5.5
-omni_attenuation = 1.2
-
-[node name="Viewport2Din3D" parent="." unique_id=1130208441 instance=ExtResource("2_bqqt6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.15, -2.68)
-screen_size = Vector2(2.4, 1.45)
-scene = ExtResource("3_ui")
-viewport_size = Vector2(1280, 720)
-input_gamepad = true
-unshaded = true
-scene_properties_keys = PackedStringArray("main_menu_ui.gd")
-
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1163565949]
-stream = ExtResource("4_wu84c")
-autoplay = true
-
-[node name="StartXR" parent="." unique_id=2039475675 instance=ExtResource("6_startxr")]
-
-[node name="Player" parent="." unique_id=629638343 instance=ExtResource("5_player")]
-
-[node name="Fade" parent="." unique_id=1653293877 instance=ExtResource("7_fade")]
-````
-
-## File: scenes/game_map.tscn
-````
-[gd_scene format=3 uid="uid://cjyxx2d4hafto"]
-
-[ext_resource type="Script" uid="uid://cbilw02reekmp" path="res://scripts/game_map.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://d3qvt0affmqvn" path="res://assets/textures/Wooden Floor Texture/wood2_COLOR.jpg" id="2_lp764"]
-[ext_resource type="Texture2D" uid="uid://ch8av1pfgrixv" path="res://assets/textures/Wooden Floor Texture/wood2_OCC.jpg" id="3_m2cng"]
-[ext_resource type="Texture2D" uid="uid://bkxkmyk7y0hl4" path="res://assets/textures/Wooden Floor Texture/wood2_NRM.jpg" id="4_oviui"]
-[ext_resource type="AudioStream" uid="uid://bv6a0kufxjmtr" path="res://assets/sounds/ambience.mp3" id="5_m2cng"]
-[ext_resource type="PackedScene" uid="uid://b4ml2o2jh5ooc" path="res://scenes/balora.tscn" id="6_oviui"]
-[ext_resource type="PackedScene" uid="uid://c0ch7jab7i3ry" path="res://scenes/player.tscn" id="7_player"]
-[ext_resource type="PackedScene" uid="uid://clc5dre31iskm" path="res://addons/godot-xr-tools/xr/start_xr.tscn" id="8_startxr"]
-[ext_resource type="PackedScene" uid="uid://wtpox7m5vu2b" path="res://addons/godot-xr-tools/effects/fade.tscn" id="9_fade"]
-[ext_resource type="PackedScene" uid="uid://b3t54b22cxxxx" path="res://scenes/marionette.tscn" id="10_marnin"]
-[ext_resource type="PackedScene" uid="uid://cxabcf23t8foo" path="res://scenes/foxy.tscn" id="11_foxy"]
-[ext_resource type="PackedScene" path="res://scenes/phantom_grasp.tscn" id="12_grasp"]
-[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="13_pause"]
-
-[sub_resource type="Environment" id="Environment_iau3x"]
-background_mode = 1
-ambient_light_source = 1
-ambient_light_energy = 0.0
-
-[sub_resource type="NavigationMesh" id="NavigationMesh_new"]
-geometry_parsed_geometry_type = 1
-agent_height = 2.75
-agent_radius = 0.75
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_test"]
-size = Vector3(40.593994, 1, 43.245117)
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_test"]
-lightmap_size_hint = Vector2i(102, 102)
-size = Vector2(40, 43)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial_test"]
-disable_specular_occlusion = true
-albedo_texture = ExtResource("2_lp764")
-normal_enabled = true
-normal_scale = 14.51
-normal_texture = ExtResource("4_oviui")
-ao_enabled = true
-ao_light_affect = 1.0
-ao_texture = ExtResource("3_m2cng")
-uv1_triplanar = true
-uv1_triplanar_sharpness = 1.6008334
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ns"]
-size = Vector3(40.58618, 4, 0.5)
-
-[sub_resource type="BoxMesh" id="BoxMesh_wall_ns"]
-size = Vector3(40, 4, 0.5)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial_wall"]
-albedo_color = Color(0.15, 0.12, 0.1, 1)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ew"]
-size = Vector3(0.5, 4, 43.78125)
-
-[sub_resource type="BoxMesh" id="BoxMesh_wall_ew"]
-size = Vector3(0.5, 4, 44)
-
-[node name="GameMap" type="Node3D" unique_id=120756022]
-script = ExtResource("1_script")
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=982597785]
-environment = SubResource("Environment_iau3x")
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1915778391]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 10, 0)
-visible = false
-light_energy = 0.0
-
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=990958998]
-navigation_mesh = SubResource("NavigationMesh_new")
-
-[node name="Floor" type="StaticBody3D" parent="NavigationRegion3D" unique_id=309467535]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Floor" unique_id=1961788420]
-shape = SubResource("BoxShape3D_test")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Floor" unique_id=1559076285]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-mesh = SubResource("PlaneMesh_test")
-surface_material_override/0 = SubResource("StandardMaterial_test")
-
-[node name="WallNorth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=723940986]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 21.738867)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallNorth" unique_id=1396440935]
-shape = SubResource("BoxShape3D_wall_ns")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallNorth" unique_id=730965168]
-mesh = SubResource("BoxMesh_wall_ns")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="WallSouth" type="StaticBody3D" parent="NavigationRegion3D" unique_id=118626652]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -21.617676)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallSouth" unique_id=913572083]
-shape = SubResource("BoxShape3D_wall_ns")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallSouth" unique_id=1717054843]
-mesh = SubResource("BoxMesh_wall_ns")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="WallEast" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1399451984]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.171703, 2, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallEast" unique_id=727175830]
-shape = SubResource("BoxShape3D_wall_ew")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallEast" unique_id=350134398]
-mesh = SubResource("BoxMesh_wall_ew")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="WallWest" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1916824261]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.25622, 2, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/WallWest" unique_id=584697121]
-shape = SubResource("BoxShape3D_wall_ew")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/WallWest" unique_id=1766290024]
-mesh = SubResource("BoxMesh_wall_ew")
-surface_material_override/0 = SubResource("StandardMaterial_wall")
-
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=569793408]
-stream = ExtResource("5_m2cng")
-volume_db = -1.273
-autoplay = true
-
-[node name="Marionette" parent="." unique_id=958148592 instance=ExtResource("10_marnin")]
-
-[node name="StartXR" parent="." unique_id=1224595367 instance=ExtResource("8_startxr")]
-
-[node name="Player" parent="." unique_id=805658640 instance=ExtResource("7_player")]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.8063904, -1.6275938)
-
-[node name="Fade" parent="." unique_id=1010360029 instance=ExtResource("9_fade")]
-
-[node name="Balora" parent="." unique_id=1656694762 instance=ExtResource("6_oviui")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4395071, 16.287754)
-
-[node name="Foxy" parent="." unique_id=123456789 instance=ExtResource("11_foxy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1.4, -18.799488)
-
-[node name="Foxy2" parent="." unique_id=123456790 instance=ExtResource("11_foxy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.4, 18)
-
-[node name="PhantomGrasp" parent="." unique_id=987654321 instance=ExtResource("12_grasp")]
-
-[node name="PauseMenu" parent="." unique_id=1457039507 instance=ExtResource("13_pause")]
-
-[editable path="Player"]
 ````
 
 ## File: scenes/player.tscn

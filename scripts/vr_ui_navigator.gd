@@ -51,9 +51,14 @@ func refresh_buttons() -> void:
 			_current_buttons[0].grab_focus()
 
 func _gather_buttons(node: Node, out_list: Array[Button]) -> void:
-	if not node.is_visible_in_tree():
-		return
-	if node is Button and not node.disabled:
+	if node is CanvasItem:
+		if not (node as CanvasItem).is_visible_in_tree():
+			return
+	elif node is Node3D:
+		if not (node as Node3D).is_visible_in_tree():
+			return
+
+	if node is Button and not node.disabled and (node as CanvasItem).is_visible_in_tree():
 		out_list.append(node)
 	for child in node.get_children():
 		_gather_buttons(child, out_list)
